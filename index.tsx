@@ -1,5 +1,3 @@
-
-
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { createRoot } from 'react-dom/client';
 
@@ -139,7 +137,7 @@ const AddIcon = () => <svg stroke="currentColor" fill="currentColor" strokeWidth
 const App = () => {
     // --- State Management --- //
     const [isLoggedIn, setIsLoggedIn] = useStickyState(false, 'isLoggedIn');
-    const [currentUser, setCurrentUser] = useStickyState({ id: 1, name: 'Teddy Lumidi', email: 'admin@funpot.com', password: 'password123', role: 'Admin' }, 'currentUser');
+    const [currentUser, setCurrentUser] = useStickyState(null, 'currentUser');
     const [users, setUsers] = useStickyState([], 'users');
     const [currentPage, setCurrentPage] = useState('Dashboard');
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -180,11 +178,13 @@ const App = () => {
     }, []);
     
      useEffect(() => {
-        // Initialize with default admin if no users exist
-        if (users.length === 0) {
-            setUsers([{ id: 1, name: 'Teddy Lumidi', email: 'admin@funpot.com', password: 'password123', role: 'Admin' }]);
+        // This effect runs once on mount to ensure the default admin user exists.
+        const usersExist = window.localStorage.getItem('users');
+        if (!usersExist || JSON.parse(usersExist).length === 0) {
+            const defaultAdmin = { id: 1, name: 'Teddy Lumidi', email: 'admin@funpot.com', password: 'password123', role: 'Admin' };
+            setUsers([defaultAdmin]);
         }
-    }, [users, setUsers]);
+    }, [setUsers]);
 
     // --- Handlers --- //
     const handleNavigate = (page) => {
@@ -1125,20 +1125,16 @@ const PaymentsPage = ({ payments, onAddClick }) => {
 };
 
 const AddPaymentForm = ({ onFormSubmit, onCancel }) => {
-    // FIX: Initialize amount as a number and update handleChange to parse input to a number to satisfy TypeScript type inference.
-    const [payment, setPayment] = useState({ name: '', amount: 0, method: 'M-Pesa', reference: '' });
+    const [payment, setPayment] = useState({ name: '', amount: '', method: 'M-Pesa', reference: '' });
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        if (name === 'amount') {
-            setPayment(prev => ({ ...prev, amount: parseInt(value, 10) || 0 }));
-        } else {
-            setPayment(prev => ({ ...prev, [name]: value }));
-        }
+        setPayment(prev => ({ ...prev, [name]: value }));
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        // FIX: Convert amount from string to number before submitting.
         onFormSubmit({...payment, amount: Number(payment.amount) });
     };
 
@@ -1397,7 +1393,6 @@ const SettingsPage = () => (
     </div>
 );
 
-// FIX: Update SearchResultsPage to accept and use onView handlers for correct navigation and to fix type errors.
 const SearchResultsPage = ({ onNavigate, searchQuery, athletes, coaches, events, payments, onViewAthlete, onViewCoach, onViewEvent }) => {
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 5;
@@ -1437,27 +1432,30 @@ const SearchResultsPage = ({ onNavigate, searchQuery, athletes, coaches, events,
                     <p>{allResults.length} result(s) found</p>
                 </div>
                 {paginatedResults.length > 0 ? (
-                    paginatedResults.map(result => (
-                         <div className="search-result-card" key={`${result.type}-${result.id}`}>
-                            <div className="result-icon">
-                                {result.type === 'Athlete' && <AthletesIcon />}
-                                {result.type === 'Coach' && <CoachesIcon />}
-                                {result.type === 'Event' && <EventsIcon />}
-                                {result.type === 'Payment' && <PaymentsIcon />}
+                    paginatedResults.map(result => {
+                        const quickAction = getQuickAction(result);
+                        return (
+                            <div className="search-result-card" key={`${result.type}-${result.id}`}>
+                               <div className="result-icon">
+                                    {result.type === 'Athlete' && <AthletesIcon />}
+                                    {result.type === 'Coach' && <CoachesIcon />}
+                                    {result.type === 'Event' && <EventsIcon />}
+                                    {result.type === 'Payment' && <PaymentsIcon />}
+                                </div>
+                                <div className="result-details">
+                                    <h4>{result.name}</h4>
+                                    <p>{result.type}</p>
+                                </div>
+                                <div className="result-actions">
+                                    {quickAction && (
+                                        <button className="btn btn-secondary" onClick={quickAction.action}>
+                                            {quickAction.text}
+                                        </button>
+                                    )}
+                                </div>
                             </div>
-                            <div className="result-details">
-                                <h4>{result.name}</h4>
-                                <p>{result.type}</p>
-                            </div>
-                            <div className="result-actions">
-                                {getQuickAction(result) && (
-                                    <button className="btn btn-secondary" onClick={getQuickAction(result).action}>
-                                        {getQuickAction(result).text}
-                                    </button>
-                                )}
-                            </div>
-                        </div>
-                    ))
+                        );
+                    })
                 ) : (
                     <div className="empty-state">
                         <p>No results found.</p>
