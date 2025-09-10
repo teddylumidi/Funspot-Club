@@ -121,7 +121,7 @@ const SearchIcon = () => (<svg stroke="currentColor" fill="currentColor" strokeW
 const BellIcon = () => <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z"></path></svg>;
 const MessagesIcon = () => <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"></path></svg>;
 const NoticeBoardIcon = () => <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14l4 4V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"></path></svg>;
-const SettingsIcon = () => <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 24 24"><path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"></path></svg>;
+const SettingsIcon = () => <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 24 24"><path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"></path></svg>;
 const GoogleIcon = () => <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C12.955 4 4 12.955 4 24s8.955 20 20 20s20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"></path><path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C16.318 4 9.656 8.337 6.306 14.691z"></path><path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238C29.211 35.091 26.715 36 24 36c-5.223 0-9.657-3.657-11.303-8H6.306C9.656 39.663 16.318 44 24 44z"></path><path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.166-4.087 5.571l6.19 5.238C42.012 36.49 44 30.823 44 24c0-1.341-.138-2.65-.389-3.917z"></path></svg>;
 const AppleIcon = () => <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 24 24"><path d="M19.62 14.47c-.24-1.42-1.12-2.58-2.31-2.62-.19 0-.38.01-.57.03-.43.05-.85.16-1.25.32-1.13.46-2.22 1.05-3.35 1.05-1.16 0-2.1-.56-3.15-1.05-.34-.17-.7-.27-1.07-.31-.15,0-.3.01-.44.01-1.24.03-2.2.98-2.56,2.29-.01.02,0,.03,0,.05,0,.08-.01.16,0,.23,0,.03,0,.05,0,.08.1.8.38,1.55.82,2.21.54.82,1.25,1.62,2.15,2.15.89.51,1.86.73,2.83.74,1.04,0,2.02-.31,2.92-.81.01,0,.02,0,.03,0,.85-.46,1.62-1.1,2.26-1.89.01-.01.02-.02.02-.03.5-.64.81-1.42.92-2.25.01-.06.01-.13.02-.19h.01c.01-.06.01-.11.01-.17,0-.01,0-.02,0-.03.01-.06.01-.12.01-.18zm-6.11-8.67c.92-.99,1.55-2.29,1.6-3.62-.01.06-.01.12-.02.19-.64.12-1.39.5-2.05,1.05-.87.75-1.6,1.84-2.03,3.01.58.05,1.15-.15,1.69-.45.02,0,.03,0,.04-.01.6-.33,1.13-.76,1.77-1.17z"></path></svg>;
 const MicrosoftIcon = () => <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 24 24"><path d="M11.4,11.4H2.2V2.2h9.2V11.4z M21.8,11.4h-9.2V2.2h9.2V11.4z M11.4,21.8H2.2v-9.2h9.2V21.8z M21.8,21.8h-9.2v-9.2h9.2V21.8z"></path></svg>;
@@ -440,6 +440,13 @@ const LoginPage = ({ onLogin, onSignUp }) => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
 
+    const handleSimulatedLogin = () => {
+        // Use default admin credentials for simulated social/Microsoft login
+        if (!onLogin('admin@funpot.com', 'password123')) {
+             setError('Default admin account not found. Please sign up.');
+        }
+    };
+
     const handleSubmit = (e) => {
         e.preventDefault();
         setError('');
@@ -467,7 +474,7 @@ const LoginPage = ({ onLogin, onSignUp }) => {
                 <form className="login-form" onSubmit={handleSubmit}>
                     <div className="input-group">
                         <label htmlFor="email">Email / Phone</label>
-                        <input type="email" id="email" value={email} onChange={e => setEmail(e.target.value)} required />
+                        <input type="text" id="email" value={email} onChange={e => setEmail(e.target.value)} required placeholder="e.g., name@example.com or 07..."/>
                     </div>
                     <div className="input-group">
                         <label htmlFor="password">Password</label>
@@ -487,9 +494,9 @@ const LoginPage = ({ onLogin, onSignUp }) => {
                 </form>
                 <div className="social-login-divider">or</div>
                 <div className="social-login-buttons">
-                    <button className="btn social-btn"><GoogleIcon /> Continue with Google</button>
-                    <button className="btn social-btn"><AppleIcon /> Continue with Apple</button>
-                    <button className="btn social-btn"><MicrosoftIcon /> Continue with Microsoft</button>
+                    <button className="btn social-btn" onClick={handleSimulatedLogin}><GoogleIcon /> Continue with Google</button>
+                    <button className="btn social-btn" onClick={handleSimulatedLogin}><AppleIcon /> Continue with Apple</button>
+                    <button className="btn social-btn" onClick={handleSimulatedLogin}><MicrosoftIcon /> Continue with Microsoft</button>
                 </div>
                  <p className="form-toggle">
                     {isSignUp ? "Already have an account?" : "Need an account?"}{' '}
@@ -631,7 +638,18 @@ const MainContent = ({ currentPage, ...props }) => {
             case 'AddEventForm': return <AddEventForm onFormSubmit={props.onAddEvent} onCancel={() => props.onNavigate('Events')} />;
             case 'EditEventForm': return <AddEventForm onFormSubmit={props.onUpdateEvent} onCancel={() => props.onNavigate('Events')} initialData={props.selectedEvent} />;
             case 'EventDetails': return <EventDetailsPage event={props.selectedEvent} onNavigate={props.onNavigate} />;
-            case 'SearchResults': return <SearchResultsPage {...props} />;
+            // FIX: Explicitly pass props to SearchResultsPage to resolve TypeScript error.
+            case 'SearchResults': return <SearchResultsPage 
+                athletes={props.athletes} 
+                coaches={props.coaches} 
+                events={props.events} 
+                payments={props.payments}
+                searchQuery={props.searchQuery}
+                onViewAthlete={props.onViewAthlete}
+                onViewCoach={props.onViewCoach}
+                onViewEvent={props.onViewEvent}
+                onNavigate={props.onNavigate}
+            />;
             case 'Notice Board': return <NoticeBoardPage announcements={props.announcements} />;
             case 'Messages': return <MessagesPage messages={props.messages} onSendMessage={props.onSendMessage} />;
             case 'Settings': return <SettingsPage />;
@@ -1107,11 +1125,16 @@ const PaymentsPage = ({ payments, onAddClick }) => {
 };
 
 const AddPaymentForm = ({ onFormSubmit, onCancel }) => {
-    const [payment, setPayment] = useState({ name: '', amount: '', method: 'M-Pesa', reference: '' });
+    // FIX: Initialize amount as a number and update handleChange to parse input to a number to satisfy TypeScript type inference.
+    const [payment, setPayment] = useState({ name: '', amount: 0, method: 'M-Pesa', reference: '' });
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setPayment(prev => ({ ...prev, [name]: value }));
+        if (name === 'amount') {
+            setPayment(prev => ({ ...prev, amount: parseInt(value, 10) || 0 }));
+        } else {
+            setPayment(prev => ({ ...prev, [name]: value }));
+        }
     };
 
     const handleSubmit = (e) => {
