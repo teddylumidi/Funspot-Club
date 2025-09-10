@@ -156,6 +156,9 @@ body {
 .remember-me input {
   margin-right: 8px;
 }
+.remember-me label {
+    margin-bottom: 0;
+}
 
 .forgot-password {
   color: var(--primary-pink);
@@ -215,6 +218,9 @@ body {
   font-size: 14px;
   color: var(--text-secondary);
 }
+.login-footer p {
+    margin-bottom: 8px;
+}
 .login-footer a {
     color: var(--primary-pink);
     text-decoration: none;
@@ -223,6 +229,56 @@ body {
 .login-footer a:hover {
     text-decoration: underline;
 }
+
+.social-login-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    color: var(--text-secondary);
+    margin: 25px 0;
+    font-size: 14px;
+}
+.social-login-divider::before,
+.social-login-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid var(--border-color);
+}
+.social-login-divider:not(:empty)::before {
+    margin-right: .5em;
+}
+.social-login-divider:not(:empty)::after {
+    margin-left: .5em;
+}
+
+.social-login-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 25px;
+}
+
+.btn.social-btn {
+    background-color: var(--bg-light-dark);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    width: 100%;
+    justify-content: center;
+}
+.btn.social-btn:hover {
+    background-color: #3c3c3e;
+    transform: none;
+    box-shadow: none;
+}
+
+.btn.social-btn svg {
+    width: 20px;
+    height: 20px;
+}
+.btn.social-btn svg path {
+    fill: var(--text-primary);
+}
+
 
 /* --- Dashboard --- */
 .dashboard-layout {
@@ -463,6 +519,7 @@ body {
   color: var(--text-secondary);
   cursor: pointer;
   position: relative;
+  padding: 4px;
 }
 .action-btn .notification-badge {
   position: absolute;
@@ -735,6 +792,10 @@ body {
 .pill.intermediate { background-color: var(--orange-light); color: var(--orange-dark); }
 .pill.advanced { background-color: var(--teal-light); color: var(--teal-dark); }
 
+.action-buttons {
+    display: flex;
+    gap: 8px;
+}
 .action-btn-icon {
     background: none;
     border: none;
@@ -986,13 +1047,26 @@ body {
     gap: 20px;
 }
 
+.add-log-form {
+    background-color: var(--bg-light-dark);
+    padding: 16px;
+    border-radius: 8px;
+}
+
+.add-log-form h4 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 16px;
+}
+
 .add-log-form form {
     display: flex;
     flex-direction: column;
     gap: 12px;
 }
+
 .add-log-form input {
-    background-color: var(--bg-light-dark);
+    background-color: var(--bg-dark);
     border: 1px solid var(--border-color);
     border-radius: 8px;
     color: var(--text-primary);
@@ -1023,6 +1097,7 @@ body {
     flex-direction: column;
     align-items: stretch;
     gap: 12px;
+    border-left-color: var(--info);
 }
 .history-item-edit input {
     width: 100%;
@@ -1185,6 +1260,31 @@ body {
     color: var(--text-secondary);
 }
 
+/* Toast Notification */
+.toast-notification {
+    position: fixed;
+    bottom: 80px; /* Above mobile nav */
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 20px;
+    border-radius: 8px;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 2000;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+}
+.toast-notification.offline { background-color: var(--warning); color: var(--bg-dark); }
+.toast-notification.online { background-color: var(--success); }
+.toast-notification.syncing { background-color: var(--info); }
+.toast-notification svg {
+    width: 20px;
+    height: 20px;
+}
+
 /* Mobile Bottom Nav */
 .mobile-bottom-nav {
     position: fixed;
@@ -1210,13 +1310,16 @@ body {
     font-size: 10px;
     font-weight: 500;
     transition: color 0.2s;
+    flex: 1;
+    height: 100%;
+    padding: 14px 4px; /* Increased padding for better touch area */
 }
 .mobile-nav-item.active {
     color: var(--primary-pink);
 }
 .mobile-nav-item svg {
-    width: 22px;
-    height: 22px;
+    width: 30px; /* Increased icon size */
+    height: 30px;
 }
 
 
@@ -1307,6 +1410,7 @@ body {
     }
     
     .mobile-bottom-nav { display: none; }
+    .toast-notification { bottom: 20px; }
 }
 
 /* Desktop Styles */
