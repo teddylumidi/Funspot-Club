@@ -1,4 +1,5 @@
 
+
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { createRoot } from 'react-dom/client';
 
@@ -121,16 +122,18 @@ const TaskIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewB
 
 // --- Helper Components ---
 const Card = ({ children, className = "" }) => <div className={`card ${className}`}>{children}</div>;
-// FIX: Add types to CardHeader props to make them optional and fix missing props errors.
-const CardHeader = ({ title, action, children }: { title?: any, action?: any, children?: any }) => (
+// FIX: Made `action` and `children` props optional by providing default null values.
+// This resolves TypeScript errors where CardHeader was used without these props.
+const CardHeader = ({ title, action = null, children = null }) => (
     <div className="card-header">
         {title && <h3>{title}</h3>}
         {action && <a href="#" onClick={(e) => { e.preventDefault(); action.onClick(); }} className="view-all">{action.label}</a>}
         {children && <div className="card-header-actions">{children}</div>}
     </div>
 );
-// FIX: Add types to EmptyState props to make `action` optional.
-const EmptyState = ({ icon, title, message, action }: { icon: any, title: any, message: any, action?: any }) => (
+// FIX: Made the `action` prop optional by providing a default null value.
+// This resolves a TypeScript error where EmptyState was used without an action.
+const EmptyState = ({ icon, title, message, action = null }) => (
     <div className="empty-state">
         <div className="empty-state-icon">{icon}</div>
         <h3>{title}</h3>
@@ -168,7 +171,6 @@ const DashboardPage = ({ setCurrentPage, events }) => {
         const now = new Date();
         const futureEvents = events
             .filter(event => new Date(event.date) > now)
-            // FIX: Use .getTime() for date comparison in sort function.
             .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
         return futureEvents[0] || null;
     }, [events]);
