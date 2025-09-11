@@ -1,3 +1,4 @@
+
 :root {
   --primary-pink: #E91E63;
   --primary-pink-hover: #F06292;
@@ -114,6 +115,7 @@ body {
 .form-layout input,
 .form-layout select,
 .form-layout textarea,
+.page-controls input[type="search"],
 .page-controls select {
   width: 100%;
   padding: 12px;
@@ -130,6 +132,7 @@ body {
 .form-layout input:focus,
 .form-layout select:focus,
 .form-layout textarea:focus,
+.page-controls input[type="search"]:focus,
 .page-controls select:focus {
   outline: none;
   border-color: var(--primary-pink);
@@ -524,21 +527,61 @@ body {
   position: relative;
 }
 
-.role-switcher {
+.role-switcher-custom {
     display: none; /* Hide on mobile by default */
+    position: relative;
 }
-.role-switcher select {
+.role-switcher-trigger {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
     color: var(--text-primary);
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+}
+.role-switcher-trigger .role-icon svg {
+    width: 20px;
+    height: 20px;
+    color: var(--text-secondary);
+}
+.role-switcher-trigger svg:last-child {
+    width: 16px;
+    height: 16px;
+    color: var(--text-secondary);
+}
+.role-switcher-menu {
+    position: absolute;
+    top: calc(100% + 5px);
+    right: 0;
+    background-color: var(--bg-card);
     border: 1px solid var(--border-color);
     border-radius: 8px;
     padding: 8px;
-    font-size: 13px;
-    font-family: 'Poppins', sans-serif;
+    width: 200px;
+    z-index: 1300;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
 }
-.role-switcher select:focus {
-    outline: none;
-    border-color: var(--primary-pink);
+.role-switcher-menu ul {
+    list-style: none;
+}
+.role-switcher-menu li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+}
+.role-switcher-menu li:hover {
+    background-color: var(--bg-light-dark);
 }
 
 .action-btn {
@@ -1042,6 +1085,63 @@ body {
     gap: 16px;
 }
 
+/* Achievements & Badges */
+.badge-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+.badge-item {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    width: 80px;
+    text-align: center;
+}
+.badge-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: var(--bg-light-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--warning);
+}
+.badge-icon svg {
+    width: 32px;
+    height: 32px;
+    color: var(--warning);
+}
+.badge-name {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+.badge-tooltip {
+    position: absolute;
+    bottom: 110%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #000;
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    white-space: nowrap;
+    z-index: 10;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s, visibility 0.2s;
+}
+.badge-item:hover .badge-tooltip {
+    opacity: 1;
+    visibility: visible;
+}
+
+
 /* Athlete Profile - History & Chart */
 .chart-container {
     width: 100%;
@@ -1315,7 +1415,7 @@ body {
     border-top: 1px solid var(--border-color);
     display: flex;
     justify-content: space-around;
-    align-items: center;
+    align-items: flex-start; /* Align to top for better touch area */
     z-index: 1000;
 }
 .mobile-nav-item {
@@ -1331,14 +1431,17 @@ body {
     transition: color 0.2s;
     flex: 1;
     height: 100%;
-    padding: 14px 4px; /* Increased padding for better touch area */
+    padding-top: 8px; /* Adjust padding */
 }
 .mobile-nav-item.active {
     color: var(--primary-pink);
 }
 .mobile-nav-item svg {
-    width: 30px; /* Increased icon size */
-    height: 30px;
+    width: 24px;
+    height: 24px;
+}
+.mobile-nav-item span {
+    line-height: 1.2;
 }
 
 /* Transaction List */
@@ -1400,7 +1503,7 @@ body {
       font-weight: 600;
     }
 
-    .role-switcher {
+    .role-switcher-custom {
         display: block; /* Show role switcher on tablet and up */
     }
 
