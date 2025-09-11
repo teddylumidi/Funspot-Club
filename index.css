@@ -1,5 +1,4 @@
 
-
 :root {
   --primary-pink: #E91E63;
   --primary-pink-hover: #F06292;
@@ -139,8 +138,11 @@ body {
   border-color: var(--primary-pink);
 }
 
-.form-layout textarea {
+.form-layout textarea, .form-layout select[multiple] {
     resize: vertical;
+}
+.form-layout select[multiple] {
+    height: 120px;
 }
 
 .form-options {
@@ -908,6 +910,13 @@ body {
 .pill.beginner { background-color: var(--blue-light); color: var(--blue-dark); }
 .pill.intermediate { background-color: var(--orange-light); color: var(--orange-dark); }
 .pill.advanced { background-color: var(--teal-light); color: var(--teal-dark); }
+.pill.active { background-color: var(--green-light); color: var(--green-dark); }
+.pill.inactive { background-color: var(--text-secondary); color: var(--bg-dark); }
+.pill.coach { background-color: var(--blue-light); color: var(--blue-dark); }
+.pill.parentathlete { background-color: var(--green-light); color: var(--green-dark); }
+.pill.admin { background-color: var(--danger); color: white; }
+.pill.athlete { background-color: var(--orange-light); color: var(--orange-dark); }
+
 
 .action-buttons {
     display: flex;
@@ -1541,6 +1550,64 @@ input:checked + .slider:before {
     background-color: white;
 }
 
+/* Attendance Page */
+.attendance-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+.session-list-card {
+    flex-shrink: 0;
+}
+.session-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+.session-item {
+    padding: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border-color);
+}
+.session-item:hover {
+    background-color: var(--bg-light-dark);
+}
+.session-item.active {
+    background-color: var(--primary-pink);
+    color: white;
+}
+.session-item p { font-weight: 500; }
+.session-item small { color: var(--text-secondary); }
+.session-item.active small { color: white; }
+
+.attendance-sheet {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.attendance-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    background-color: var(--bg-light-dark);
+    border-radius: 8px;
+}
+.attendance-row p { font-weight: 500; }
+.attendance-actions { display: flex; gap: 8px; }
+.btn-attendance {
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+}
+.btn-attendance.present.active { background-color: var(--success); color: white; border-color: var(--success); }
+.btn-attendance.absent.active { background-color: var(--danger); color: white; border-color: var(--danger); }
+
 
 /* Tablet Styles */
 @media (min-width: 768px) {
@@ -1578,7 +1645,7 @@ input:checked + .slider:before {
         display: block; /* Show role switcher on tablet and up */
     }
 
-    .stats-grid { grid-template-columns: repeat(4, 1fr); }
+    .stats-grid { grid-template-columns: repeat(3, 1fr); }
     .main-layout { grid-template-columns: 2fr 1fr; }
     .page-controls {
         flex-direction: row;
@@ -1682,6 +1749,17 @@ input:checked + .slider:before {
         background-color: var(--bg-light-dark);
         border: 1px solid var(--border-color);
     }
+    
+    .attendance-layout {
+        flex-direction: row;
+        align-items: flex-start;
+    }
+    .session-list-card {
+        width: 300px;
+    }
+    .attendance-sheet-card {
+        flex-grow: 1;
+    }
 }
 
 /* Desktop Styles */
@@ -1717,6 +1795,7 @@ input:checked + .slider:before {
 .stat-card-lg {
     padding: 24px;
     text-align: center;
+    cursor: pointer;
 }
 .stat-card-lg h3 { font-size: 32px; }
 .stat-card-lg p { font-size: 14px; }
