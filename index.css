@@ -1632,3 +1632,54 @@ body {
 @media (min-width: 1280px) {
     .events-grid { grid-template-columns: repeat(3, 1fr); }
 }
+
+/* Role-based dashboard themes */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+}
+.stat-card-lg {
+    padding: 24px;
+    text-align: center;
+}
+.stat-card-lg h3 { font-size: 32px; }
+.stat-card-lg p { font-size: 14px; }
+
+.dashboard-admin .card-header, .dashboard-admin .stat-card-lg { border-left: 4px solid var(--danger); }
+.dashboard-coach .card-header, .dashboard-coach .stat-card-lg { border-left: 4px solid var(--info); }
+.dashboard-parent .card-header, .dashboard-parent .stat-card-lg { border-left: 4px solid var(--success); }
+.balance-due { background-color: var(--danger); }
+
+.athlete-list-widget .athlete-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.athlete-list-widget .athlete-list-item:hover {
+    background-color: var(--bg-light-dark);
+}
+.athlete-list-widget .athlete-list-item:not(:last-child) {
+    border-bottom: 1px solid var(--border-color);
+}
+.athlete-list-widget p { font-weight: 500; }
+.athlete-list-widget small { color: var(--text-secondary); }
+
+@media (min-width: 768px) {
+    .dashboard-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .dashboard-grid .grid-col-span-2 {
+        grid-column: span 2;
+    }
+}
+
+@media (min-width: 1024px) {
+     .dashboard-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}

@@ -1,5 +1,4 @@
 
-
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { createRoot } from 'react-dom/client';
 
@@ -51,17 +50,17 @@ const useOnClickOutside = (ref, handler) => {
 
 
 const initialAthletes = [
-    { id: 1, name: 'Sarah Wanjiku', skillLevel: 'Beginner', activity: 'Skating', ageGroup: 'U10', badges: ['first_competition'], history: [
+    { id: 1, name: 'Sarah Wanjiku', skillLevel: 'Beginner', activity: 'Skating', ageGroup: 'U10', parentId: 1, coachId: 1, badges: ['first_competition'], history: [
         { id: 4, date: '2025-09-12', description: 'New high score: 92 in choreography.' },
         { id: 3, date: '2025-09-05', description: 'Completed speed circuit. Time: 120 seconds.' },
         { id: 1, date: '2025-08-28', description: 'Mastered forward swizzles. Freestyle routine score: 85.' },
         { id: 2, date: '2025-08-20', description: 'First time on ice without assistance.' }
     ]},
-    { id: 2, name: 'John Kamau', skillLevel: 'Intermediate', activity: 'Swimming', ageGroup: '15-18', badges: [], history: [] },
-    { id: 3, name: 'Aisha Mwalimu', skillLevel: 'Advanced', activity: 'Chess', ageGroup: '15-18', badges: ['first_competition'], history: [
+    { id: 2, name: 'John Kamau', skillLevel: 'Intermediate', activity: 'Swimming', ageGroup: '15-18', parentId: 1, coachId: 2, badges: [], history: [] },
+    { id: 3, name: 'Aisha Mwalimu', skillLevel: 'Advanced', activity: 'Chess', ageGroup: '15-18', parentId: 2, coachId: null, badges: ['first_competition'], history: [
         { id: 3, date: '2025-09-01', description: 'Won local club tournament.'}
     ] },
-    { id: 4, name: 'Peter Kiprotich', skillLevel: 'Beginner', activity: 'Skating', ageGroup: 'U10', badges: ['first_competition'], history: [] },
+    { id: 4, name: 'Peter Kiprotich', skillLevel: 'Beginner', activity: 'Skating', ageGroup: 'U10', parentId: 3, coachId: 1, badges: ['first_competition'], history: [] },
 ];
 
 const initialCoaches = [
@@ -161,7 +160,6 @@ const ChevronDownIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none
 
 // --- Helper Components ---
 const Card = ({ children, className = '' }) => <div className={`card ${className}`}>{children}</div>;
-// FIX: Made `action` and `children` optional by providing default values to fix props-related errors.
 const CardHeader = ({ title, action = null, children = null }) => (
     <div className="card-header">
         <h3>{title}</h3>
@@ -170,7 +168,6 @@ const CardHeader = ({ title, action = null, children = null }) => (
     </div>
 );
 
-// FIX: Made `children` optional by providing a default value to fix a props-related error.
 const EmptyState = ({ icon, title, message, children = null }) => (
     <div className="empty-state">
         <div className="empty-state-icon">{icon}</div>
@@ -189,7 +186,7 @@ const Modal = ({ show, onClose, title, children }) => {
             <div className="modal-content" onClick={e => e.stopPropagation()}>
                 <div className="modal-header">
                     <h3>{title}</h3>
-                    <button onClick={onClose} className="close-btn"><CloseIcon /></button>
+                    <button onClick={onClose} className="close-btn" aria-label="Close modal"><CloseIcon /></button>
                 </div>
                 <div className="modal-body">
                     {children}
@@ -354,7 +351,7 @@ const Sidebar = ({ activePage, navigate, role, isSidebarOpen, setSidebarOpen }) 
                 <div className="sidebar-header">
                     <div className="logo"><LogoIcon /></div>
                     <h2>Funpot Club</h2>
-                    <button className="close-sidebar-btn" onClick={() => setSidebarOpen(false)}><CloseIcon /></button>
+                    <button className="close-sidebar-btn" onClick={() => setSidebarOpen(false)} aria-label="Close sidebar"><CloseIcon /></button>
                 </div>
                 <nav className="nav-menu">
                     <ul>
@@ -398,7 +395,7 @@ const RoleSwitcherDropdown = ({ role, setRole }) => {
 
     return (
         <div className="role-switcher-custom" ref={dropdownRef}>
-            <button className="role-switcher-trigger" onClick={() => setIsOpen(!isOpen)}>
+            <button className="role-switcher-trigger" onClick={() => setIsOpen(!isOpen)} aria-haspopup="true" aria-expanded={isOpen}>
                 <span className="role-icon">{roles[role]}</span>
                 <span className="role-name">{role}</span>
                 <ChevronDownIcon />
@@ -437,7 +434,7 @@ const Header = ({ title, onMenuClick, role, setRole, navigate, notifications, se
     return (
         <header className="main-header">
             <div className="header-left">
-                <button className="hamburger-menu" onClick={onMenuClick}><HamburgerIcon /></button>
+                <button className="hamburger-menu" onClick={onMenuClick} aria-label="Open sidebar"><HamburgerIcon /></button>
                 <div>
                     <h1>{title}</h1>
                     <p className="current-date">{new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
@@ -450,7 +447,7 @@ const Header = ({ title, onMenuClick, role, setRole, navigate, notifications, se
                 </form>
                 <div className="header-actions">
                      <RoleSwitcherDropdown role={role} setRole={setRole} />
-                    <button className="action-btn" onClick={() => setShowNotifications(s => !s)}>
+                    <button className="action-btn" onClick={() => setShowNotifications(s => !s)} aria-label="Toggle notifications">
                         <NotificationIcon />
                         {unreadCount > 0 && <span className="notification-badge">{unreadCount}</span>}
                     </button>
@@ -475,14 +472,14 @@ const MobileBottomNav = ({ activePage, navigate, role }) => {
         ],
         Coach: [
             { name: 'Home', icon: <HomeIcon />, page: 'dashboard' },
-            { name: 'Athletes', icon: <UsersIcon />, page: 'athletes' },
+            { name: 'My Athletes', icon: <UsersIcon />, page: 'athletes' },
             { name: 'Events', icon: <CalendarIcon />, page: 'events' },
             { name: 'Tasks', icon: <TasksIcon />, page: 'tasks' },
             { name: 'Messages', icon: <MessagesIcon />, page: 'messages' },
         ],
         'Parent/Athlete': [
             { name: 'Home', icon: <HomeIcon />, page: 'dashboard' },
-            { name: 'Profile', icon: <UsersIcon />, page: 'athlete-profile', params: { athleteId: 1 } },
+            { name: 'My Child(ren)', icon: <UsersIcon />, page: 'athlete-profile', params: { athleteId: 1 } },
             { name: 'Events', icon: <CalendarIcon />, page: 'events' },
             { name: 'Payments', icon: <PaymentsIcon />, page: 'payments' },
             { name: 'Messages', icon: <MessagesIcon />, page: 'messages' },
@@ -500,10 +497,88 @@ const MobileBottomNav = ({ activePage, navigate, role }) => {
     );
 };
 
-const DashboardPage = ({ navigate, athletes, events, role }) => {
-    const totalAthletes = athletes.length;
-    const totalEvents = events.length;
+const AdminDashboard = ({ navigate, athletes, events, coaches }) => {
+    return (
+        <div className="dashboard-admin">
+            <div className="stats-grid">
+                <Card className="stat-card-lg"><h3>{athletes.length}</h3><p>Total Athletes</p></Card>
+                <Card className="stat-card-lg"><h3>{coaches.length}</h3><p>Coaches</p></Card>
+                <Card className="stat-card-lg"><h3>{events.length}</h3><p>Events</p></Card>
+                <Card className="stat-card-lg"><h3>Ksh 4,500</h3><p>Fees Collected</p></Card>
+            </div>
+            <div className="dashboard-grid">
+                <Card><CardHeader title="User Management"/></Card>
+                <Card><CardHeader title="Activities Control"/></Card>
+                <Card><CardHeader title="Payments & Subscriptions"/></Card>
+                <Card><CardHeader title="Events"/></Card>
+                <Card><CardHeader title="Communication"/></Card>
+                <Card><CardHeader title="Recent Logs"/></Card>
+            </div>
+        </div>
+    );
+};
 
+const CoachDashboard = ({ navigate, athletes, events }) => {
+    return (
+        <div className="dashboard-coach">
+            <div className="dashboard-grid">
+                <Card className="grid-col-span-2">
+                    <CardHeader title="My Athletes" action={<a href="#" onClick={(e) => { e.preventDefault(); navigate('athletes'); }} className="view-all">View All</a>} />
+                    <div className="athlete-list-widget">
+                        {(athletes || []).map(athlete => (
+                             <div key={athlete.id} className="athlete-list-item" onClick={() => navigate('athlete-profile', {athleteId: athlete.id})}>
+                                <p>{athlete.name}</p>
+                                <Pill text={athlete.skillLevel} type={athlete.skillLevel.toLowerCase()}/>
+                            </div>
+                        ))}
+                    </div>
+                </Card>
+                <Card>
+                    <CardHeader title="Performance Reports" />
+                     {athletes.length > 0 && <ProgressChart history={athletes[0].history} />}
+                </Card>
+                <Card><CardHeader title="Training Management"/></Card>
+                <Card><CardHeader title="Attendance Tracker"/></Card>
+                <Card><CardHeader title="Messaging"/></Card>
+            </div>
+        </div>
+    );
+};
+
+const ParentDashboard = ({ navigate, athletes, events }) => {
+     const myChildren = athletes; // athletes are pre-filtered
+    return (
+        <div className="dashboard-parent">
+            <div className="stats-grid">
+                 <Card className="stat-card-lg balance-due"><h3>Ksh 2,500</h3><p>Balance Due</p></Card>
+            </div>
+            <div className="dashboard-grid">
+                <Card className="grid-col-span-2">
+                    <CardHeader title="My Child(ren)" />
+                    {myChildren.map(child => (
+                         <div key={child.id} className="athlete-list-item" onClick={() => navigate('athlete-profile', {athleteId: child.id})}>
+                            <div>
+                                <p>{child.name}</p>
+                                <small>{child.activity}</small>
+                            </div>
+                            <Pill text={child.skillLevel} type={child.skillLevel.toLowerCase()}/>
+                        </div>
+                    ))}
+                </Card>
+                <Card>
+                    <CardHeader title="Progress Tracker" />
+                     {myChildren.length > 0 && <ProgressChart history={myChildren[0].history} />}
+                </Card>
+                <Card><CardHeader title="Payments & Balance"/></Card>
+                <Card><CardHeader title="Upcoming Events"/></Card>
+                <Card><CardHeader title="Messages"/></Card>
+            </div>
+        </div>
+    );
+};
+
+
+const DashboardPage = ({ navigate, athletes, events, role, currentCoachId, currentParentId }) => {
     const upcomingEvent = useMemo(() => {
         const now = new Date();
         return events
@@ -511,22 +586,20 @@ const DashboardPage = ({ navigate, athletes, events, role }) => {
             .sort((a, b) => new Date(`${a.date}T${a.time}`).getTime() - new Date(`${b.date}T${b.time}`).getTime())[0];
     }, [events]);
 
-    const quickActions = {
-        Admin: [
-            { name: 'Add New Athlete', icon: 'add-athlete', action: () => navigate('add-athlete') },
-            { name: 'Schedule Training', icon: 'schedule-training', action: () => navigate('events') },
-            { name: 'Generate Reports', icon: 'generate-reports', action: () => {} },
-            { name: 'QR Code Attendance', icon: 'qr-attendance', action: () => {} },
-        ],
-        Coach: [
-            { name: 'Add Training Report', icon: 'add-athlete', action: () => {} },
-            { name: 'Mark Attendance', icon: 'qr-attendance', action: () => {} },
-        ],
-        'Parent/Athlete': [
-            { name: 'Pay Balance', icon: 'generate-reports', action: () => navigate('payments') },
-            { name: 'Message Coach', icon: 'schedule-training', action: () => navigate('messages') },
-        ],
-    };
+    const renderDashboard = () => {
+        switch(role) {
+            case 'Admin':
+                return <AdminDashboard navigate={navigate} athletes={athletes} events={events} coaches={initialCoaches} />;
+            case 'Coach':
+                const myAthletes = athletes.filter(a => a.coachId === currentCoachId);
+                return <CoachDashboard navigate={navigate} athletes={myAthletes} events={events} />;
+            case 'Parent/Athlete':
+                const myChildren = athletes.filter(a => a.parentId === currentParentId);
+                return <ParentDashboard navigate={navigate} athletes={myChildren} events={events} />;
+            default:
+                return <p>No dashboard available for this role.</p>;
+        }
+    }
 
     return (
         <>
@@ -548,73 +621,32 @@ const DashboardPage = ({ navigate, athletes, events, role }) => {
                     </div>
                 </div>
             )}
-            <div className="stats-grid">
-                <div className="stat-card">
-                    <div className="stat-card-header"><div className="icon blue"><UsersIcon /></div></div>
-                    <div className="stat-card-body"><h3>{totalAthletes}</h3><p>Total Athletes</p></div>
-                </div>
-                <div className="stat-card">
-                    <div className="stat-card-header"><div className="icon teal"><CalendarIcon /></div></div>
-                    <div className="stat-card-body"><h3>{totalEvents}</h3><p>Total Events</p></div>
-                </div>
-                <div className="stat-card">
-                    <div className="stat-card-header"><div className="icon orange"><UsersIcon /></div></div>
-                    <div className="stat-card-body"><h3>{initialCoaches.length}</h3><p>Coaches</p></div>
-                </div>
-                <div className="stat-card">
-                    <div className="stat-card-header"><div className="icon green"><PaymentsIcon /></div></div>
-                    <div className="stat-card-body"><h3>Ksh 4,500</h3><p>Fees Collected</p></div>
-                </div>
-            </div>
-            <div className="main-layout">
-                <Card>
-                    <CardHeader title="Recent Activity" action={<a href="#" className="view-all">View All</a>} />
-                     <div className="activity-list">
-                         {initialPayments.slice(0, 3).map(p => (
-                            <div key={p.id} className="activity-item">
-                                <div className="icon" style={{backgroundColor: '#e8f5e9', color: '#2e7d32'}}><PaymentsIcon/></div>
-                                <div className="description">
-                                    <p>Payment received from <strong>{p.name}</strong></p>
-                                    <p>Amount: Ksh {p.amount}</p>
-                                </div>
-                            </div>
-                         ))}
-                    </div>
-                </Card>
-                <Card>
-                    <CardHeader title="Quick Actions" />
-                    <div className="quick-actions">
-                        <ul>
-                            {(quickActions[role] || []).map(action => (
-                                <li key={action.name}>
-                                    <button onClick={action.action} className="action-link">
-                                        <span className={`icon ${action.icon}`}><UsersIcon/></span>
-                                        {action.name}
-                                    </button>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                </Card>
-            </div>
+            {renderDashboard()}
         </>
     );
 };
 
-const AthletesPage = ({ athletes, navigate, setAthletes, showToast, logAction }) => {
+const AthletesPage = ({ athletes, navigate, setAthletes, showToast, logAction, role, currentCoachId }) => {
     const [activityFilter, setActivityFilter] = useState('all');
     const [ageGroupFilter, setAgeGroupFilter] = useState('all');
     
-    const uniqueActivities = useMemo(() => ['all', ...Array.from(new Set(athletes.map(a => a.activity)))], [athletes]);
-    const uniqueAgeGroups = useMemo(() => ['all', ...Array.from(new Set(athletes.map(a => a.ageGroup)))], [athletes]);
+    const athletesToShow = useMemo(() => {
+        if (role === 'Coach') {
+            return athletes.filter(a => a.coachId === currentCoachId);
+        }
+        return athletes; // Admins and Parents see all athletes on this page
+    }, [athletes, role, currentCoachId]);
+
+    const uniqueActivities = useMemo(() => ['all', ...Array.from(new Set(athletesToShow.map(a => a.activity)))], [athletesToShow]);
+    const uniqueAgeGroups = useMemo(() => ['all', ...Array.from(new Set(athletesToShow.map(a => a.ageGroup)))], [athletesToShow]);
 
     const filteredAthletes = useMemo(() => {
-        return athletes.filter(athlete => {
+        return athletesToShow.filter(athlete => {
             const activityMatch = activityFilter === 'all' || athlete.activity === activityFilter;
             const ageGroupMatch = ageGroupFilter === 'all' || athlete.ageGroup === ageGroupFilter;
             return activityMatch && ageGroupMatch;
         });
-    }, [athletes, activityFilter, ageGroupFilter]);
+    }, [athletesToShow, activityFilter, ageGroupFilter]);
 
     const [athleteToDelete, setAthleteToDelete] = useState(null);
 
@@ -640,11 +672,13 @@ const AthletesPage = ({ athletes, navigate, setAthletes, showToast, logAction })
                         {uniqueAgeGroups.filter((v): v is string => !!v).map(group => <option key={group} value={group}>{group === 'all' ? 'All Age Groups' : group}</option>)}
                     </select>
                 </div>
-                <button className="btn btn-primary" onClick={() => navigate('add-athlete')}><AddIcon /> Add Athlete</button>
+                {role === 'Admin' && (
+                    <button className="btn btn-primary" onClick={() => navigate('add-athlete')}><AddIcon /> Add Athlete</button>
+                )}
             </div>
             
             <Card>
-                <CardHeader title="All Athletes" />
+                <CardHeader title={role === 'Coach' ? "My Athletes" : "All Athletes"} />
                 {filteredAthletes.length > 0 ? (
                     <div className="list-table">
                         <table>
@@ -660,8 +694,12 @@ const AthletesPage = ({ athletes, navigate, setAthletes, showToast, logAction })
                                         <td data-label="Age Group">{athlete.ageGroup}</td>
                                         <td data-label="Actions">
                                             <div className="action-buttons">
-                                                <button className="action-btn-icon edit-btn" onClick={() => navigate('edit-athlete', { athleteId: athlete.id })}><EditIcon /></button>
-                                                <button className="action-btn-icon delete-btn" onClick={() => handleDeleteClick(athlete)}><DeleteIcon /></button>
+                                                {role === 'Admin' && (
+                                                    <>
+                                                        <button className="action-btn-icon edit-btn" onClick={() => navigate('edit-athlete', { athleteId: athlete.id })} aria-label={`Edit ${athlete.name}`}><EditIcon /></button>
+                                                        <button className="action-btn-icon delete-btn" onClick={() => handleDeleteClick(athlete)} aria-label={`Delete ${athlete.name}`}><DeleteIcon /></button>
+                                                    </>
+                                                )}
                                             </div>
                                         </td>
                                     </tr>
@@ -703,19 +741,20 @@ const AthleteProfilePage = ({ navigate, params, athletes, setAthletes, showToast
         };
         
         logAction(`Added progress log for ${athlete.name}: "${logDescription}"`);
-        setAthletes(prev => prev.map(a => a.id === athlete.id ? {...a, history: [newLog, ...a.history]} : a));
+        setAthletes(prev => prev.map(a => a.id === athlete.id ? {...a, history: [newLog, ...(a.history || [])]} : a));
         setLogDescription('');
         showToast('Progress log added successfully!', 'success');
     };
 
     const filteredHistory = useMemo(() => {
-        if (!historyFilter) return athlete?.history || [];
-        return athlete.history.filter(h => h.description.toLowerCase().includes(historyFilter.toLowerCase()));
+        const history = athlete?.history || [];
+        if (!historyFilter) return history;
+        return history.filter(h => h.description.toLowerCase().includes(historyFilter.toLowerCase()));
     }, [athlete, historyFilter]);
     
     const athleteBadges = useMemo(() => {
-        if (!athlete || !athlete.badges) return [];
-        return athlete.badges.map(badgeId => badges.find(b => b.id === badgeId)).filter(Boolean);
+        const currentBadges = athlete?.badges || [];
+        return currentBadges.map(badgeId => badges.find(b => b.id === badgeId)).filter(Boolean);
     }, [athlete, badges]);
 
     if (!athlete) return <p>Athlete not found.</p>;
@@ -794,7 +833,7 @@ const AthleteProfilePage = ({ navigate, params, athletes, setAthletes, showToast
 
 const ProgressChart = ({ history }) => {
     const dataPoints = useMemo(() => {
-        const points = history
+        const points = (history || [])
             .map(log => {
                 const match = log.description.match(/(\bscore\b|\btime\b|\bpoints\b)[\s:]*(\d+(\.\d+)?)/i);
                 if (match) {
@@ -807,7 +846,7 @@ const ProgressChart = ({ history }) => {
         return points;
     }, [history]);
 
-    if (dataPoints.length < 2) {
+    if (!history || history.length < 2 || dataPoints.length < 2) {
         return (
             <div className="chart-placeholder">
                 <p>Not enough data to display a chart. Add history logs with keywords like "score", "time", or "points" followed by a number.</p>
@@ -824,8 +863,11 @@ const ProgressChart = ({ history }) => {
     const yMin = Math.min(...dataPoints.map(d => d.value));
     const yMax = Math.max(...dataPoints.map(d => d.value));
 
-    const xScale = (date) => margin.left + (date.getTime() - xMin) / (xMax - xMin) * (width - margin.left - margin.right);
-    const yScale = (value) => height - margin.bottom - (value - yMin) / (yMax - yMin) * (height - margin.top - margin.bottom);
+    const xRange = xMax - xMin;
+    const yRange = yMax - yMin;
+
+    const xScale = (date) => margin.left + (xRange === 0 ? (width - margin.left - margin.right) / 2 : (date.getTime() - xMin) / xRange * (width - margin.left - margin.right));
+    const yScale = (value) => height - margin.bottom - (yRange === 0 ? (height - margin.top - margin.bottom) / 2 : (value - yMin) / yRange * (height - margin.top - margin.bottom));
 
     const pathData = "M" + dataPoints.map(d => `${xScale(d.date)},${yScale(d.value)}`).join(" L ");
 
@@ -833,7 +875,7 @@ const ProgressChart = ({ history }) => {
         <div className="chart-container">
             <svg viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="xMidYMid meet">
                 {[...Array(5)].map((_, i) => {
-                    const y = yMin + (yMax - yMin) / 4 * i;
+                    const y = yMin + yRange / 4 * i;
                     const yPos = yScale(y);
                     return (
                         <g key={i} className="grid-line">
@@ -972,16 +1014,20 @@ const EventsPage = ({ events, navigate }) => {
 
 const EventDetailsPage = ({ params, events, athletes, setEvents, role, showToast, onRegister }) => {
     const event = events.find(e => e.id === params.eventId);
-    const eventAttendees = event ? event.attendees.map(id => athletes.find(a => a.id === id)).filter(Boolean) : [];
+
+    const eventAttendees = useMemo(() => {
+        if (!event) return [];
+        return (event.attendees || []).map(id => athletes.find(a => a.id === id)).filter(Boolean);
+    }, [event, athletes]);
     
     // For demo: assume Parent/Athlete role is for athleteId=1
-    const isRegistered = role === 'Parent/Athlete' && event?.attendees.includes(1);
+    const isRegistered = role === 'Parent/Athlete' && event?.attendees?.includes(1);
     const athleteIdToRegister = 1; // Demo athlete
 
     const handleRegister = () => {
         if (role !== 'Parent/Athlete') return;
         setEvents(prevEvents => prevEvents.map(e => 
-            e.id === event.id ? { ...e, attendees: [...e.attendees, athleteIdToRegister] } : e
+            e.id === event.id ? { ...e, attendees: [...(e.attendees || []), athleteIdToRegister] } : e
         ));
         onRegister(athleteIdToRegister); // Trigger badge check
         showToast(`Successfully registered for ${event.name}!`, 'success');
@@ -1136,8 +1182,8 @@ const TasksPage = ({ tasks, setTasks, coaches, showToast, logAction }) => {
                                     </div>
                                 </div>
                                 <div className="action-buttons">
-                                    <button className="action-btn-icon edit-btn" onClick={() => handleEditTask(task)}><EditIcon /></button>
-                                    <button className="action-btn-icon delete-btn" onClick={() => handleDeleteClick(task)}><DeleteIcon /></button>
+                                    <button className="action-btn-icon edit-btn" onClick={() => handleEditTask(task)} aria-label={`Edit task ${task.title}`}><EditIcon /></button>
+                                    <button className="action-btn-icon delete-btn" onClick={() => handleDeleteClick(task)} aria-label={`Delete task ${task.title}`}><DeleteIcon /></button>
                                 </div>
                             </div>
                         ))}
@@ -1414,6 +1460,10 @@ const App = () => {
 
     const [toast, setToast] = useState({ show: false, message: '', type: 'info' });
 
+    // --- FOR DEMO: Define current user IDs ---
+    const currentCoachId = 1; // Logged in as David Omondi
+    const currentParentId = 1; // Logged in as parent of Sarah & John
+
     const showToast = (message, type = 'info') => {
         setToast({ show: true, message, type });
     };
@@ -1450,7 +1500,7 @@ const App = () => {
             // Badge 1: First Competition
             const hasCompetitionBadge = updatedBadges.includes('first_competition');
             if (!hasCompetitionBadge) {
-                const hasAttendedEvent = events.some(e => e.attendees.includes(athleteId));
+                const hasAttendedEvent = events.some(e => (e.attendees || []).includes(athleteId));
                 if (hasAttendedEvent) {
                     updatedBadges.push('first_competition');
                     badgeAwarded = true;
@@ -1515,41 +1565,68 @@ const App = () => {
     };
 
     const renderPage = () => {
-        switch (page.name) {
-            case 'dashboard': return <DashboardPage navigate={navigate} athletes={athletes} events={events} role={role} />;
-            case 'athletes': return <AthletesPage athletes={athletes} navigate={navigate} setAthletes={setAthletes} showToast={showToast} logAction={logAction} />;
-            case 'athlete-profile': return <AthleteProfilePage navigate={navigate} params={page.params} athletes={athletes} setAthletes={setAthletes} showToast={showToast} logAction={logAction} badges={badges} />;
+        const pageName = page.name;
+        const params = page.params;
+        switch (pageName) {
+            case 'dashboard':
+                return <DashboardPage navigate={navigate} athletes={athletes} events={events} role={role} currentCoachId={currentCoachId} currentParentId={currentParentId} />;
+            case 'athletes':
+                return <AthletesPage athletes={athletes} setAthletes={setAthletes} navigate={navigate} showToast={showToast} logAction={logAction} role={role} currentCoachId={currentCoachId} />;
+            case 'athlete-profile':
+                return <AthleteProfilePage navigate={navigate} params={params} athletes={athletes} setAthletes={setAthletes} showToast={showToast} logAction={logAction} badges={badges} />;
             case 'add-athlete':
-            case 'edit-athlete': return <AthleteFormPage navigate={navigate} params={page.params} athletes={athletes} setAthletes={setAthletes} showToast={showToast} logAction={logAction} />;
-            case 'events': return <EventsPage events={events} navigate={navigate} />;
-            case 'event-details': return <EventDetailsPage params={page.params} events={events} athletes={athletes} setEvents={setEvents} role={role} showToast={showToast} onRegister={awardBadges} />;
-            case 'payments': return <PaymentsPage payments={payments} />;
-            case 'tasks': return <TasksPage tasks={tasks} setTasks={setTasks} coaches={coaches} showToast={showToast} logAction={logAction}/>;
-            case 'messages': return <MessagesPage messages={messages} />;
-            case 'search-results': return <SearchResultsPage params={page.params} navigate={navigate} athletes={athletes} coaches={coaches} events={events} />;
-            case 'audit-logs': return <AuditLogPage auditLogs={auditLogs} />;
-            default: return <DashboardPage navigate={navigate} athletes={athletes} events={events} role={role} />;
+            case 'edit-athlete':
+                return <AthleteFormPage navigate={navigate} params={params} athletes={athletes} setAthletes={setAthletes} showToast={showToast} logAction={logAction} />;
+            case 'events':
+                return <EventsPage events={events} navigate={navigate} />;
+            case 'event-details':
+                return <EventDetailsPage params={params} events={events} athletes={athletes} setEvents={setEvents} role={role} showToast={showToast} onRegister={awardBadges} />;
+            case 'payments':
+                return <PaymentsPage payments={payments} />;
+            case 'tasks':
+                return <TasksPage tasks={tasks} setTasks={setTasks} coaches={coaches} showToast={showToast} logAction={logAction} />;
+            case 'messages':
+                return <MessagesPage messages={messages} />;
+            case 'search-results':
+                return <SearchResultsPage params={params} navigate={navigate} athletes={athletes} coaches={coaches} events={events} />;
+            case 'audit-logs':
+                return <AuditLogPage auditLogs={auditLogs} />;
+            default:
+                return <DashboardPage navigate={navigate} athletes={athletes} events={events} role={role} currentCoachId={currentCoachId} currentParentId={currentParentId} />;
         }
     };
 
     if (!isAuthenticated) {
-        return <LoginPage onLogin={() => setIsAuthenticated(true)} />;
+        return <LoginPage onLogin={() => { setIsAuthenticated(true); navigate('dashboard'); }} />;
     }
 
     return (
         <div className="dashboard-layout">
-            <Sidebar activePage={page.name} navigate={navigate} role={role} isSidebarOpen={isSidebarOpen} setSidebarOpen={setSidebarOpen}/>
-            <div style={{ marginLeft: 0 }}> {/* Simplified for mobile-first; desktop handled by media queries */}
-                <main className="main-content">
-                    <Header title={pageTitles[page.name] || 'Dashboard'} onMenuClick={() => setSidebarOpen(true)} role={role} setRole={setRole} navigate={navigate} notifications={notifications} setNotifications={setNotifications} />
-                    {renderPage()}
-                </main>
+            <Sidebar activePage={page.name} navigate={navigate} role={role} isSidebarOpen={isSidebarOpen} setSidebarOpen={setSidebarOpen} />
+            <div className="main-content">
+                <Header 
+                    title={pageTitles[page.name] || 'Dashboard'} 
+                    onMenuClick={() => setSidebarOpen(true)}
+                    role={role}
+                    setRole={setRole}
+                    navigate={navigate}
+                    notifications={notifications}
+                    setNotifications={setNotifications}
+                />
+                {renderPage()}
             </div>
-             <MobileBottomNav activePage={page.name} navigate={navigate} role={role} />
-             {toast.show && <ToastNotification message={toast.message} type={toast.type} onDismiss={() => setToast({ ...toast, show: false })} />}
+            <MobileBottomNav activePage={page.name} navigate={navigate} role={role} />
+            {toast.show && (
+                <ToastNotification 
+                    message={toast.message} 
+                    type={toast.type} 
+                    onDismiss={() => setToast({ ...toast, show: false })} 
+                />
+            )}
         </div>
     );
 };
 
-const root = createRoot(document.getElementById('root'));
+const container = document.getElementById('root');
+const root = createRoot(container);
 root.render(<App />);
