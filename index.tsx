@@ -1,4 +1,5 @@
 
+
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { createRoot } from 'react-dom/client';
 
@@ -139,6 +140,7 @@ const CalendarIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" v
 const PaymentsIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h6m3-3.75l-3 1.5m3-1.5l-3-1.5m3 1.5V15m-2.25 1.5l-3-1.5m3 1.5l-3 1.5m3-1.5V15m1.5-1.5l3-1.5m-3 1.5l3 1.5m-3 1.5V15M9 12l-3 1.5m3-1.5l-3-1.5m3 1.5V15" /></svg>;
 const MessagesIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" /></svg>;
 const TasksIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>;
+const SettingsIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.438.995s.145.755.438.995l1.003.827c.48.398.668 1.03.26 1.431l-1.296 2.247a1.125 1.125 0 01-1.37.49l-1.217-.456c-.355-.133-.75-.072-1.075.124a6.57 6.57 0 01-.22.127c-.332.183-.582.495-.645.87l-.213 1.281c-.09.543-.56.94-1.11.94h-2.593c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.063-.374-.313-.686-.645-.87a6.52 6.52 0 01-.22-.127c-.324-.196-.72-.257-1.075-.124l-1.217.456a1.125 1.125 0 01-1.37-.49l-1.296-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.437-.995s-.145-.755-.437-.995l-1.004-.827a1.125 1.125 0 01-.26-1.431l1.296-2.247a1.125 1.125 0 011.37-.49l1.217.456c.355.133.75.072 1.075-.124.073-.044.146-.087.22-.127.332-.183.582-.495.645-.87l.213-1.281z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>;
 const LogoutIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" /></svg>;
 const SearchIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>;
 const NotificationIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" /></svg>;
@@ -328,6 +330,7 @@ const Sidebar = ({ activePage, navigate, role, isSidebarOpen, setSidebarOpen }) 
             { name: 'Tasks', icon: <TasksIcon />, page: 'tasks' },
             { name: 'Messages', icon: <MessagesIcon />, page: 'messages' },
             { name: 'Audit Logs', icon: <AuditLogIcon />, page: 'audit-logs' },
+            { name: 'Settings', icon: <SettingsIcon />, page: 'notification-settings' },
         ],
         Coach: [
             { name: 'Dashboard', icon: <HomeIcon />, page: 'dashboard' },
@@ -335,13 +338,15 @@ const Sidebar = ({ activePage, navigate, role, isSidebarOpen, setSidebarOpen }) 
             { name: 'Events', icon: <CalendarIcon />, page: 'events' },
             { name: 'Tasks', icon: <TasksIcon />, page: 'tasks' },
             { name: 'Messages', icon: <MessagesIcon />, page: 'messages' },
+            { name: 'Settings', icon: <SettingsIcon />, page: 'notification-settings' },
         ],
         'Parent/Athlete': [
             { name: 'Dashboard', icon: <HomeIcon />, page: 'dashboard' },
-            { name: 'My Profile', icon: <UsersIcon />, page: 'athlete-profile', params: { athleteId: 1 } },
+            { name: 'My Child(ren)', icon: <UsersIcon />, page: 'athlete-profile', params: { athleteId: 1 } },
             { name: 'Events', icon: <CalendarIcon />, page: 'events' },
             { name: 'Payments', icon: <PaymentsIcon />, page: 'payments' },
             { name: 'Messages', icon: <MessagesIcon />, page: 'messages' },
+            { name: 'Settings', icon: <SettingsIcon />, page: 'notification-settings' },
         ],
     };
 
@@ -468,21 +473,21 @@ const MobileBottomNav = ({ activePage, navigate, role }) => {
             { name: 'Athletes', icon: <UsersIcon />, page: 'athletes' },
             { name: 'Events', icon: <CalendarIcon />, page: 'events' },
             { name: 'Tasks', icon: <TasksIcon />, page: 'tasks' },
-            { name: 'Logs', icon: <AuditLogIcon />, page: 'audit-logs' },
+            { name: 'Settings', icon: <SettingsIcon />, page: 'notification-settings' },
         ],
         Coach: [
             { name: 'Home', icon: <HomeIcon />, page: 'dashboard' },
             { name: 'My Athletes', icon: <UsersIcon />, page: 'athletes' },
             { name: 'Events', icon: <CalendarIcon />, page: 'events' },
             { name: 'Tasks', icon: <TasksIcon />, page: 'tasks' },
-            { name: 'Messages', icon: <MessagesIcon />, page: 'messages' },
+            { name: 'Settings', icon: <SettingsIcon />, page: 'notification-settings' },
         ],
         'Parent/Athlete': [
             { name: 'Home', icon: <HomeIcon />, page: 'dashboard' },
             { name: 'My Child(ren)', icon: <UsersIcon />, page: 'athlete-profile', params: { athleteId: 1 } },
             { name: 'Events', icon: <CalendarIcon />, page: 'events' },
             { name: 'Payments', icon: <PaymentsIcon />, page: 'payments' },
-            { name: 'Messages', icon: <MessagesIcon />, page: 'messages' },
+            { name: 'Settings', icon: <SettingsIcon />, page: 'notification-settings' },
         ],
     };
     return (
@@ -968,12 +973,97 @@ const AthleteFormPage = ({ navigate, params, athletes, setAthletes, showToast, l
     );
 };
 
-const EventsPage = ({ events, navigate }) => {
+const EventFormModal = ({ show, onClose, onSave, event }) => {
+    const [name, setName] = useState('');
+    const [date, setDate] = useState('');
+    const [time, setTime] = useState('');
+    const [location, setLocation] = useState('');
+    const [description, setDescription] = useState('');
+
+    useEffect(() => {
+        if (event) {
+            setName(event.name);
+            setDate(event.date);
+            setTime(event.time);
+            setLocation(event.location);
+            setDescription(event.description);
+        } else {
+            // Reset for new event
+            setName('');
+            setDate(new Date().toISOString().split('T')[0]);
+            setTime('12:00');
+            setLocation('');
+            setDescription('');
+        }
+    }, [event, show]);
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        onSave({ name, date, time, location, description });
+    };
+
+    return (
+        <Modal show={show} onClose={onClose} title={event ? 'Edit Event' : 'Add New Event'}>
+            <form onSubmit={handleSubmit} className="form-layout">
+                <div className="form-group">
+                    <label htmlFor="eventName">Event Name</label>
+                    <input type="text" id="eventName" value={name} onChange={e => setName(e.target.value)} required />
+                </div>
+                <div className="form-grid">
+                    <div className="form-group">
+                        <label htmlFor="eventDate">Date</label>
+                        <input type="date" id="eventDate" value={date} onChange={e => setDate(e.target.value)} required />
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="eventTime">Time</label>
+                        <input type="time" id="eventTime" value={time} onChange={e => setTime(e.target.value)} required />
+                    </div>
+                </div>
+                <div className="form-group">
+                    <label htmlFor="eventLocation">Location</label>
+                    <input type="text" id="eventLocation" value={location} onChange={e => setLocation(e.target.value)} required />
+                </div>
+                <div className="form-group">
+                    <label htmlFor="eventDescription">Description</label>
+                    <textarea id="eventDescription" rows="4" value={description} onChange={e => setDescription(e.target.value)}></textarea>
+                </div>
+                <div className="modal-actions">
+                    <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
+                    <button type="submit" className="btn btn-primary">Save Event</button>
+                </div>
+            </form>
+        </Modal>
+    );
+};
+
+
+const EventsPage = ({ events, setEvents, navigate, role, showToast, logAction }) => {
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
     const upcomingEvents = events.filter(e => new Date(e.date) >= new Date()).sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime());
     const pastEvents = events.filter(e => new Date(e.date) < new Date()).sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
+    const handleSaveEvent = (eventData) => {
+        const newEvent = {
+            id: Date.now(),
+            ...eventData,
+            attendees: []
+        };
+        setEvents(prev => [newEvent, ...prev]);
+        logAction(`Created new event: "${newEvent.name}"`);
+        showToast('Event created successfully!', 'success');
+        setIsModalOpen(false);
+    };
+
     return (
         <div className="page-container">
+             {(role === 'Admin' || role === 'Coach') && (
+                <div className="page-controls" style={{justifyContent: 'flex-end', marginBottom: 0}}>
+                    <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
+                        <AddIcon /> Create Event
+                    </button>
+                </div>
+            )}
             <section>
                 <h2 className="section-title">Upcoming Events</h2>
                 {upcomingEvents.length > 0 ? (
@@ -1008,6 +1098,12 @@ const EventsPage = ({ events, navigate }) => {
                     </div>
                 ) : <p>No past events.</p>}
             </section>
+            <EventFormModal 
+                show={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onSave={handleSaveEvent}
+                event={null}
+            />
         </div>
     );
 };
@@ -1442,6 +1538,54 @@ const AuditLogPage = ({ auditLogs }) => {
     );
 };
 
+const NotificationSettingsPage = ({ settings, setSettings, showToast }) => {
+    const handleToggle = () => {
+        setSettings(prev => ({ ...prev, enabled: !prev.enabled }));
+        showToast(`Notifications ${!settings.enabled ? 'enabled' : 'disabled'}!`, 'success');
+    };
+
+    const handleTimingChange = (e) => {
+        setSettings(prev => ({ ...prev, timing: Number(e.target.value) }));
+        showToast('Notification timing updated!', 'success');
+    };
+
+    return (
+        <div className="page-container">
+            <Card>
+                <CardHeader title="Notification Settings" />
+                <div className="settings-list">
+                    <div className="settings-item">
+                        <div>
+                            <h4>Event Reminders</h4>
+                            <p>Receive push notifications for upcoming events.</p>
+                        </div>
+                        <label className="toggle-switch">
+                            <input type="checkbox" checked={settings.enabled} onChange={handleToggle} />
+                            <span className="slider"></span>
+                        </label>
+                    </div>
+                    {settings.enabled && (
+                        <div className="settings-item">
+                            <div>
+                                <h4>Reminder Time</h4>
+                                <p>How far in advance would you like to be notified?</p>
+                            </div>
+                            <div className="form-group" style={{ marginBottom: 0 }}>
+                                <select value={settings.timing} onChange={handleTimingChange} style={{minWidth: '150px'}}>
+                                    {/* FIX: The select's value is a number (`settings.timing`). The option values must also be numbers to match the type and resolve the error. */}
+                                    <option value={1}>1 hour before</option>
+                                    <option value={12}>12 hours before</option>
+                                    <option value={24}>24 hours before</option>
+                                </select>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </Card>
+        </div>
+    );
+};
+
 const App = () => {
     const [isAuthenticated, setIsAuthenticated] = useStickyState(false, 'auth');
     const [page, setPage] = useState({ name: 'dashboard', params: {} });
@@ -1457,6 +1601,8 @@ const App = () => {
     const [badges, setBadges] = useStickyState(initialBadges, 'badges');
     const [notifications, setNotifications] = useStickyState([], 'notifications');
     const [auditLogs, setAuditLogs] = useStickyState([], 'auditLogs');
+    const [notificationSettings, setNotificationSettings] = useStickyState({ enabled: true, timing: 24 }, 'notificationSettings');
+
 
     const [toast, setToast] = useState({ show: false, message: '', type: 'info' });
 
@@ -1521,13 +1667,17 @@ const App = () => {
     }, []); // Run only once
 
     useEffect(() => {
+        if (!notificationSettings.enabled) {
+            return; 
+        }
+
         const now = new Date().getTime();
-        const twentyFourHours = 24 * 60 * 60 * 1000;
+        const notificationWindow = notificationSettings.timing * 60 * 60 * 1000;
 
         const upcomingEventNotifications = events
             .filter(event => {
                 const eventTime = new Date(`${event.date}T${event.time}`).getTime();
-                return eventTime > now && eventTime - now < twentyFourHours;
+                return eventTime > now && (eventTime - now < notificationWindow);
             })
             .map(event => ({
                 id: `event-${event.id}`,
@@ -1547,7 +1697,7 @@ const App = () => {
             }
             return prev;
         });
-    }, [events, setNotifications]);
+    }, [events, setNotifications, notificationSettings]);
     
     const pageTitles = {
         'dashboard': 'Dashboard',
@@ -1562,6 +1712,7 @@ const App = () => {
         'messages': 'Messages',
         'search-results': 'Search Results',
         'audit-logs': 'Audit Logs',
+        'notification-settings': 'Settings',
     };
 
     const renderPage = () => {
@@ -1578,7 +1729,7 @@ const App = () => {
             case 'edit-athlete':
                 return <AthleteFormPage navigate={navigate} params={params} athletes={athletes} setAthletes={setAthletes} showToast={showToast} logAction={logAction} />;
             case 'events':
-                return <EventsPage events={events} navigate={navigate} />;
+                return <EventsPage events={events} setEvents={setEvents} navigate={navigate} role={role} showToast={showToast} logAction={logAction} />;
             case 'event-details':
                 return <EventDetailsPage params={params} events={events} athletes={athletes} setEvents={setEvents} role={role} showToast={showToast} onRegister={awardBadges} />;
             case 'payments':
@@ -1591,6 +1742,8 @@ const App = () => {
                 return <SearchResultsPage params={params} navigate={navigate} athletes={athletes} coaches={coaches} events={events} />;
             case 'audit-logs':
                 return <AuditLogPage auditLogs={auditLogs} />;
+            case 'notification-settings':
+                return <NotificationSettingsPage settings={notificationSettings} setSettings={setNotificationSettings} showToast={showToast} />;
             default:
                 return <DashboardPage navigate={navigate} athletes={athletes} events={events} role={role} currentCoachId={currentCoachId} currentParentId={currentParentId} />;
         }
