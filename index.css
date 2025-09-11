@@ -235,7 +235,7 @@ body {
     background-color: var(--danger);
     color: var(--text-primary);
 }
-.btn-danger:hover {
+.btn-danger:hover:not(:disabled) {
     background-color: var(--danger-hover);
 }
 
@@ -566,6 +566,56 @@ body {
   display: none; /* Hide on mobile */
 }
 
+/* Upcoming Event Banner */
+.upcoming-event-banner {
+    background: linear-gradient(90deg, var(--bg-card), #3a3a3c);
+    padding: 16px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.upcoming-event-banner:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+    border-color: var(--primary-pink);
+}
+.upcoming-event-banner.info {
+    cursor: default;
+}
+.upcoming-event-banner.info:hover {
+    transform: none;
+    box-shadow: none;
+    border-color: var(--border-color);
+}
+.upcoming-event-banner > svg {
+    width: 28px;
+    height: 28px;
+    color: var(--primary-pink);
+    flex-shrink: 0;
+}
+.banner-content {
+    flex-grow: 1;
+}
+.banner-content h4 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+.banner-content p {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+.banner-action {
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 500;
+}
+
 .stats-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -594,10 +644,10 @@ body {
   width: 20px;
   height: 20px;
 }
-.stat-card-header .icon.total-athletes { background-color: var(--blue-light); color: var(--blue-dark); }
-.stat-card-header .icon.active-coaches { background-color: var(--teal-light); color: var(--teal-dark); }
-.stat-card-header .icon.monthly-revenue { background-color: var(--orange-light); color: var(--orange-dark); }
-.stat-card-header .icon.attendance-rate { background-color: var(--green-light); color: var(--green-dark); }
+.stat-card-header .icon.blue { background-color: var(--blue-light); color: var(--blue-dark); }
+.stat-card-header .icon.teal { background-color: var(--teal-light); color: var(--teal-dark); }
+.stat-card-header .icon.orange { background-color: var(--orange-light); color: var(--orange-dark); }
+.stat-card-header .icon.green { background-color: var(--green-light); color: var(--green-dark); }
 
 .stat-card-body h3 {
   font-size: 22px;
@@ -636,6 +686,11 @@ body {
   color: var(--primary-pink);
   text-decoration: none;
   font-weight: 500;
+}
+.card-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
 .activity-list .activity-item {
@@ -721,6 +776,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 16px;
+    margin-bottom: 24px;
 }
 
 .filters {
@@ -734,6 +790,7 @@ body {
 .filters select {
     flex: 1;
     min-width: 120px;
+    background-color: var(--bg-card);
 }
 .page-controls .btn {
     width: 100%;
@@ -865,7 +922,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000;
+    z-index: 1200;
     padding: 16px;
 }
 
@@ -879,13 +936,26 @@ body {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
-.modal-content h3 {
-    font-size: 18px;
-    font-weight: 600;
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 12px;
 }
 
-.modal-content p {
+.modal-header h3 {
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.modal-header .close-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+
+.modal-body p {
     color: var(--text-secondary);
     margin-bottom: 24px;
     line-height: 1.6;
@@ -895,6 +965,7 @@ body {
     display: flex;
     justify-content: flex-end;
     gap: 12px;
+    margin-top: 24px;
 }
 
 /* Events Page */
@@ -948,7 +1019,7 @@ body {
 }
 
 /* Profile & Details Pages */
-.profile-header { display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px; }
+.profile-header { display: flex; flex-direction: column; gap: 16px; }
 .back-btn { background: none; border: none; color: var(--primary-pink); cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 500; padding: 0;}
 .profile-details { display: flex; flex-direction: column; gap: 12px; }
 .profile-details p, .event-details-page-card p {
@@ -966,16 +1037,37 @@ body {
     gap: 16px;
 }
 
-/* Athlete Profile - History */
+/* Athlete Profile - History & Chart */
+.chart-container {
+    width: 100%;
+    margin-bottom: 24px;
+}
+.chart-container svg text {
+    fill: var(--text-secondary);
+    font-size: 12px;
+}
+.chart-container .grid-line line {
+    stroke: var(--border-color);
+    stroke-dasharray: 2,2;
+}
+.chart-placeholder {
+    margin-bottom: 24px;
+    padding: 24px;
+    background-color: var(--bg-light-dark);
+    border-radius: 8px;
+    text-align: center;
+    color: var(--text-secondary);
+}
+
 .add-log-form {
     margin-bottom: 24px;
-    background: var(--bg-light-dark);
+    margin-top: 24px;
     padding: 16px;
+    background-color: var(--bg-light-dark);
+    border-radius: 8px;
+    border-top: 1px solid var(--border-color);
 }
-.add-log-form h4 {
-    margin-bottom: 16px;
-    font-weight: 600;
-}
+
 .history-list { display: flex; flex-direction: column; gap: 12px; }
 .history-item, .history-item-edit {
     display: flex;
@@ -984,23 +1076,6 @@ body {
     padding: 12px;
     background: var(--bg-light-dark);
     border-radius: 8px;
-}
-.form-inline {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    width: 100%;
-}
-.form-inline input {
-    background-color: var(--bg-dark);
-}
-.history-item-edit .form-inline {
-    flex-direction: row;
-    gap: 8px;
-    align-items: center;
-}
-.history-item-edit .form-inline input[type="text"] {
-    flex-grow: 1;
 }
 
 /* Toast Notification */
@@ -1020,9 +1095,10 @@ body {
     font-weight: 500;
     box-shadow: 0 4px 20px rgba(0,0,0,0.4);
 }
-.toast-notification.offline { background-color: var(--warning); color: var(--bg-dark); }
-.toast-notification.online { background-color: var(--success); }
-.toast-notification.syncing { background-color: var(--info); }
+.toast-notification.success { background-color: var(--success); }
+.toast-notification.danger { background-color: var(--danger); }
+.toast-notification.warning { background-color: var(--warning); color: var(--bg-dark); }
+.toast-notification.info { background-color: var(--info); }
 .toast-notification svg {
     width: 20px;
     height: 20px;
@@ -1314,11 +1390,9 @@ body {
     /* Events */
     .events-grid { grid-template-columns: repeat(2, 1fr); }
     
-    .form-inline {
-        flex-direction: row;
-        align-items: center;
+    .add-log-form .form-grid {
+        grid-template-columns: 150px 1fr;
     }
-    .form-inline input[type="text"] { flex-grow: 1; }
 
     .mobile-bottom-nav { display: none; }
     .toast-notification { bottom: 20px; }

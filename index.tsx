@@ -1,4 +1,5 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+
+import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { createRoot } from 'react-dom/client';
 
 // Custom hook to persist state to localStorage
@@ -30,7 +31,9 @@ const useStickyState = (defaultValue, key) => {
 
 const initialAthletes = [
     { id: 1, name: 'Sarah Wanjiku', skillLevel: 'Beginner', activity: 'Skating', ageGroup: 'U10', history: [
-        { id: 1, date: '2025-08-28', description: 'Mastered forward swizzles.' },
+        { id: 4, date: '2025-09-12', description: 'Achieved a new high score of 92 in choreography.' },
+        { id: 3, date: '2025-09-05', description: 'Completed speed circuit in 120 seconds.' },
+        { id: 1, date: '2025-08-28', description: 'Mastered forward swizzles. Freestyle routine score: 85.' },
         { id: 2, date: '2025-08-20', description: 'First time on ice without assistance.' }
     ]},
     { id: 2, name: 'John Kamau', skillLevel: 'Intermediate', activity: 'Swimming', ageGroup: '15-18', history: [] },
@@ -46,9 +49,9 @@ const initialCoaches = [
 ];
 
 const initialEvents = [
-    { id: 1, name: 'Annual Skating Gala', date: '2025-10-25', time: '09:00', location: 'Moi Stadium Kasarani', description: 'Our biggest skating event of the year. All levels welcome!' },
-    { id: 2, name: 'Club Chess Tournament', date: '2025-08-15', time: '13:00', location: 'Club House', description: 'A friendly competition for all our chess enthusiasts.' },
-    { id: 3, name: 'Summer Swim Meet', date: '2026-01-10', time: '10:00', location: 'Aquatics Center', description: 'Join us for a fun day of swimming races and relays.' },
+    { id: 1, name: 'Annual Skating Gala', date: '2025-10-25', time: '09:00', location: 'Moi Stadium Kasarani', description: 'Our biggest skating event of the year. All levels welcome!', attendees: [1, 4] },
+    { id: 2, name: 'Club Chess Tournament', date: '2025-08-15', time: '13:00', location: 'Club House', description: 'A friendly competition for all our chess enthusiasts.', attendees: [3] },
+    { id: 3, name: 'Summer Swim Meet', date: '2026-01-10', time: '10:00', location: 'Aquatics Center', description: 'Join us for a fun day of swimming races and relays.', attendees: [] },
 ];
 
 const initialPayments = [
@@ -63,39 +66,46 @@ const initialAnnouncements = [
 ];
 
 const initialMessages = [
-    { 
-        id: 1, 
-        sender: 'David Omondi', 
-        preview: 'Hi Sarah, great job today! Let\'s work...', 
-        timestamp: '10:47 AM', 
-        unread: 0, 
-        conversation: [ 
-            {sender: 'David Omondi', text: 'Hi Sarah, great job today! Let\'s work on stops next week.', time: '10:45 AM'}, 
+    {
+        id: 1,
+        sender: 'David Omondi',
+        preview: 'Hi Sarah, great job today! Let\'s work...',
+        timestamp: '10:47 AM',
+        unread: 0,
+        conversation: [
+            {sender: 'David Omondi', text: 'Hi Sarah, great job today! Let\'s work on stops next week.', time: '10:45 AM'},
             {sender: 'You', text: 'Thanks, Coach! Sounds good.', time: '10:47 AM'}
-        ] 
+        ]
     },
-    { 
-        id: 2, 
-        sender: 'Grace Njeri', 
-        preview: 'Reminder: The swim meet is this Satur...', 
-        timestamp: 'Yesterday', 
-        unread: 0, 
+    {
+        id: 2,
+        sender: 'Grace Njeri',
+        preview: 'Reminder: The swim meet is this Satur...',
+        timestamp: 'Yesterday',
+        unread: 0,
         conversation: [
             {sender: 'Grace Njeri', text: 'Reminder: The swim meet is this Saturday. Be there by 8 AM.', time: 'Yesterday'}
-        ] 
+        ]
     },
-    { 
-        id: 3, 
-        sender: 'Skating Group Chat', 
-        preview: 'Peter: Don\'t forget your helmets!', 
-        timestamp: '3 days ago', 
-        unread: 1, 
+    {
+        id: 3,
+        sender: 'Skating Group Chat',
+        preview: 'Peter: Don\'t forget your helmets!',
+        timestamp: '3 days ago',
+        unread: 1,
         conversation: [
             {sender: 'David Omondi', text: 'Practice is at 4 PM tomorrow everyone.', time: '4 days ago'},
             {sender: 'Peter', text: 'Don\'t forget your helmets!', time: '3 days ago'}
-        ] 
+        ]
     },
 ];
+
+const initialTasks = [
+    { id: 1, title: 'Plan new choreography for U10', dueDate: '2025-09-30', completed: false, assignedTo: 1 },
+    { id: 2, title: 'Order new team swimsuits', dueDate: '2025-10-05', completed: false, assignedTo: 2 },
+    { id: 3, title: 'Finalize Gala schedule', dueDate: '2025-09-28', completed: true, assignedTo: 1 }
+];
+
 
 const fuzzyMatch = (pattern, str) => {
   if (!pattern) return true;
@@ -106,360 +116,201 @@ const fuzzyMatch = (pattern, str) => {
 };
 
 // --- SVG Icons --- //
-const LogoIcon = () => (<svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 16 16"><path d="M8 16a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-1 0v1a.5.5 0 0 0 .5.5zM3.5 12.5a.5.5 0 0 0 0 1h1a.5.5 0 0 0 0-1h-1zm8 0a.5.5 0 0 0 0 1h1a.5.5 0 0 0 0-1h-1zM3 10a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 0-1h-1a.5.5 0 0 0-.5.5zm10 0a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 0-1h-1a.5.5 0 0 0-.5.5zM4.887 3.652A8.484 8.484 0 0 0 8 15.869a8.484 8.484 0 0 0 3.113-12.217.5.5 0 0 0-.707-.707 7.484 7.484 0 0 1-2.406 10.908A7.484 7.484 0 0 1 5.594 2.945a.5.5 0 1 0-.707.707z"></path><path d="M6.21 1.477a.5.5 0 0 0-.707 0l-1.83 1.83a.5.5 0 0 0 0 .707l1.83 1.83a.5.5 0 0 0 .707 0l1.83-1.83a.5.5 0 0 0 0-.707L6.21 1.477zM11.646.354a.5.5 0 0 0-.707 0L8.025 3.268a.5.5 0 0 0 0 .707l2.914 2.914a.5.5 0 0 0 .707 0l2.914-2.914a.5.5 0 0 0 0-.707L11.646.354z"></path></svg>);
-const DashboardIcon = () => (<svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"></path></svg>);
-const AthletesIcon = () => (<svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 24 24"><path d="M12 2C9.243 2 7 4.243 7 7s2.243 5 5 5 5-2.243 5-5S14.757 2 12 2zM12 10c-1.654 0-3-1.346-3-3s1.346-3 3-3 3 1.346 3 3S13.654 10 12 10zM21 21v-1c0-3.859-3.141-7-7-7h-4c-3.859 0-7 3.141-7 7v1h2v-1c0-2.757 2.243-5 5-5h4c2.757 0 5 2.243 5 5v1h2z"></path></svg>);
-const CoachesIcon = () => (<svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 24 24"><path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0-6c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm0 8c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4zm-6 4c.22-.72 2.31-2 6-2 3.7 0 5.79 1.28 6 2H9zm-3-3v-3h3v-2H9V7H7v3H4v2h3v3h2z"></path></svg>);
-const PaymentsIcon = () => (<svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 24 24"><path d="M20 4H4c-1.103 0-2 .897-2 2v12c0 1.103.897 2 2 2h16c1.103 0 2-.897 2-2V6c0-1.103-.897-2-2-2zM4 6h16v2H4V6zm0 12v-6h16.001l.001 6H4z"></path><path d="M6 14h6v2H6z"></path></svg>);
-const EventsIcon = () => (<svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 24 24"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"></path></svg>);
-const LogoutIcon = () => (<svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 24 24"><path d="M16 13v-2H7V8l-5 4 5 4v-3z"></path><path d="M20 3h-9c-1.103 0-2 .897-2 2v4h2V5h9v14h-9v-4H9v4c0 1.103.897 2 2 2h9c1.103 0 2-.897 2-2V5c0-1.103-.897-2-2-2z"></path></svg>);
-const CloseIcon = () => (<svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>);
-const HamburgerIcon = () => (<svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"></path></svg>);
-const SearchIcon = () => (<svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path></svg>);
-const BellIcon = () => <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z"></path></svg>;
-const MessagesIcon = () => <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"></path></svg>;
-const NoticeBoardIcon = () => <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14l4 4V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"></path></svg>;
-const SettingsIcon = () => <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 24 24"><path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"></path></svg>;
-const GoogleIcon = () => <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C12.955 4 4 12.955 4 24s8.955 20 20 20s20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"></path><path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C16.318 4 9.656 8.337 6.306 14.691z"></path><path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238C29.211 35.091 26.715 36 24 36c-5.223 0-9.657-3.657-11.303-8H6.306C9.656 39.663 16.318 44 24 44z"></path><path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.166-4.087 5.571l6.19 5.238C42.012 36.49 44 30.823 44 24c0-1.341-.138-2.65-.389-3.917z"></path></svg>;
-const AppleIcon = () => <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 24 24"><path d="M19.62 14.47c-.24-1.42-1.12-2.58-2.31-2.62-.19 0-.38.01-.57.03-.43.05-.85.16-1.25.32-1.13.46-2.22 1.05-3.35 1.05-1.16 0-2.1-.56-3.15-1.05-.34-.17-.7-.27-1.07-.31-.15,0-.3.01-.44.01-1.24.03-2.2.98-2.56,2.29-.01.02,0,.03,0,.05,0,.08-.01.16,0,.23,0,.03,0,.05,0,.08.1.8.38,1.55.82,2.21.54.82,1.25,1.62,2.15,2.15.89.51,1.86.73,2.83.74,1.04,0,2.02-.31,2.92-.81.01,0,.02,0,.03,0,.85-.46,1.62-1.1,2.26-1.89.01-.01.02-.02.02-.03.5-.64.81-1.42.92-2.25.01-.06.01-.13.02-.19h.01c.01-.06.01-.11.01-.17,0-.01,0-.02,0-.03.01-.06.01-.12.01-.18zm-6.11-8.67c.92-.99,1.55-2.29,1.6-3.62-.01.06-.01.12-.02.19-.64.12-1.39.5-2.05,1.05-.87.75-1.6,1.84-2.03,3.01.58.05,1.15-.15,1.69-.45.02,0,.03,0,.04-.01.6-.33,1.13-.76,1.77-1.17z"></path></svg>;
-const MicrosoftIcon = () => <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 24 24"><path d="M11.4,11.4H2.2V2.2h9.2V11.4z M21.8,11.4h-9.2V2.2h9.2V11.4z M11.4,21.8H2.2v-9.2h9.2V21.8z M21.8,21.8h-9.2v-9.2h9.2V21.8z"></path></svg>;
-const BackIcon = () => <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"></path></svg>;
-const EditIcon = () => <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"></path></svg>;
-const DeleteIcon = () => <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"></path></svg>;
-const SaveIcon = () => <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 24 24"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"></path></svg>;
-const OfflineIcon = () => <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"></path></svg>;
-const OnlineIcon = () => <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"></path></svg>;
-const SyncIcon = () => <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 24 24" className="spin"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"></path></svg>;
-const AddIcon = () => <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"></path></svg>;
+const LogoIcon = () => (<svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 16 16" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M13.545 2.165a.5.5 0 0 1 .91 0l1.25 2.5a.5.5 0 0 1-.455.717H13.5a.5.5 0 0 1-.5-.5v-2.717ZM8.5 2.5a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0ZM14.12 11.882c.111.419.22.848.33 1.287.173.693.355 1.42.553 2.18.293 1.12.63 2.298.532 3.54-.1 1.27-.923 2.04-2.22 2.04-1.01 0-1.74-.6-2.18-1.52-.46-1.02-.38-2.23.28-3.33.56-.91 1.29-1.85 2.18-2.73.92-.92 1.89-1.81 2.73-2.73.19-.21.36-.42.53-.63a.48.48 0 0 0-.01-.73c-.41-.33-.8-.68-1.2-.99-.37-.3-.74-.6-1.11-.9a.48.48 0 0 0-.64.04c-.38.41-.75.83-1.12 1.25-.37.42-.74.84-1.1 1.28-.27.33-.54.65-.81 1a.48.48 0 0 1-.6.04c-.46-.35-.9-.72-1.34-1.07-.42-.35-.85-.68-1.27-1.02a.48.48 0 0 0-.6-.02c-.52.4-1.02.82-1.52 1.25-.48.4-.95.8-1.42 1.2a.48.48 0 0 0-.1.68c.21.49.42.98.64 1.46.22.48.45.96.68 1.43.25.52.52 1.04.8 1.55.28.51.56 1.02.85 1.52.28.5.58 1 .88 1.48.3.49.6.97.92 1.45.32.48.65.95.98 1.4a.48.48 0 0 0 .66.2c.5-.22.98-.46 1.46-.7.48-.24.95-.48 1.42-.73.47-.25.93-.5 1.4-.76.46-.26.92-.53 1.37-.8a.48.48 0 0 0 .14-.65c-.14-.49-.28-.98-.43-1.46-.15-.49-.3-1-.45-1.48-.15-.5-.3-1-.46-1.5-.16-.51-.33-1.01-.5-1.5-.17-.49-.34-.98-.52-1.46a.48.48 0 0 0-.54-.36Z"></path></svg>);
+const DashboardIcon = () => (<svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>);
+const AthletesIcon = () => (<svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>);
+const CoachesIcon = () => (<svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>);
+const EventsIcon = () => (<svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>);
+const PaymentsIcon = () => (<svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>);
+const TasksIcon = () => (<svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect><path d="m9 14 2 2 4-4"></path></svg>);
+const NoticeBoardIcon = () => (<svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="8" y1="12" x2="16" y2="12"></line><line x1="8" y1="8" x2="16" y2="8"></line><line x1="8" y1="16" x2="13" y2="16"></line></svg>);
+const MessagesIcon = () => (<svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>);
+const LogoutIcon = () => (<svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>);
+const SearchIcon = () => (<svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>);
+const NotificationIcon = () => (<svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>);
+const HamburgerIcon = () => (<svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>);
+const CloseIcon = () => (<svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>);
+const MoreIcon = () => (<svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>);
+const RevenueIcon = () => <svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>;
+const AttendanceIcon = () => <svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><path d="M3 10h18"></path><path d="m9 16 2 2 4-4"></path></svg>;
+const PlusIcon = () => <svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>;
+const ReportIcon = () => <svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M8 17l4 4 4-4"></path><path d="M12 3v18"></path><path d="M16 4h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-2"></path><path d="M8 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h2"></path></svg>;
+const QRIcon = () => <svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>;
+const EditIcon = () => <svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>;
+const DeleteIcon = () => <svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>;
+const EmptyIcon = () => <svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10"></circle><line x1="8" y1="15" x2="8" y2="15.01"></line><line x1="16" y1="15" x2="16" y2="15.01"></line><path d="M9 10h.01"></path><path d="M15 10h.01"></path></svg>;
+const ArrowLeftIcon = () => <svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>;
+const SendIcon = () => <svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>;
+const ChatIcon = () => <svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>;
 
-
-// --- Main App Component --- //
+// Main App Component
 const App = () => {
-    // --- State Management --- //
-    const [isLoggedIn, setIsLoggedIn] = useStickyState(false, 'isLoggedIn');
-    const [currentUser, setCurrentUser] = useStickyState(null, 'currentUser');
-    const [users, setUsers] = useStickyState([], 'users');
-    const [currentPage, setCurrentPage] = useState('Dashboard');
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-    const [searchQuery, setSearchQuery] = useState('');
-    const [onlineStatus, setOnlineStatus] = useState(navigator.onLine);
-    
-    // Data states
-    const [athletes, setAthletes] = useStickyState(initialAthletes, 'athletes');
-    const [coaches, setCoaches] = useStickyState(initialCoaches, 'coaches');
-    const [events, setEvents] = useStickyState(initialEvents, 'events');
-    const [payments, setPayments] = useStickyState(initialPayments, 'payments');
-    const [announcements, setAnnouncements] = useStickyState(initialAnnouncements, 'announcements');
-    const [messages, setMessages] = useStickyState(initialMessages, 'messages');
-    const [notifications, setNotifications] = useStickyState([], 'notifications');
+    // Authentication State
+    const [isAuthenticated, setIsAuthenticated] = useStickyState(false, 'auth-status');
+    // App State
+    const [athletes, setAthletes] = useStickyState(initialAthletes, 'athletes-data');
+    const [coaches, setCoaches] = useStickyState(initialCoaches, 'coaches-data');
+    const [events, setEvents] = useStickyState(initialEvents, 'events-data');
+    const [payments, setPayments] = useStickyState(initialPayments, 'payments-data');
+    const [announcements, setAnnouncements] = useStickyState(initialAnnouncements, 'announcements-data');
+    const [messages, setMessages] = useStickyState(initialMessages, 'messages-data');
+    const [tasks, setTasks] = useStickyState(initialTasks, 'tasks-data');
 
-    // Selection/Modal states
-    const [selectedAthlete, setSelectedAthlete] = useState(null);
-    const [athleteToDelete, setAthleteToDelete] = useState(null);
-    const [selectedCoach, setSelectedCoach] = useState(null);
-    const [coachToDelete, setCoachToDelete] = useState(null);
-    const [selectedEvent, setSelectedEvent] = useState(null);
-    const [eventToDelete, setEventToDelete] = useState(null);
-    const [logToEdit, setLogToEdit] = useState(null);
-    const [logToDelete, setLogToDelete] = useState(null);
+    // UI State
+    const [role, setRole] = useStickyState('Admin', 'user-role');
+    const [page, setPage] = useStickyState({ name: 'Dashboard', params: {} }, 'current-page');
+    const [isSidebarOpen, setSidebarOpen] = useState(false);
+    const [toast, setToast] = useState(null);
 
-    const [isNotificationPanelOpen, setIsNotificationPanelOpen] = useState(false);
-
-    // --- Effects --- //
-    useEffect(() => {
-        const handleOnline = () => setOnlineStatus(true);
-        const handleOffline = () => setOnlineStatus(false);
-        window.addEventListener('online', handleOnline);
-        window.addEventListener('offline', handleOffline);
-        return () => {
-            window.removeEventListener('online', handleOnline);
-            window.removeEventListener('offline', handleOffline);
-        };
-    }, []);
-    
-     useEffect(() => {
-        // This effect runs once on mount to ensure the default admin user exists.
-        const usersExist = window.localStorage.getItem('users');
-        if (!usersExist || JSON.parse(usersExist).length === 0) {
-            const defaultAdmin = { id: 1, name: 'Teddy Lumidi', email: 'admin@funpot.com', password: 'password123', role: 'Admin' };
-            setUsers([defaultAdmin]);
-        }
-    }, [setUsers]);
-
-    // --- Handlers --- //
-    const handleNavigate = (page) => {
-        setCurrentPage(page);
-        setIsSidebarOpen(false);
-        setSearchQuery('');
-        setSelectedAthlete(null);
-        setSelectedCoach(null);
-        setSelectedEvent(null);
+    const showToast = (message, type = 'success') => {
+        setToast({ message, type });
+        setTimeout(() => setToast(null), 3000);
     };
 
-    // Authentication
-    const handleLogin = (email, password) => {
-        const user = users.find(u => u.email === email && u.password === password);
-        if (user) {
-            setCurrentUser(user);
-            setIsLoggedIn(true);
-            return true;
-        }
-        return false;
+    const navigate = (name, params = {}) => {
+        setPage({ name, params });
+        setSidebarOpen(false); // Close sidebar on navigation
+    };
+
+    // Data handling functions
+    const handleRegisterForEvent = (eventId, athleteId) => {
+        setEvents(prevEvents => prevEvents.map(event => {
+            if (event.id === eventId) {
+                if (!event.attendees.includes(athleteId)) {
+                    return { ...event, attendees: [...event.attendees, athleteId] };
+                }
+            }
+            return event;
+        }));
+        showToast('Successfully registered for the event!');
+    };
+
+    const handleAddTask = (task) => {
+        setTasks(prev => [...prev, { ...task, id: Date.now(), completed: false }]);
+    };
+    const handleToggleTask = (taskId) => {
+        setTasks(prev => prev.map(t => t.id === taskId ? { ...t, completed: !t.completed } : t));
+    };
+    const handleDeleteTask = (taskId) => {
+        setTasks(prev => prev.filter(t => t.id !== taskId));
     };
     
-    const handleSignUp = (email, password) => {
-        if (users.find(u => u.email === email)) {
-            return { success: false, message: 'User with this email already exists.' };
-        }
-        const newUser = { id: Date.now(), name: 'New User', email, password, role: 'Parent' }; // Default role
-        setUsers([...users, newUser]);
-        setCurrentUser(newUser);
-        setIsLoggedIn(true);
-        return { success: true };
+    const handleAddAthleteHistory = (athleteId, log) => {
+        setAthletes(prev => prev.map(a => 
+            a.id === athleteId
+                ? { ...a, history: [{...log, id: Date.now()}, ...a.history] } // Add new log to the beginning
+                : a
+        ));
+        showToast('Progress log added successfully!');
     };
-    
-    const handleLogout = () => {
-        setIsLoggedIn(false);
-        setCurrentUser(null);
-        setCurrentPage('Dashboard');
-    };
-    
-    const handleRoleChange = (newRole) => {
-        if (currentUser) {
-            setCurrentUser({ ...currentUser, role: newRole });
-        }
-    };
-    
-    // Athletes
-    const handleAddAthlete = (athlete) => {
-        const newAthlete = { ...athlete, id: Date.now(), history: [] };
-        setAthletes([...athletes, newAthlete]);
-        handleNavigate('Athletes');
-    };
+
     const handleUpdateAthlete = (updatedAthlete) => {
-        setAthletes(athletes.map(a => a.id === updatedAthlete.id ? updatedAthlete : a));
-        handleNavigate('Athletes');
-    };
-    const handleDeleteAthlete = (id) => {
-        setAthletes(athletes.filter(a => a.id !== id));
-        setAthleteToDelete(null);
+        setAthletes(prev => prev.map(a => a.id === updatedAthlete.id ? updatedAthlete : a));
+        showToast('Athlete details updated successfully!');
     };
 
-    // Coaches
-    const handleAddCoach = (coach) => {
-        const newCoach = { ...coach, id: Date.now() };
-        setCoaches([...coaches, newCoach]);
-        handleNavigate('Coaches');
-    };
-    const handleUpdateCoach = (updatedCoach) => {
-        setCoaches(coaches.map(c => c.id === updatedCoach.id ? updatedCoach : c));
-        handleNavigate('Coaches');
-    };
-    const handleDeleteCoach = (id) => {
-        setCoaches(coaches.filter(c => c.id !== id));
-        setCoachToDelete(null);
+    const handleDeleteAthlete = (athleteId) => {
+        setAthletes(prev => prev.filter(a => a.id !== athleteId));
+        showToast('Athlete deleted successfully.', 'danger');
+        navigate('Athletes'); // Go back to the list after deletion
     };
 
-    // Events
-    const handleAddEvent = (event) => {
-        const newEvent = { ...event, id: Date.now() };
-        setEvents([...events, newEvent]);
-        addNotification({ type: 'event', text: `New event added: ${event.name}` });
-        handleNavigate('Events');
-    };
-    const handleUpdateEvent = (updatedEvent) => {
-        setEvents(events.map(e => e.id === updatedEvent.id ? updatedEvent : e));
-        handleNavigate('Events');
-    };
-
-    // Payments
-    const handleAddPayment = (payment) => {
-        const newPayment = { ...payment, id: Date.now(), date: new Date().toISOString() };
-        setPayments([newPayment, ...payments]);
-        addNotification({ type: 'payment', text: `Payment of KSh ${payment.amount} received from ${payment.name}` });
-        handleNavigate('Payments');
-    };
-    
-    // Athlete History
-    const handleAddAthleteLog = (athleteId, log) => {
-        const newLog = { ...log, id: Date.now() };
-        const updatedAthletes = athletes.map(athlete => {
-            if (athlete.id === athleteId) {
-                return { ...athlete, history: [newLog, ...athlete.history] };
-            }
-            return athlete;
-        });
-        setAthletes(updatedAthletes);
-        setSelectedAthlete(updatedAthletes.find(a => a.id === athleteId));
-    };
-
-    const handleUpdateAthleteLog = (athleteId, updatedLog) => {
-        const updatedAthletes = athletes.map(athlete => {
-            if (athlete.id === athleteId) {
-                const updatedHistory = athlete.history.map(log => log.id === updatedLog.id ? updatedLog : log);
-                return { ...athlete, history: updatedHistory };
-            }
-            return athlete;
-        });
-        setAthletes(updatedAthletes);
-        setSelectedAthlete(updatedAthletes.find(a => a.id === athleteId));
-        setLogToEdit(null);
-    };
-
-    const handleDeleteAthleteLog = (athleteId, logId) => {
-        const updatedAthletes = athletes.map(athlete => {
-            if (athlete.id === athleteId) {
-                return { ...athlete, history: athlete.history.filter(log => log.id !== logId) };
-            }
-            return athlete;
-        });
-        setAthletes(updatedAthletes);
-        setSelectedAthlete(updatedAthletes.find(a => a.id === athleteId));
-        setLogToDelete(null);
-    };
-
-    // Notifications
-    const addNotification = (notification) => {
-        const newNotification = { ...notification, id: Date.now(), read: false, date: new Date().toISOString() };
-        setNotifications([newNotification, ...notifications]);
-    };
-
-    const handleMarkNotificationsRead = () => {
-        setNotifications(notifications.map(n => ({...n, read: true})));
-        setIsNotificationPanelOpen(false);
-    };
-    
-    const handleSendMessage = (conversationId, messageText) => {
-        const newMessage = {
-            sender: 'You',
-            text: messageText,
-            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        };
-        const updatedMessages = messages.map(msg => {
-            if (msg.id === conversationId) {
-                return {
-                    ...msg,
-                    conversation: [...msg.conversation, newMessage],
-                    preview: messageText,
-                    timestamp: 'Just now'
-                };
-            }
-            return msg;
-        });
-        setMessages(updatedMessages);
-    };
-    
-    const unreadNotificationsCount = notifications.filter(n => !n.read).length;
-
-    // --- Render Logic --- //
-    if (!isLoggedIn) {
-        return <LoginPage onLogin={handleLogin} onSignUp={handleSignUp} />;
+    if (!isAuthenticated) {
+        return <LoginScreen onLogin={() => setIsAuthenticated(true)} />;
     }
+
+    const renderPage = () => {
+        switch (page.name) {
+            case 'Dashboard':
+                return <DashboardPage athletes={athletes} coaches={coaches} payments={payments} announcements={announcements} events={events} navigate={navigate} />;
+            case 'Athletes':
+                return <AthletesPage athletes={athletes} navigate={navigate} />;
+            case 'AthleteProfile':
+                return <AthleteProfilePage 
+                            athlete={athletes.find(a => a.id === page.params.id)}
+                            onAddHistory={handleAddAthleteHistory}
+                            onUpdateAthlete={handleUpdateAthlete}
+                            onDeleteAthlete={handleDeleteAthlete}
+                            navigate={navigate} 
+                        />;
+            case 'Events':
+                return <EventsPage events={events} navigate={navigate} />;
+            case 'EventDetails':
+                return <EventDetailsPage
+                    event={events.find(e => e.id === page.params.id)}
+                    athletes={athletes}
+                    role={role}
+                    onRegister={handleRegisterForEvent}
+                    navigate={navigate}
+                />;
+            case 'Payments':
+                return <PaymentsPage payments={payments} />;
+            case 'Notice Board':
+                return <NoticeBoardPage announcements={announcements} />;
+            case 'Messages':
+                return <MessagesPage messages={messages} />;
+            case 'Tasks':
+                 return <TasksPage tasks={tasks} coaches={coaches} onAddTask={handleAddTask} onToggleTask={handleToggleTask} onDeleteTask={handleDeleteTask} />;
+            case 'Search':
+                return <SearchResultsPage 
+                            query={page.params.query}
+                            athletes={athletes}
+                            coaches={coaches}
+                            events={events}
+                            navigate={navigate}
+                        />;
+            case 'Profile': // For Parent/Athlete role
+                 return <AthleteProfilePage 
+                            athlete={athletes.find(a => a.id === 1)} // Demo: linked to first athlete
+                            onAddHistory={handleAddAthleteHistory}
+                            onUpdateAthlete={handleUpdateAthlete}
+                            onDeleteAthlete={handleDeleteAthlete}
+                            navigate={navigate} 
+                        />;
+
+            default:
+                return <h1>Page not found</h1>;
+        }
+    };
 
     return (
         <div className="dashboard-layout">
-            <div className={`sidebar-overlay ${isSidebarOpen ? 'active' : ''}`} onClick={() => setIsSidebarOpen(false)}></div>
-            <Sidebar 
-                currentPage={currentPage}
-                onNavigate={handleNavigate}
-                isSidebarOpen={isSidebarOpen}
-                onClose={() => setIsSidebarOpen(false)}
-                onLogout={handleLogout}
-                currentUser={currentUser}
+            <Sidebar
+                role={role}
+                currentPage={page.name}
+                navigate={navigate}
+                onLogout={() => setIsAuthenticated(false)}
+                isOpen={isSidebarOpen}
+                setIsOpen={setSidebarOpen}
             />
-            <div className="main-content">
-                <MainHeader 
-                    page={currentPage}
-                    user={currentUser}
-                    onToggleSidebar={() => setIsSidebarOpen(true)}
-                    searchQuery={searchQuery}
-                    setSearchQuery={setSearchQuery}
-                    onSearchSubmit={() => handleNavigate('SearchResults')}
-                    unreadNotificationsCount={unreadNotificationsCount}
-                    onToggleNotificationPanel={() => setIsNotificationPanelOpen(!isNotificationPanelOpen)}
-                    onRoleChange={handleRoleChange}
+            <main className="main-content">
+                <Header 
+                    role={role}
+                    setRole={setRole}
+                    onMenuClick={() => setSidebarOpen(true)}
+                    navigate={navigate}
                 />
-                 {isNotificationPanelOpen && (
-                    <NotificationPanel 
-                        notifications={notifications} 
-                        onClose={handleMarkNotificationsRead}
-                    />
-                )}
-                <MainContent
-                    currentPage={currentPage}
-                    // Pass all state and handlers
-                    athletes={athletes} coaches={coaches} events={events} payments={payments} announcements={announcements} messages={messages}
-                    searchQuery={searchQuery}
-                    // Athlete Handlers
-                    onAddAthlete={handleAddAthlete}
-                    onUpdateAthlete={handleUpdateAthlete}
-                    onDeleteAthlete={(athlete) => setAthleteToDelete(athlete)}
-                    onViewAthlete={(athlete) => { setSelectedAthlete(athlete); handleNavigate('AthleteProfile'); }}
-                    onEditAthlete={(athlete) => { setSelectedAthlete(athlete); handleNavigate('EditAthleteForm'); }}
-                    selectedAthlete={selectedAthlete}
-                    onAddAthleteLog={handleAddAthleteLog}
-                    onUpdateAthleteLog={handleUpdateAthleteLog}
-                    onDeleteAthleteLog={(log) => setLogToDelete(log)}
-                    logToEdit={logToEdit} setLogToEdit={setLogToEdit}
-                    logToDelete={logToDelete}
-                    // Coach Handlers
-                    onAddCoach={handleAddCoach}
-                    onUpdateCoach={handleUpdateCoach}
-                    onDeleteCoach={(coach) => setCoachToDelete(coach)}
-                    onViewCoach={(coach) => { setSelectedCoach(coach); handleNavigate('CoachProfile'); }}
-                    onEditCoach={(coach) => { setSelectedCoach(coach); handleNavigate('EditCoachForm'); }}
-                    selectedCoach={selectedCoach}
-                    // Event Handlers
-                    onAddEvent={handleAddEvent}
-                    onUpdateEvent={handleUpdateEvent}
-                    onViewEvent={(event) => { setSelectedEvent(event); handleNavigate('EventDetails'); }}
-                    onEditEvent={(event) => { setSelectedEvent(event); handleNavigate('EditEventForm'); }}
-                    selectedEvent={selectedEvent}
-                    // Payment Handlers
-                    onAddPayment={handleAddPayment}
-                    // Message Handlers
-                    onSendMessage={handleSendMessage}
-                    // Navigation
-                    onNavigate={handleNavigate}
-                />
-            </div>
-            <MobileBottomNav currentPage={currentPage} onNavigate={handleNavigate} />
-            <ToastNotification onlineStatus={onlineStatus} />
-
-            {/* Modals */}
-            {athleteToDelete && <ConfirmationDialog title="Delete Athlete" message={`Are you sure you want to delete ${athleteToDelete.name}? This action cannot be undone.`} onConfirm={() => handleDeleteAthlete(athleteToDelete.id)} onCancel={() => setAthleteToDelete(null)} />}
-            {coachToDelete && <ConfirmationDialog title="Delete Coach" message={`Are you sure you want to delete ${coachToDelete.name}? This action cannot be undone.`} onConfirm={() => handleDeleteCoach(coachToDelete.id)} onCancel={() => setCoachToDelete(null)} />}
-            {logToDelete && selectedAthlete && <ConfirmationDialog title="Delete Log Entry" message="Are you sure you want to delete this training log entry?" onConfirm={() => handleDeleteAthleteLog(selectedAthlete.id, logToDelete.id)} onCancel={() => setLogToDelete(null)} />}
+                {renderPage()}
+            </main>
+            <MobileBottomNav role={role} currentPage={page.name} navigate={navigate} />
+            {toast && <div className={`toast-notification ${toast.type}`}>{toast.message}</div>}
         </div>
     );
 };
 
-const LoginPage = ({ onLogin, onSignUp }) => {
-    const [isSignUp, setIsSignUp] = useState(false);
+// --- SCREENS & PAGES --- //
+
+const LoginScreen = ({ onLogin }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
 
-    const handleSimulatedLogin = () => {
-        // Use default admin credentials for simulated social/Microsoft login
-        if (!onLogin('admin@funpot.com', 'password123')) {
-             setError('Default admin account not found. Please sign up.');
-        }
-    };
-
     const handleSubmit = (e) => {
         e.preventDefault();
-        setError('');
-        if (isSignUp) {
-            const result = onSignUp(email, password);
-            if (!result.success) {
-                setError(result.message);
-            }
+        if (email && password) {
+            onLogin();
         } else {
-            const success = onLogin(email, password);
-            if (!success) {
-                setError('Invalid email or password.');
-            }
+            setError('Please enter your email and password.');
         }
     };
 
@@ -468,1103 +319,914 @@ const LoginPage = ({ onLogin, onSignUp }) => {
             <div className="login-card">
                 <div className="login-header">
                     <div className="logo"><LogoIcon /></div>
-                    <h1>Funpot Skating Club</h1>
-                    <p>Management System</p>
+                    <h1>Welcome Back</h1>
+                    <p>Login to manage your club activities.</p>
                 </div>
                 <form className="login-form" onSubmit={handleSubmit}>
+                    {error && <p className="form-error">{error}</p>}
                     <div className="input-group">
-                        <label htmlFor="email">Email / Phone</label>
-                        <input type="text" id="email" value={email} onChange={e => setEmail(e.target.value)} required placeholder="e.g., name@example.com or 07..."/>
+                        <label htmlFor="email">Email</label>
+                        <input type="email" id="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@example.com" />
                     </div>
                     <div className="input-group">
                         <label htmlFor="password">Password</label>
-                        <input type="password" id="password" value={password} onChange={e => setPassword(e.target.value)} required />
+                        <input type="password" id="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" />
                     </div>
-                    {error && <p className="form-error">{error}</p>}
-                    {!isSignUp && (
-                        <div className="form-options">
-                            <div className="remember-me">
-                                <input type="checkbox" id="remember" />
-                                <label htmlFor="remember">Remember me</label>
-                            </div>
-                            <a href="#" className="forgot-password">Forgot password?</a>
-                        </div>
-                    )}
-                    <button type="submit" className="btn btn-primary">{isSignUp ? 'Sign Up' : 'Sign In'}</button>
+                    <button type="submit" className="btn btn-primary">Login</button>
                 </form>
-                <div className="social-login-divider">or</div>
-                <div className="social-login-buttons">
-                    <button className="btn social-btn" onClick={handleSimulatedLogin}><GoogleIcon /> Continue with Google</button>
-                    <button className="btn social-btn" onClick={handleSimulatedLogin}><AppleIcon /> Continue with Apple</button>
-                    <button className="btn social-btn" onClick={handleSimulatedLogin}><MicrosoftIcon /> Continue with Microsoft</button>
-                </div>
-                 <p className="form-toggle">
-                    {isSignUp ? "Already have an account?" : "Need an account?"}{' '}
-                    <a href="#" onClick={(e) => { e.preventDefault(); setIsSignUp(!isSignUp); setError(''); }}>
-                        {isSignUp ? 'Sign In' : 'Sign Up'}
-                    </a>
-                </p>
             </div>
         </div>
     );
 };
 
-const Sidebar = ({ currentPage, onNavigate, isSidebarOpen, onClose, onLogout, currentUser }) => {
-    const navItems = [
-        { name: 'Dashboard', icon: <DashboardIcon />, roles: ['Admin', 'Coach', 'Parent', 'Athlete'] },
-        { name: 'Athletes', icon: <AthletesIcon />, roles: ['Admin', 'Coach', 'Parent', 'Athlete'] },
-        { name: 'Coaches', icon: <CoachesIcon />, roles: ['Admin'] },
-        { name: 'Payments', icon: <PaymentsIcon />, roles: ['Admin'] },
-        { name: 'Events', icon: <EventsIcon />, roles: ['Admin', 'Coach', 'Parent', 'Athlete'] },
-        { name: 'Messages', icon: <MessagesIcon />, roles: ['Admin', 'Coach', 'Parent', 'Athlete'] },
-        { name: 'Notice Board', icon: <NoticeBoardIcon />, roles: ['Admin', 'Coach', 'Parent', 'Athlete'] },
-        { name: 'Settings', icon: <SettingsIcon />, roles: ['Admin', 'Coach', 'Parent', 'Athlete'] },
-    ].filter(item => item.roles.includes(currentUser?.role));
+const UpcomingEventBanner = ({ event, navigate }) => {
+    if (!event) {
+        return (
+            <div className="upcoming-event-banner info">
+                <EventsIcon />
+                <div className="banner-content">
+                    <h4>No Upcoming Events</h4>
+                    <p>Check back later for new events and announcements.</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
-        <aside className={`sidebar ${isSidebarOpen ? 'active' : ''}`}>
-            <div className="sidebar-header">
-                <div className="logo"><LogoIcon /></div>
-                <h2>Funpot Club</h2>
-                <button className="close-sidebar-btn" onClick={onClose}><CloseIcon /></button>
+        <div className="upcoming-event-banner" onClick={() => navigate('EventDetails', { id: event.id })}>
+            <EventsIcon />
+            <div className="banner-content">
+                <h4>Next Event: {event.name}</h4>
+                <p>{new Date(event.date).toDateString()} at {event.time} - {event.location}</p>
             </div>
-
-            <div className="user-profile">
-                <div className="avatar">{currentUser?.name?.charAt(0) || 'U'}</div>
-                <div className="user-info">
-                    <h4>{currentUser?.name || 'User'}</h4>
-                    <p>{currentUser?.role || 'Role'}</p>
-                </div>
-                <div className="online-indicator"></div>
+            <div className="banner-action">
+                <span>View Details &rarr;</span>
             </div>
-
-            <nav className="nav-menu">
-                <ul>
-                    {navItems.map(item => (
-                        <li key={item.name}>
-                            <a href="#" onClick={(e) => { e.preventDefault(); onNavigate(item.name); }} className={`nav-item ${currentPage === item.name ? 'active' : ''}`}>
-                                {item.icon}
-                                <span>{item.name}</span>
-                            </a>
-                        </li>
-                    ))}
-                </ul>
-            </nav>
-
-            <div className="sidebar-footer">
-                <a href="#" className="nav-item" onClick={(e) => { e.preventDefault(); onLogout(); }}>
-                    <LogoutIcon />
-                    <span>Logout</span>
-                </a>
-            </div>
-        </aside>
+        </div>
     );
 };
 
-const MainHeader = ({ page, user, onToggleSidebar, searchQuery, setSearchQuery, onSearchSubmit, unreadNotificationsCount, onToggleNotificationPanel, onRoleChange }) => {
-    const pageTitles = {
-        'Dashboard': 'Dashboard',
-        'Athletes': 'Athletes Management',
-        'Coaches': 'Coaches Management',
-        'Payments': 'Payments Management',
-        'Events': 'Events & Competitions',
-        'AddAthleteForm': 'Add New Athlete',
-        'EditAthleteForm': 'Edit Athlete',
-        'AthleteProfile': 'Athlete Profile',
-        'AddCoachForm': 'Add New Coach',
-        'EditCoachForm': 'Edit Coach',
-        'CoachProfile': 'Coach Profile',
-        'AddEventForm': 'Add New Event',
-        'EditEventForm': 'Edit Event',
-        'EventDetails': 'Event Details',
-        'AddPaymentForm': 'Record Payment',
-        'SearchResults': 'Search Results',
-        'Notice Board': 'Notice Board',
-        'Messages': 'Messages',
-        'Settings': 'Settings',
+
+const DashboardPage = ({ athletes, coaches, payments, announcements, events, navigate }) => {
+    const totalRevenue = payments.reduce((sum, p) => sum + p.amount, 0);
+
+    const nextEvent = useMemo(() => {
+        const upcomingEvents = events
+            .filter(e => new Date(e.date) >= new Date())
+            .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+        return upcomingEvents.length > 0 ? upcomingEvents[0] : null;
+    }, [events]);
+
+
+    return (
+        <>
+            <UpcomingEventBanner event={nextEvent} navigate={navigate} />
+            <div className="stats-grid">
+                <StatCard icon={<AthletesIcon />} title="Total Athletes" value={athletes.length} color="blue" />
+                <StatCard icon={<CoachesIcon />} title="Active Coaches" value={coaches.length} color="teal" />
+                <StatCard icon={<RevenueIcon />} title="Monthly Revenue" value={`KES ${totalRevenue.toLocaleString()}`} color="orange" />
+                <StatCard icon={<AttendanceIcon />} title="Attendance Rate" value="92%" color="green" />
+            </div>
+            <div className="main-layout">
+                <div className="card">
+                    <CardHeader title="Recent Announcements" onViewAll={() => navigate('Notice Board')} />
+                    <div className="activity-list">
+                        {announcements.slice(0, 3).map(item => (
+                            <div key={item.id} className="activity-item">
+                                <div className="icon" style={{ backgroundColor: 'var(--blue-light)', color: 'var(--blue-dark)'}}><NoticeBoardIcon /></div>
+                                <div className="description">
+                                    <p>{item.title}</p>
+                                    <p>{new Date(item.date).toLocaleDateString()}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+                <div className="card">
+                    <CardHeader title="Quick Actions" />
+                    <div className="quick-actions">
+                        <ul>
+                            <li><button className="action-link" onClick={() => navigate('Athletes')}><span className="icon add-athlete"><PlusIcon /></span> Add New Athlete</button></li>
+                            <li><button className="action-link" onClick={() => navigate('Events')}><span className="icon schedule-training"><EventsIcon /></span> Schedule Training</button></li>
+                            <li><button className="action-link"><span className="icon generate-reports"><ReportIcon /></span> Generate Reports</button></li>
+                             <li><button className="action-link"><span className="icon qr-attendance"><QRIcon /></span> QR Attendance</button></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </>
+    );
+};
+
+const AthletesPage = ({ athletes, navigate }) => (
+    <div className="card">
+        <CardHeader title="Athletes" />
+        <div className="list-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Skill Level</th>
+                        <th>Activity</th>
+                        <th>Age Group</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {athletes.map(athlete => (
+                        <tr key={athlete.id} onClick={() => navigate('AthleteProfile', { id: athlete.id })} style={{cursor: 'pointer'}}>
+                            <td data-label="Name">{athlete.name}</td>
+                            <td data-label="Skill Level"><span className={`pill ${athlete.skillLevel.toLowerCase()}`}>{athlete.skillLevel}</span></td>
+                            <td data-label="Activity">{athlete.activity}</td>
+                            <td data-label="Age Group">{athlete.ageGroup}</td>
+                            <td data-label="Actions">
+                                <div className="action-buttons" onClick={e => e.stopPropagation()}>
+                                    <button className="action-btn-icon edit-btn" aria-label="Edit"><EditIcon /></button>
+                                    <button className="action-btn-icon delete-btn" aria-label="Delete"><DeleteIcon /></button>
+                                </div>
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+    </div>
+);
+
+const ProgressChart = ({ data }) => {
+    const svgRef = useRef(null);
+    const [width, setWidth] = useState(0);
+    const height = 200;
+    const margin = { top: 20, right: 20, bottom: 40, left: 40 };
+
+    useEffect(() => {
+        if (svgRef.current) {
+            setWidth(svgRef.current.parentElement.offsetWidth);
+        }
+        const handleResize = () => {
+            if (svgRef.current?.parentElement) {
+                setWidth(svgRef.current.parentElement.offsetWidth);
+            }
+        };
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    if (width === 0 || data.length < 2) return null;
+
+    const innerWidth = width - margin.left - margin.right;
+    const innerHeight = height - margin.top - margin.bottom;
+
+    const minDate = data[0].date;
+    const maxDate = data[data.length - 1].date;
+    const minValue = Math.min(...data.map(d => d.value)) * 0.9;
+    const maxValue = Math.max(...data.map(d => d.value)) * 1.1;
+
+    const xScale = (date) => margin.left + ((date.getTime() - minDate.getTime()) / (maxDate.getTime() - minDate.getTime() || 1)) * innerWidth;
+    const yScale = (value) => margin.top + innerHeight - (((value - minValue) / (maxValue - minValue || 1)) * innerHeight);
+
+    const linePath = data.map((d, i) => {
+        const x = xScale(d.date);
+        const y = yScale(d.value);
+        return i === 0 ? `M ${x},${y}` : `L ${x},${y}`;
+    }).join(' ');
+    
+    const areaPath = `${linePath} V ${margin.top + innerHeight} H ${margin.left} Z`;
+    
+    const yAxisTicks = Array.from({length: 3}, (_, i) => minValue + i * (maxValue - minValue) / 2);
+    const xAxisTicks = [data[0], data[Math.floor((data.length - 1) / 2)], data[data.length - 1]];
+
+
+    return (
+        <svg ref={svgRef} width="100%" height={height} viewBox={`0 0 ${width} ${height}`}>
+            <defs>
+                <linearGradient id="area-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style={{stopColor: 'var(--primary-pink)', stopOpacity: 0.4}} />
+                    <stop offset="100%" style={{stopColor: 'var(--primary-pink)', stopOpacity: 0.05}} />
+                </linearGradient>
+            </defs>
+            
+            {yAxisTicks.map((tick, i) => (
+                <g key={i} className="grid-line">
+                    <line x1={margin.left} x2={width - margin.right} y1={yScale(tick)} y2={yScale(tick)} />
+                    <text x={margin.left - 8} y={yScale(tick)} dy="0.32em" textAnchor="end">{Math.round(tick)}</text>
+                </g>
+            ))}
+
+            {xAxisTicks.map((d, i) => (
+                <g key={i} className="axis-label" transform={`translate(${xScale(d.date)}, ${height - margin.bottom + 15})`}>
+                    <text textAnchor="middle">{d.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</text>
+                </g>
+            ))}
+            
+            <path d={areaPath} fill="url(#area-gradient)" />
+            <path d={linePath} fill="none" stroke="var(--primary-pink)" strokeWidth="2" />
+            
+            {data.map((d, i) => (
+                <circle key={i} cx={xScale(d.date)} cy={yScale(d.value)} r="4" fill="var(--primary-pink)" stroke="var(--bg-card)" strokeWidth="2" />
+            ))}
+        </svg>
+    );
+};
+
+const AthleteProfilePage = ({ athlete, onAddHistory, onUpdateAthlete, onDeleteAthlete, navigate }) => {
+    const [historyFilter, setHistoryFilter] = useState('');
+    const [isEditModalOpen, setEditModalOpen] = useState(false);
+    const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
+    
+    const [newLogDescription, setNewLogDescription] = useState('');
+    const [newLogDate, setNewLogDate] = useState(new Date().toISOString().split('T')[0]);
+
+    const chartData = useMemo(() => {
+        const dataPoints = [];
+        const regex = /(?:score|time|seconds|points)[\s:]*(\d+\.?\d*)/i;
+
+        athlete?.history.forEach(log => {
+            const match = log.description.match(regex);
+            if (match && match[1]) {
+                dataPoints.push({
+                    date: new Date(log.date),
+                    value: parseFloat(match[1])
+                });
+            }
+        });
+        return dataPoints.sort((a, b) => a.date.getTime() - b.date.getTime());
+    }, [athlete?.history]);
+
+    if (!athlete) {
+        return <div className="card"><p>Athlete not found. They may have been deleted.</p></div>;
+    }
+    
+    const handleAddLog = (e) => {
+        e.preventDefault();
+        if (!newLogDescription.trim()) return;
+        onAddHistory(athlete.id, { date: newLogDate, description: newLogDescription });
+        setNewLogDescription('');
     };
+    
+    const filteredHistory = athlete.history.filter(log =>
+        log.description.toLowerCase().includes(historyFilter.toLowerCase())
+    );
+
+    return (
+        <div className="page-container">
+             <div className="profile-header">
+                <button className="back-btn" onClick={() => navigate('Athletes')}><ArrowLeftIcon /> Back to Athletes</button>
+            </div>
+            <div className="card">
+                <CardHeader title={athlete.name}>
+                    <div className="action-buttons">
+                        <button className="btn btn-secondary" onClick={() => setEditModalOpen(true)}><EditIcon /> Edit</button>
+                        <button className="btn btn-danger" onClick={() => setDeleteModalOpen(true)}><DeleteIcon /> Delete</button>
+                    </div>
+                </CardHeader>
+                <div className="profile-details">
+                    <p><strong>Activity:</strong> {athlete.activity}</p>
+                    <p><strong>Skill Level:</strong> <span className={`pill ${athlete.skillLevel.toLowerCase()}`}>{athlete.skillLevel}</span></p>
+                    <p><strong>Age Group:</strong> {athlete.ageGroup}</p>
+                </div>
+            </div>
+            <div className="card">
+                <CardHeader title="Progress History" />
+                {chartData.length >= 2 ? (
+                    <div className="chart-container">
+                        <ProgressChart data={chartData} />
+                    </div>
+                ) : (
+                    <div className="chart-placeholder">
+                        <p>No numerical progress data available to generate a chart. Add logs with keywords like "score", "time", or "points" to see a chart.</p>
+                    </div>
+                )}
+                <form onSubmit={handleAddLog} className="add-log-form">
+                    <div className="form-grid">
+                        <div className="form-group">
+                            <label htmlFor="logDate">Date</label>
+                            <input 
+                                type="date" 
+                                id="logDate"
+                                value={newLogDate}
+                                onChange={(e) => setNewLogDate(e.target.value)}
+                                required
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="logDescription">Description</label>
+                            <input 
+                                type="text" 
+                                id="logDescription"
+                                placeholder="e.g., Mastered new skill, score: 95" 
+                                value={newLogDescription}
+                                onChange={(e) => setNewLogDescription(e.target.value)}
+                                required
+                            />
+                        </div>
+                    </div>
+                    <div className="form-actions" style={{paddingTop: '10px', marginTop: 0, borderTop: 'none', justifyContent: 'flex-start'}}>
+                        <button type="submit" className="btn btn-primary"><PlusIcon /> Add Log</button>
+                    </div>
+                </form>
+
+                <div className="form-group" style={{marginBottom: '20px'}}>
+                  <input 
+                    type="text" 
+                    placeholder="Filter history..." 
+                    value={historyFilter}
+                    onChange={(e) => setHistoryFilter(e.target.value)}
+                  />
+                </div>
+                {filteredHistory.length > 0 ? (
+                    <div className="history-list">
+                        {filteredHistory.map(log => (
+                            <div key={log.id} className="history-item">
+                                <span>{log.description}</span>
+                                <span>{new Date(log.date).toLocaleDateString()}</span>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <p>No history records found.</p>
+                )}
+            </div>
+
+            {isEditModalOpen && (
+                <EditAthleteModal 
+                    athlete={athlete}
+                    onSave={(updatedAthlete) => {
+                        onUpdateAthlete(updatedAthlete);
+                        setEditModalOpen(false);
+                    }}
+                    onClose={() => setEditModalOpen(false)}
+                />
+            )}
+            {isDeleteModalOpen && (
+                 <ConfirmationModal
+                    isOpen={isDeleteModalOpen}
+                    title="Delete Athlete"
+                    message={`Are you sure you want to permanently delete ${athlete.name}? This action cannot be undone.`}
+                    onConfirm={() => {
+                        onDeleteAthlete(athlete.id);
+                        setDeleteModalOpen(false);
+                    }}
+                    onClose={() => setDeleteModalOpen(false)}
+                    confirmText="Confirm Delete"
+                    confirmButtonClass="btn-danger"
+                />
+            )}
+        </div>
+    );
+};
+
+const EventsPage = ({ events, navigate }) => (
+    <div className="page-container">
+        <div className="section-title">Upcoming Events</div>
+        <div className="events-grid">
+            {events.filter(e => new Date(e.date) >= new Date()).map(event => (
+                <div key={event.id} className="event-card" onClick={() => navigate('EventDetails', { id: event.id })}>
+                    <div className="event-card-header">
+                        <h4>{event.name}</h4>
+                    </div>
+                    <div className="event-card-body">
+                         <p>{new Date(event.date).toDateString()} at {event.time}</p>
+                         <p>{event.location}</p>
+                    </div>
+                </div>
+            ))}
+        </div>
+        <div className="section-title">Past Events</div>
+        <div className="events-grid">
+            {events.filter(e => new Date(e.date) < new Date()).map(event => (
+                <div key={event.id} className="event-card" onClick={() => navigate('EventDetails', { id: event.id })}>
+                     <div className="event-card-header">
+                        <h4>{event.name}</h4>
+                    </div>
+                    <div className="event-card-body">
+                         <p>{new Date(event.date).toDateString()}</p>
+                    </div>
+                </div>
+            ))}
+        </div>
+    </div>
+);
+
+const EventDetailsPage = ({ event, athletes, role, onRegister, navigate }) => {
+    if (!event) return <div className="card"><p>Event not found.</p></div>;
+    
+    // For demo, assume 'Parent/Athlete' role is for athlete with id: 1
+    const currentAthleteId = 1;
+    const isRegistered = event.attendees.includes(currentAthleteId);
+
+    const attendeesDetails = event.attendees.map(id => athletes.find(a => a.id === id)).filter(Boolean);
+
+    return (
+        <div className="page-container">
+            <div className="profile-header">
+                <button className="back-btn" onClick={() => navigate('Events')}><ArrowLeftIcon /> Back to Events</button>
+            </div>
+            <div className="card">
+                <CardHeader title={event.name} />
+                <div className="event-details-page-card">
+                    <p><strong>Date & Time:</strong> {new Date(event.date).toDateString()} at {event.time}</p>
+                    <p><strong>Location:</strong> {event.location}</p>
+                    <p><strong>Description:</strong> {event.description}</p>
+                    {new Date(event.date) >= new Date() && (role === 'Parent/Athlete' || role === 'Admin') && (
+                        <div className="form-actions" style={{paddingTop: 0, marginTop: 10, borderTop: 'none'}}>
+                            {isRegistered ? (
+                                <button className="btn" disabled>Registered</button>
+                            ) : (
+                                <button className="btn btn-primary" onClick={() => onRegister(event.id, currentAthleteId)}>Register</button>
+                            )}
+                        </div>
+                    )}
+                </div>
+            </div>
+             <div className="card">
+                <CardHeader title={`Attendees (${attendeesDetails.length})`} />
+                {attendeesDetails.length > 0 ? (
+                    <ul>
+                        {attendeesDetails.map(a => <li key={a.id}>{a.name}</li>)}
+                    </ul>
+                ) : <p>No one is registered yet.</p>}
+            </div>
+        </div>
+    );
+};
+
+const PaymentsPage = ({ payments }) => (
+    <div className="card">
+        <CardHeader title="Payment History" />
+        <div className="transaction-list">
+            {payments.map(p => (
+                <div key={p.id} className="transaction-item">
+                    <div className="transaction-details">
+                        <h4>{p.name}</h4>
+                        <p>{p.method} - {p.reference}</p>
+                    </div>
+                    <div className="transaction-amount">
+                        <h4>KES {p.amount.toLocaleString()}</h4>
+                        <p>{new Date(p.date).toLocaleDateString()}</p>
+                    </div>
+                </div>
+            ))}
+        </div>
+    </div>
+);
+
+const NoticeBoardPage = ({ announcements }) => (
+    <div className="page-container">
+        {announcements.map(item => (
+            <div key={item.id} className="card announcement-card">
+                <h3>{item.title}</h3>
+                <small>Posted on {new Date(item.date).toLocaleDateString()}</small>
+                <p>{item.content}</p>
+            </div>
+        ))}
+    </div>
+);
+
+const MessagesPage = ({ messages }) => {
+    const [activeConversationId, setActiveConversationId] = useState(null);
+    const activeConversation = messages.find(m => m.id === activeConversationId);
+
+    return (
+        <div className="messages-page">
+            <div className="card">
+                <div className="messages-layout">
+                    <div className="conversations-list">
+                        <div className="conversations-header">
+                            <h3>Conversations</h3>
+                        </div>
+                        <div className="conversation-items">
+                            {messages.map(msg => (
+                                <div key={msg.id} className={`conversation-item ${msg.id === activeConversationId ? 'active' : ''}`} onClick={() => setActiveConversationId(msg.id)}>
+                                    <div className="conversation-avatar">{msg.sender.charAt(0)}</div>
+                                    <div className="conversation-details">
+                                        <div className="conversation-sender">{msg.sender}</div>
+                                        <div className="conversation-preview">{msg.preview}</div>
+                                    </div>
+                                    <div className="conversation-meta">
+                                        <div className="conversation-timestamp">{msg.timestamp}</div>
+                                        {msg.unread > 0 && <div className="unread-badge">{msg.unread}</div>}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                    <div className="chat-window">
+                        {activeConversation ? (
+                            <>
+                                <div className="chat-header">
+                                    <h3>{activeConversation.sender}</h3>
+                                </div>
+                                <div className="chat-body">
+                                    {activeConversation.conversation.map((chat, i) => (
+                                        <div key={i} className={`message ${chat.sender === 'You' ? 'sent' : 'received'}`}>
+                                            <p>{chat.text}</p>
+                                            <span>{chat.time}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="chat-footer">
+                                    <form onSubmit={e => e.preventDefault()}>
+                                        <input type="text" placeholder="Type your message..." />
+                                        <button className="btn btn-primary" aria-label="Send"><SendIcon /></button>
+                                    </form>
+                                </div>
+                            </>
+                        ) : (
+                            <div className="no-chat-selected">
+                                <ChatIcon />
+                                <p>Select a conversation to start chatting</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const TasksPage = ({ tasks, coaches, onAddTask, onToggleTask, onDeleteTask }) => {
+    const [title, setTitle] = useState('');
+    const [dueDate, setDueDate] = useState('');
+    const [assignedTo, setAssignedTo] = useState('');
+    const [filterStatus, setFilterStatus] = useState('all');
+    const [sortOrder, setSortOrder] = useState('desc');
+    
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        if(!title) return;
+        onAddTask({ title, dueDate, assignedTo: parseInt(assignedTo) });
+        setTitle('');
+        setDueDate('');
+        setAssignedTo('');
+    };
+
+    const processedTasks = useMemo(() => {
+        let filtered = tasks;
+        if (filterStatus === 'completed') {
+            filtered = tasks.filter(t => t.completed);
+        } else if (filterStatus === 'incomplete') {
+            filtered = tasks.filter(t => !t.completed);
+        }
+        
+        return [...filtered].sort((a, b) => {
+            const dateA = a.dueDate ? new Date(a.dueDate).getTime() : 0;
+            const dateB = b.dueDate ? new Date(b.dueDate).getTime() : 0;
+            if (!dateA) return 1;
+            if (!dateB) return -1;
+            return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+        });
+    }, [tasks, filterStatus, sortOrder]);
+
+
+    return (
+        <div className="page-container">
+            <div className="card">
+                <CardHeader title="Add New Task" />
+                <form className="form-layout" onSubmit={handleSubmit}>
+                    <div className="form-grid">
+                        <div className="form-group">
+                            <label htmlFor="taskTitle">Task Title</label>
+                            <input type="text" id="taskTitle" value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g., Prepare training schedule" />
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="dueDate">Due Date</label>
+                            <input type="date" id="dueDate" value={dueDate} onChange={e => setDueDate(e.target.value)} />
+                        </div>
+                        <div className="form-group full-width">
+                            <label htmlFor="assignedTo">Assign To</label>
+                            <select id="assignedTo" value={assignedTo} onChange={e => setAssignedTo(e.target.value)}>
+                                <option value="">Select a coach</option>
+                                {coaches.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                            </select>
+                        </div>
+                    </div>
+                    <div className="form-actions">
+                        <button type="submit" className="btn btn-primary">Add Task</button>
+                    </div>
+                </form>
+            </div>
+            <div className="card">
+                 <CardHeader title="Task List" />
+                 <div className="page-controls">
+                    <div className="filters">
+                        <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
+                            <option value="all">All Statuses</option>
+                            <option value="completed">Completed</option>
+                            <option value="incomplete">Incomplete</option>
+                        </select>
+                        <select value={sortOrder} onChange={e => setSortOrder(e.target.value)}>
+                            <option value="desc">Due Date (Newest)</option>
+                            <option value="asc">Due Date (Oldest)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div className="list-table">
+                     <table>
+                        <thead>
+                            <tr>
+                                <th>Status</th>
+                                <th>Task</th>
+                                <th>Due Date</th>
+                                <th>Assigned To</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {processedTasks.map(task => {
+                                const coach = coaches.find(c => c.id === task.assignedTo);
+                                return (
+                                    <tr key={task.id} style={{textDecoration: task.completed ? 'line-through' : 'none', opacity: task.completed ? 0.6 : 1}}>
+                                        <td data-label="Status">
+                                            <input type="checkbox" checked={task.completed} onChange={() => onToggleTask(task.id)} />
+                                        </td>
+                                        <td data-label="Task">{task.title}</td>
+                                        <td data-label="Due Date">{task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'N/A'}</td>
+                                        <td data-label="Assigned To">{coach?.name || 'Unassigned'}</td>
+                                        <td data-label="Actions">
+                                            <div className="action-buttons">
+                                                <button className="action-btn-icon delete-btn" onClick={() => onDeleteTask(task.id)} aria-label="Delete"><DeleteIcon /></button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const SearchResultsPage = ({ query, athletes, coaches, events, navigate }) => {
+    const searchResults = useMemo(() => {
+        if (!query) return [];
+        const results = [];
+        athletes.forEach(a => {
+            if (fuzzyMatch(query, a.name)) {
+                results.push({ type: 'Athlete', item: a, onClick: () => navigate('AthleteProfile', { id: a.id }) });
+            }
+        });
+        coaches.forEach(c => {
+            if (fuzzyMatch(query, c.name)) {
+                results.push({ type: 'Coach', item: c, onClick: () => {} });
+            }
+        });
+        events.forEach(e => {
+            if (fuzzyMatch(query, e.name)) {
+                results.push({ type: 'Event', item: e, onClick: () => navigate('EventDetails', { id: e.id }) });
+            }
+        });
+        return results;
+    }, [query, athletes, coaches, events, navigate]);
+
+    const getIcon = (type) => {
+        switch(type) {
+            case 'Athlete': return <AthletesIcon />;
+            case 'Coach': return <CoachesIcon />;
+            case 'Event': return <EventsIcon />;
+            default: return null;
+        }
+    }
+
+    return (
+        <div className="card">
+            <CardHeader title={`Search Results for "${query}"`} />
+            {searchResults.length > 0 ? searchResults.map(({ type, item, onClick }, index) => (
+                <div className="search-result-card" key={`${type}-${item.id}-${index}`}>
+                    <div className="result-icon">{getIcon(type)}</div>
+                    <div className="result-details">
+                        <h4>{item.name}</h4>
+                        <p>{type}</p>
+                    </div>
+                    <div className="result-actions">
+                        <button className="btn btn-secondary" onClick={onClick}>View</button>
+                    </div>
+                </div>
+            )) : <EmptyState title="No Results Found" message="Try searching for something else." />}
+        </div>
+    );
+};
+
+// --- LAYOUT COMPONENTS --- //
+
+const navConfig = {
+    Admin: ['Dashboard', 'Athletes', 'Coaches', 'Events', 'Payments', 'Tasks', 'Notice Board', 'Messages'],
+    Coach: ['Dashboard', 'Athletes', 'Events', 'Tasks', 'Messages'],
+    'Parent/Athlete': ['Dashboard', 'Profile', 'Events', 'Payments', 'Notice Board', 'Messages']
+};
+
+const navIcons = {
+    Dashboard: <DashboardIcon />,
+    Athletes: <AthletesIcon />,
+    Coaches: <CoachesIcon />,
+    Events: <EventsIcon />,
+    Payments: <PaymentsIcon />,
+    Tasks: <TasksIcon />,
+    'Notice Board': <NoticeBoardIcon />,
+    Messages: <MessagesIcon />,
+    Profile: <AthletesIcon />
+};
+
+const Header = ({ role, setRole, onMenuClick, navigate }) => {
+    const [searchTerm, setSearchTerm] = useState('');
+
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            if (searchTerm) {
+                navigate('Search', { query: searchTerm });
+            }
+        }, 500); // Debounce search
+        return () => clearTimeout(handler);
+    }, [searchTerm, navigate]);
+
 
     return (
         <header className="main-header">
             <div className="header-left">
-                <button className="hamburger-menu" onClick={onToggleSidebar}><HamburgerIcon /></button>
-                <div>
-                    <h1>{pageTitles[page] || 'Dashboard'}</h1>
-                    <p>Today, {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
-                </div>
+                <button className="hamburger-menu" onClick={onMenuClick}><HamburgerIcon /></button>
             </div>
             <div className="header-right">
-                <form className="search-bar" onSubmit={(e) => { e.preventDefault(); onSearchSubmit(); }}>
+                <div className="search-bar">
                     <SearchIcon />
-                    <input type="text" placeholder="Search..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
-                </form>
-                 <div className="role-switcher">
-                    <select value={user?.role} onChange={(e) => onRoleChange(e.target.value)}>
+                    <input type="text" placeholder="Search..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                </div>
+                <div className="role-switcher">
+                    <select value={role} onChange={(e) => setRole(e.target.value)}>
                         <option value="Admin">Admin</option>
                         <option value="Coach">Coach</option>
-                        <option value="Parent">Parent</option>
-                        <option value="Athlete">Athlete</option>
+                        <option value="Parent/Athlete">Parent/Athlete</option>
                     </select>
-                </div>
-                <div className="header-actions">
-                    <button className="action-btn" onClick={onToggleNotificationPanel}>
-                        <BellIcon />
-                        {unreadNotificationsCount > 0 && <span className="notification-badge">{unreadNotificationsCount}</span>}
-                    </button>
-                </div>
-                <div className="header-user-profile">
-                     <div className="avatar">{user?.name?.charAt(0) || 'U'}</div>
                 </div>
             </div>
         </header>
     );
 };
 
-const MainContent = ({ currentPage, ...props }) => {
-    const renderPage = () => {
-        switch(currentPage) {
-            case 'Dashboard': return <Dashboard onNavigate={props.onNavigate} />;
-            case 'Athletes': return <AthletesPage athletes={props.athletes} searchQuery={props.searchQuery} onAddClick={() => props.onNavigate('AddAthleteForm')} onViewClick={props.onViewAthlete} onEditClick={props.onEditAthlete} onDeleteClick={props.onDeleteAthlete} />;
-            case 'AddAthleteForm': return <AddAthleteForm onFormSubmit={props.onAddAthlete} onCancel={() => props.onNavigate('Athletes')} />;
-            case 'EditAthleteForm': return <AddAthleteForm onFormSubmit={props.onUpdateAthlete} onCancel={() => props.onNavigate('Athletes')} initialData={props.selectedAthlete} />;
-            case 'AthleteProfile': return <AthleteProfilePage athlete={props.selectedAthlete} onNavigate={props.onNavigate} onAddLog={props.onAddAthleteLog} onUpdateLog={props.onUpdateAthleteLog} onDeleteLog={props.onDeleteAthleteLog} logToEdit={props.logToEdit} setLogToEdit={props.setLogToEdit} logToDelete={props.logToDelete} />;
-            case 'Coaches': return <CoachesPage coaches={props.coaches} searchQuery={props.searchQuery} onAddClick={() => props.onNavigate('AddCoachForm')} onViewClick={props.onViewCoach} onEditClick={props.onEditCoach} onDeleteClick={props.onDeleteCoach} />;
-            case 'AddCoachForm': return <AddCoachForm onFormSubmit={props.onAddCoach} onCancel={() => props.onNavigate('Coaches')} />;
-            case 'EditCoachForm': return <AddCoachForm onFormSubmit={props.onUpdateCoach} onCancel={() => props.onNavigate('Coaches')} initialData={props.selectedCoach} />;
-            case 'CoachProfile': return <CoachProfilePage coach={props.selectedCoach} onNavigate={props.onNavigate} />;
-            case 'Payments': return <PaymentsPage payments={props.payments} onAddClick={() => props.onNavigate('AddPaymentForm')} />;
-            case 'AddPaymentForm': return <AddPaymentForm onFormSubmit={props.onAddPayment} onCancel={() => props.onNavigate('Payments')} />;
-            case 'Events': return <EventsPage events={props.events} searchQuery={props.searchQuery} onAddClick={() => props.onNavigate('AddEventForm')} onViewClick={props.onViewEvent} onEditClick={props.onEditEvent} />;
-            case 'AddEventForm': return <AddEventForm onFormSubmit={props.onAddEvent} onCancel={() => props.onNavigate('Events')} />;
-            case 'EditEventForm': return <AddEventForm onFormSubmit={props.onUpdateEvent} onCancel={() => props.onNavigate('Events')} initialData={props.selectedEvent} />;
-            case 'EventDetails': return <EventDetailsPage event={props.selectedEvent} onNavigate={props.onNavigate} />;
-            // FIX: Explicitly pass props to SearchResultsPage to resolve TypeScript error.
-            case 'SearchResults': return <SearchResultsPage 
-                athletes={props.athletes} 
-                coaches={props.coaches} 
-                events={props.events} 
-                payments={props.payments}
-                searchQuery={props.searchQuery}
-                onViewAthlete={props.onViewAthlete}
-                onViewCoach={props.onViewCoach}
-                onViewEvent={props.onViewEvent}
-                onNavigate={props.onNavigate}
-            />;
-            case 'Notice Board': return <NoticeBoardPage announcements={props.announcements} />;
-            case 'Messages': return <MessagesPage messages={props.messages} onSendMessage={props.onSendMessage} />;
-            case 'Settings': return <SettingsPage />;
-            default: return <Dashboard onNavigate={props.onNavigate}/>;
-        }
-    };
+
+const Sidebar = ({ role, currentPage, navigate, onLogout, isOpen, setIsOpen }) => {
+    const navItems = navConfig[role];
     return (
-        <main className="main-content-area">
-            {renderPage()}
-        </main>
-    );
-};
-
-// --- Page Components --- //
-
-const Dashboard = ({ onNavigate }) => (
-    <div className="page-container">
-        <div className="stats-grid">
-             <div className="stat-card">
-                <div className="stat-card-header"><div className="icon total-athletes"><AthletesIcon /></div></div>
-                <div className="stat-card-body">
-                    <h3>0</h3>
-                    <p>Total Athletes</p>
+        <>
+            <div className={`sidebar ${isOpen ? 'active' : ''}`}>
+                <div className="sidebar-header">
+                    <div className="logo"><LogoIcon /></div>
+                    <h2>Funpot Club</h2>
+                    <button className="close-sidebar-btn" onClick={() => setIsOpen(false)}><CloseIcon /></button>
                 </div>
-            </div>
-            <div className="stat-card">
-                <div className="stat-card-header"><div className="icon active-coaches"><CoachesIcon /></div></div>
-                <div className="stat-card-body">
-                    <h3>0</h3>
-                    <p>Active Coaches</p>
-                </div>
-            </div>
-            <div className="stat-card">
-                <div className="stat-card-header"><div className="icon monthly-revenue"><PaymentsIcon /></div></div>
-                <div className="stat-card-body">
-                    <h3>KSh 0</h3>
-                    <p>Monthly Revenue</p>
-                </div>
-            </div>
-            <div className="stat-card">
-                <div className="stat-card-header"><div className="icon attendance-rate"><EventsIcon /></div></div>
-                <div className="stat-card-body">
-                    <h3>0%</h3>
-                    <p>Attendance Rate</p>
-                </div>
-            </div>
-        </div>
-        <div className="main-layout">
-            <div className="card">
-                <div className="card-header">
-                    <h3>Recent Activities</h3>
-                    <a href="#" className="view-all">View All</a>
-                </div>
-                <div className="activity-list">
-                    {/* Items here */}
-                </div>
-            </div>
-            <div className="quick-actions">
-                 <ul>
-                    <li><button onClick={() => onNavigate('AddAthleteForm')} className="action-link"><span className="icon add-athlete"><AthletesIcon /></span> Add New Athlete</button></li>
-                    <li><button className="action-link"><span className="icon schedule-training"><EventsIcon /></span> Schedule Training</button></li>
-                    <li><button className="action-link"><span className="icon generate-reports"><DashboardIcon /></span> Generate Reports</button></li>
-                    <li><button className="action-link"><span className="icon qr-attendance"><CoachesIcon /></span> QR Attendance</button></li>
-                </ul>
-            </div>
-        </div>
-    </div>
-);
-
-const AthletesPage = ({ athletes, searchQuery, onAddClick, onViewClick, onEditClick, onDeleteClick }) => {
-    const [skillFilter, setSkillFilter] = useState('All');
-    const [activityFilter, setActivityFilter] = useState('All');
-    const [ageFilter, setAgeFilter] = useState('All');
-
-    const filteredAthletes = useMemo(() => {
-        return athletes.filter(athlete => {
-            const matchesSearch = fuzzyMatch(searchQuery, athlete.name);
-            const matchesSkill = skillFilter === 'All' || athlete.skillLevel === skillFilter;
-            const matchesActivity = activityFilter === 'All' || athlete.activity === activityFilter;
-            const matchesAge = ageFilter === 'All' || athlete.ageGroup === ageFilter;
-            return matchesSearch && matchesSkill && matchesActivity && matchesAge;
-        });
-    }, [athletes, searchQuery, skillFilter, activityFilter, ageFilter]);
-    
-    return (
-        <div className="page-container">
-            <div className="card">
-                <div className="page-controls">
-                     <div className="filters">
-                        <select value={skillFilter} onChange={(e) => setSkillFilter(e.target.value)}>
-                            <option value="All">All Levels</option>
-                            <option value="Beginner">Beginner</option>
-                            <option value="Intermediate">Intermediate</option>
-                            <option value="Advanced">Advanced</option>
-                        </select>
-                        <select value={activityFilter} onChange={(e) => setActivityFilter(e.target.value)}>
-                            <option value="All">All Activities</option>
-                            <option value="Skating">Skating</option>
-                            <option value="Swimming">Swimming</option>
-                            <option value="Chess">Chess</option>
-                        </select>
-                        <select value={ageFilter} onChange={(e) => setAgeFilter(e.target.value)}>
-                            <option value="All">All Ages</option>
-                            <option value="U10">U10</option>
-                            <option value="10-14">10-14</option>
-                            <option value="15-18">15-18</option>
-                        </select>
-                    </div>
-                    <button className="btn btn-primary" onClick={onAddClick}>Add New Athlete</button>
-                </div>
-            </div>
-            {filteredAthletes.length > 0 ? (
-                <div className="card list-table">
-                     <table>
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Skill Level</th>
-                                <th>Activity</th>
-                                <th>Age Group</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filteredAthletes.map(athlete => (
-                                <tr key={athlete.id}>
-                                    <td data-label="Name" data-clickable="true" onClick={() => onViewClick(athlete)}>{athlete.name}</td>
-                                    <td data-label="Skill Level"><span className={`pill ${athlete.skillLevel.toLowerCase()}`}>{athlete.skillLevel}</span></td>
-                                    <td data-label="Activity">{athlete.activity}</td>
-                                    <td data-label="Age Group">{athlete.ageGroup}</td>
-                                    <td data-label="Actions">
-                                        <div className="action-buttons">
-                                            <button className="action-btn-icon edit-btn" onClick={() => onEditClick(athlete)}><EditIcon /></button>
-                                            <button className="action-btn-icon delete-btn" onClick={() => onDeleteClick(athlete)}><DeleteIcon /></button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            ) : (
-                <div className="card">
-                    <div className="empty-state">
-                        <div className="empty-state-icon"><AthletesIcon /></div>
-                        <h3>No athletes found</h3>
-                        <p>Get started by adding your first athlete to the system.</p>
-                        <button className="btn btn-primary" onClick={onAddClick}>Add First Athlete</button>
-                    </div>
-                </div>
-            )}
-        </div>
-    );
-};
-
-const AddAthleteForm = ({ onFormSubmit, onCancel, initialData = null }) => {
-    const [athlete, setAthlete] = useState(initialData || { name: '', skillLevel: 'Beginner', activity: 'Skating', ageGroup: 'U10' });
-    const isEditing = !!initialData;
-    
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setAthlete(prev => ({ ...prev, [name]: value }));
-    };
-
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        onFormSubmit(athlete);
-    };
-    
-    return (
-        <div className="card">
-            <form className="form-layout" onSubmit={handleSubmit}>
-                <div className="form-grid">
-                    <div className="form-group">
-                        <label htmlFor="name">Full Name</label>
-                        <input type="text" id="name" name="name" value={athlete.name} onChange={handleChange} required />
-                    </div>
-                     <div className="form-group">
-                        <label htmlFor="skillLevel">Skill Level</label>
-                        <select id="skillLevel" name="skillLevel" value={athlete.skillLevel} onChange={handleChange}>
-                             <option value="Beginner">Beginner</option>
-                             <option value="Intermediate">Intermediate</option>
-                             <option value="Advanced">Advanced</option>
-                        </select>
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="activity">Activity</label>
-                        <select id="activity" name="activity" value={athlete.activity} onChange={handleChange}>
-                            <option value="Skating">Skating</option>
-                            <option value="Swimming">Swimming</option>
-                            <option value="Chess">Chess</option>
-                        </select>
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="ageGroup">Age Group</label>
-                        <select id="ageGroup" name="ageGroup" value={athlete.ageGroup} onChange={handleChange}>
-                             <option value="U10">U10</option>
-                             <option value="10-14">10-14</option>
-                             <option value="15-18">15-18</option>
-                        </select>
-                    </div>
-                </div>
-                 <div className="form-actions">
-                    <button type="button" className="btn btn-secondary" onClick={onCancel}>Cancel</button>
-                    <button type="submit" className="btn btn-primary">{isEditing ? 'Update Athlete' : 'Add Athlete'}</button>
-                </div>
-            </form>
-        </div>
-    );
-};
-
-// FIX: Add `logToDelete` to props to fix assignment error.
-const AthleteProfilePage = ({ athlete, onNavigate, onAddLog, onUpdateLog, onDeleteLog, logToEdit, setLogToEdit, logToDelete }) => {
-    const [newLog, setNewLog] = useState({ date: '', description: '' });
-
-    if (!athlete) return <div className="card"><p>Athlete not found.</p></div>;
-
-    const handleAddLogSubmit = (e) => {
-        e.preventDefault();
-        if(newLog.description && newLog.date) {
-            onAddLog(athlete.id, newLog);
-            setNewLog({ date: '', description: '' });
-        }
-    };
-
-    const handleUpdateLogSubmit = (e, log) => {
-        e.preventDefault();
-        onUpdateLog(athlete.id, log);
-    };
-
-    const HistoryItemEdit = ({ log }) => {
-        const [editedLog, setEditedLog] = useState(log);
-        return (
-            <form className="history-item-edit form-inline" onSubmit={(e) => handleUpdateLogSubmit(e, editedLog)}>
-                <input type="date" value={editedLog.date} onChange={(e) => setEditedLog({...editedLog, date: e.target.value})} required/>
-                <input type="text" value={editedLog.description} onChange={(e) => setEditedLog({...editedLog, description: e.target.value})} required/>
-                <div className="action-buttons">
-                    <button type="submit" className="action-btn-icon"><SaveIcon /></button>
-                    <button type="button" className="action-btn-icon" onClick={() => setLogToEdit(null)}><CloseIcon /></button>
-                </div>
-            </form>
-        );
-    };
-    
-    return (
-        <div className="page-container">
-            <div className="card">
-                <div className="profile-header">
-                    <button onClick={() => onNavigate('Athletes')} className="back-btn"><BackIcon /> Back to Athletes</button>
-                    <div className="profile-details">
-                        <h2>{athlete.name}</h2>
-                        <p><strong>Skill Level:</strong> <span className={`pill ${athlete.skillLevel.toLowerCase()}`}>{athlete.skillLevel}</span></p>
-                        <p><strong>Activity:</strong> {athlete.activity}</p>
-                        <p><strong>Age Group:</strong> {athlete.ageGroup}</p>
-                    </div>
-                </div>
-            </div>
-
-            <div className="card">
-                <div className="card-header"><h3>Training History & Achievements</h3></div>
-                <div className="add-log-form card">
-                    <h4>Add New Log Entry</h4>
-                    <form className="form-layout" onSubmit={handleAddLogSubmit}>
-                        <div className="form-grid">
-                             <div className="form-group">
-                                <label>Date</label>
-                                <input type="date" value={newLog.date} onChange={e => setNewLog({...newLog, date: e.target.value})} required/>
-                            </div>
-                            <div className="form-group">
-                                <label>Description / Achievement</label>
-                                <input type="text" placeholder="e.g., Mastered a new skill" value={newLog.description} onChange={e => setNewLog({...newLog, description: e.target.value})} required/>
-                            </div>
-                        </div>
-                        <div className="form-actions" style={{justifyContent: 'flex-start', paddingTop: '10px', borderTop: 'none'}}>
-                            <button type="submit" className="btn btn-primary"><AddIcon /> Add Entry</button>
-                        </div>
-                    </form>
-                </div>
-                
-                <div className="history-list">
-                    {athlete.history.length > 0 ? athlete.history.map(log => (
-                        logToEdit?.id === log.id ? <HistoryItemEdit key={log.id} log={log} /> :
-                        <div className="history-item" key={log.id}>
-                            <div>
-                                <p><strong>{new Date(log.date + 'T00:00:00').toLocaleDateString()}</strong></p>
-                                <p>{log.description}</p>
-                            </div>
-                            <div className="action-buttons">
-                                <button className="action-btn-icon edit-btn" onClick={() => setLogToEdit(log)}><EditIcon /></button>
-                                <button className="action-btn-icon delete-btn" onClick={() => onDeleteLog(log)}><DeleteIcon /></button>
-                            </div>
-                        </div>
-                    )) : <p>No training history recorded.</p>}
-                </div>
-            </div>
-        </div>
-    );
-};
-
-const CoachesPage = ({ coaches, searchQuery, onAddClick, onViewClick, onEditClick, onDeleteClick }) => {
-    const filteredCoaches = useMemo(() => {
-        return coaches.filter(coach => 
-            fuzzyMatch(searchQuery, coach.name) ||
-            fuzzyMatch(searchQuery, coach.email) ||
-            fuzzyMatch(searchQuery, coach.expertise)
-        );
-    }, [coaches, searchQuery]);
-
-    return (
-        <div className="page-container">
-            <div className="card">
-                 <div className="page-controls">
-                    <div className="filters" style={{flexGrow: 1}}>{/* Placeholder for future filters */}</div>
-                    <button className="btn btn-primary" onClick={onAddClick}>Add New Coach</button>
-                </div>
-            </div>
-            {filteredCoaches.length > 0 ? (
-                 <div className="card list-table">
-                     <table>
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Phone</th>
-                                <th>Expertise</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filteredCoaches.map(coach => (
-                                <tr key={coach.id}>
-                                    <td data-label="Name" data-clickable="true" onClick={() => onViewClick(coach)}>{coach.name}</td>
-                                    <td data-label="Email">{coach.email}</td>
-                                    <td data-label="Phone">{coach.phone}</td>
-                                    <td data-label="Expertise">{coach.expertise}</td>
-                                    <td data-label="Actions">
-                                        <div className="action-buttons">
-                                            <button className="action-btn-icon edit-btn" onClick={() => onEditClick(coach)}><EditIcon /></button>
-                                            <button className="action-btn-icon delete-btn" onClick={() => onDeleteClick(coach)}><DeleteIcon /></button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            ) : (
-                 <div className="card">
-                    <div className="empty-state">
-                        <div className="empty-state-icon"><CoachesIcon /></div>
-                        <h3>No coaches found</h3>
-                        <p>Get started by adding your first coach to the system.</p>
-                        <button className="btn btn-primary" onClick={onAddClick}>Add First Coach</button>
-                    </div>
-                </div>
-            )}
-        </div>
-    )
-};
-
-const AddCoachForm = ({ onFormSubmit, onCancel, initialData = null }) => {
-    const [coach, setCoach] = useState(initialData || { name: '', email: '', phone: '', expertise: 'Skating' });
-    const isEditing = !!initialData;
-    
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setCoach(prev => ({ ...prev, [name]: value }));
-    };
-
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        onFormSubmit(coach);
-    };
-    
-    return (
-        <div className="card">
-            <form className="form-layout" onSubmit={handleSubmit}>
-                <div className="form-grid">
-                    <div className="form-group">
-                        <label htmlFor="name">Full Name</label>
-                        <input type="text" id="name" name="name" value={coach.name} onChange={handleChange} required />
-                    </div>
-                     <div className="form-group">
-                        <label htmlFor="email">Email</label>
-                        <input type="email" id="email" name="email" value={coach.email} onChange={handleChange} required />
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="phone">Phone Number</label>
-                        <input type="tel" id="phone" name="phone" value={coach.phone} onChange={handleChange} required />
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="expertise">Expertise</label>
-                        <select id="expertise" name="expertise" value={coach.expertise} onChange={handleChange}>
-                            <option value="Skating">Skating</option>
-                            <option value="Swimming">Swimming</option>
-                            <option value="Chess">Chess</option>
-                        </select>
-                    </div>
-                </div>
-                 <div className="form-actions">
-                    <button type="button" className="btn btn-secondary" onClick={onCancel}>Cancel</button>
-                    <button type="submit" className="btn btn-primary">{isEditing ? 'Update Coach' : 'Add Coach'}</button>
-                </div>
-            </form>
-        </div>
-    );
-};
-
-const CoachProfilePage = ({ coach, onNavigate }) => {
-    if (!coach) return <div className="card"><p>Coach not found.</p></div>;
-    return (
-        <div className="card">
-            <div className="profile-header">
-                <button onClick={() => onNavigate('Coaches')} className="back-btn"><BackIcon /> Back to Coaches</button>
-                <div className="profile-details">
-                    <h2>{coach.name}</h2>
-                    <p><strong>Email:</strong> {coach.email}</p>
-                    <p><strong>Phone:</strong> {coach.phone}</p>
-                    <p><strong>Expertise:</strong> {coach.expertise}</p>
-                </div>
-            </div>
-        </div>
-    );
-};
-
-const PaymentsPage = ({ payments, onAddClick }) => {
-    const monthlyRevenue = useMemo(() => payments.reduce((sum, p) => sum + Number(p.amount), 0), [payments]);
-
-    return (
-         <div className="page-container">
-            <div className="stats-grid">
-                <div className="stat-card">
-                    <div className="stat-card-body">
-                        <h3>KSh {monthlyRevenue.toLocaleString()}</h3>
-                        <p>Total Revenue (Month)</p>
-                    </div>
-                </div>
-                <div className="stat-card">
-                     <div className="stat-card-body">
-                        <h3>KSh 45,200</h3>
-                        <p>Pending Payments</p>
-                    </div>
-                </div>
-                <div className="stat-card">
-                     <div className="stat-card-body">
-                        <h3>{payments.filter(p => p.method === 'M-Pesa').length}</h3>
-                        <p>M-Pesa Transactions</p>
-                    </div>
-                </div>
-            </div>
-            <div className="card">
-                 <div className="card-header">
-                    <h3>Recent Transactions</h3>
-                    <button className="btn btn-primary" onClick={onAddClick}>Record Payment</button>
-                </div>
-                 <div className="transaction-list">
-                    {payments.map(payment => (
-                        <div className="transaction-item" key={payment.id}>
-                            <div className="transaction-details">
-                                <h4>{payment.name}</h4>
-                                <p>{payment.method} - Ref: {payment.reference}</p>
-                            </div>
-                            <div className="transaction-amount">
-                                <h4>+KSh {Number(payment.amount).toLocaleString()}</h4>
-                                <p>{new Date(payment.date).toLocaleDateString()}</p>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
-        </div>
-    )
-};
-
-const AddPaymentForm = ({ onFormSubmit, onCancel }) => {
-    const [payment, setPayment] = useState({ name: '', amount: '', method: 'M-Pesa', reference: '' });
-
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setPayment(prev => ({ ...prev, [name]: value }));
-    };
-
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        // FIX: Convert amount from string to number before submitting.
-        onFormSubmit({...payment, amount: Number(payment.amount) });
-    };
-
-    return (
-         <div className="card">
-            <form className="form-layout" onSubmit={handleSubmit}>
-                 <div className="form-grid">
-                    <div className="form-group">
-                        <label htmlFor="name">Payer's Name</label>
-                        <input type="text" id="name" name="name" value={payment.name} onChange={handleChange} required />
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="amount">Amount (KSh)</label>
-                        <input type="text" inputMode="numeric" id="amount" name="amount" value={payment.amount} onChange={handleChange} required />
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="method">Payment Method</label>
-                        <select id="method" name="method" value={payment.method} onChange={handleChange}>
-                            <option value="M-Pesa">M-Pesa</option>
-                            <option value="Card">Bank Card</option>
-                            <option value="Cash">Cash</option>
-                        </select>
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="reference">Reference / Receipt No.</label>
-                        <input type="text" id="reference" name="reference" value={payment.reference} onChange={handleChange} required />
-                    </div>
-                </div>
-                <div className="form-actions">
-                    <button type="button" className="btn btn-secondary" onClick={onCancel}>Cancel</button>
-                    <button type="submit" className="btn btn-primary">Record Payment</button>
-                </div>
-            </form>
-        </div>
-    );
-};
-
-const EventsPage = ({ events, searchQuery, onAddClick, onViewClick, onEditClick }) => {
-     const today = new Date();
-     const upcomingEvents = useMemo(() => events.filter(e => new Date(e.date) >= today && fuzzyMatch(searchQuery, e.name)).sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime()), [events, searchQuery, today]);
-     const pastEvents = useMemo(() => events.filter(e => new Date(e.date) < today && fuzzyMatch(searchQuery, e.name)).sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()), [events, searchQuery, today]);
-    
-    const EventCard = ({ event, onEdit, onView }) => (
-        <div className="event-card" onClick={() => onView(event)}>
-             <div className="event-edit-btn" onClick={(e) => { e.stopPropagation(); onEdit(event); }}>
-                <button className="action-btn-icon edit-btn"><EditIcon /></button>
-            </div>
-            <div className="event-card-header">
-                <h4>{event.name}</h4>
-                 <p>{new Date(event.date + 'T00:00:00').toDateString()}</p>
-            </div>
-        </div>
-    );
-
-    return (
-        <div className="page-container">
-            <div className="card">
-                <div className="page-controls">
-                    <div className="filters" style={{flexGrow: 1}}>{/* Placeholder for future filters */}</div>
-                    <button className="btn btn-primary" onClick={onAddClick}>Add New Event</button>
-                </div>
-            </div>
-            <div className="upcoming-events">
-                <h3 className="section-title">Upcoming Events</h3>
-                {upcomingEvents.length > 0 ? (
-                    <div className="events-grid">
-                        {upcomingEvents.map(event => <EventCard key={event.id} event={event} onEdit={onEditClick} onView={onViewClick} />)}
-                    </div>
-                ) : <p>No upcoming events.</p>}
-            </div>
-             <div className="past-events">
-                <h3 className="section-title">Past Events</h3>
-                {pastEvents.length > 0 ? (
-                    <div className="events-grid">
-                        {pastEvents.map(event => <EventCard key={event.id} event={event} onEdit={onEditClick} onView={onViewClick} />)}
-                    </div>
-                ) : <p>No past events.</p>}
-            </div>
-        </div>
-    );
-};
-
-const AddEventForm = ({ onFormSubmit, onCancel, initialData = null }) => {
-    const [event, setEvent] = useState(initialData || { name: '', date: '', time: '', location: '', description: '' });
-    const isEditing = !!initialData;
-    
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setEvent(prev => ({ ...prev, [name]: value }));
-    };
-
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        onFormSubmit(event);
-    };
-    
-    return (
-        <div className="card">
-            <form className="form-layout" onSubmit={handleSubmit}>
-                <div className="form-grid">
-                    <div className="form-group">
-                        <label htmlFor="name">Event Name</label>
-                        <input type="text" id="name" name="name" value={event.name} onChange={handleChange} required />
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="location">Location</label>
-                        <input type="text" id="location" name="location" value={event.location} onChange={handleChange} required />
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="date">Date</label>
-                        <input type="date" id="date" name="date" value={event.date} onChange={handleChange} required />
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="time">Time</label>
-                        <input type="time" id="time" name="time" value={event.time} onChange={handleChange} required />
-                    </div>
-                    <div className="form-group full-width">
-                        <label htmlFor="description">Description</label>
-                        <textarea id="description" name="description" rows="4" value={event.description} onChange={handleChange}></textarea>
-                    </div>
-                </div>
-                 <div className="form-actions">
-                    <button type="button" className="btn btn-secondary" onClick={onCancel}>Cancel</button>
-                    <button type="submit" className="btn btn-primary">{isEditing ? 'Update Event' : 'Add Event'}</button>
-                </div>
-            </form>
-        </div>
-    );
-};
-
-const EventDetailsPage = ({ event, onNavigate }) => {
-     if (!event) return <div className="card"><p>Event not found.</p></div>;
-    return (
-        <div className="card event-details-page-card">
-            <div className="profile-header">
-                <button onClick={() => onNavigate('Events')} className="back-btn"><BackIcon /> Back to Events</button>
-                <h2>{event.name}</h2>
-            </div>
-            <div className="profile-details">
-                <p><strong>Date:</strong> {new Date(event.date + 'T00:00:00').toDateString()}</p>
-                <p><strong>Time:</strong> {event.time}</p>
-                <p><strong>Location:</strong> {event.location}</p>
-                <p><strong>Details:</strong> {event.description || 'No description provided.'}</p>
-            </div>
-        </div>
-    );
-};
-
-const NoticeBoardPage = ({ announcements }) => (
-    <div className="page-container">
-        {announcements.map(announcement => (
-            <div className="card announcement-card" key={announcement.id}>
-                <h3>{announcement.title}</h3>
-                <small>Posted on: {new Date(announcement.date).toDateString()}</small>
-                <p>{announcement.content}</p>
-            </div>
-        ))}
-    </div>
-);
-
-const MessagesPage = ({ messages, onSendMessage }) => {
-    const [selectedConversation, setSelectedConversation] = useState(null);
-    const [newMessage, setNewMessage] = useState('');
-    const chatBodyRef = useRef(null);
-
-    useEffect(() => {
-        if (chatBodyRef.current) {
-            chatBodyRef.current.scrollTop = chatBodyRef.current.scrollHeight;
-        }
-    }, [selectedConversation]);
-
-    const handleSelectConversation = (conversation) => {
-        setSelectedConversation(conversation);
-    };
-
-    const handleFormSubmit = (e) => {
-        e.preventDefault();
-        if (newMessage.trim() && selectedConversation) {
-            onSendMessage(selectedConversation.id, newMessage);
-            setNewMessage('');
-            // After message is sent, we need to get the updated conversation to scroll
-            setTimeout(() => {
-                 if (chatBodyRef.current) {
-                    chatBodyRef.current.scrollTop = chatBodyRef.current.scrollHeight;
-                }
-            }, 0);
-        }
-    };
-
-    return (
-        <div className="messages-page card">
-            <div className="messages-layout">
-                <div className="conversations-list">
-                    <div className="conversations-header">
-                        <h3>Conversations</h3>
-                    </div>
-                    <div className="conversation-items">
-                        {messages.map(msg => (
-                            <div key={msg.id} className={`conversation-item ${selectedConversation?.id === msg.id ? 'active' : ''}`} onClick={() => handleSelectConversation(msg)}>
-                                <div className="conversation-avatar">{msg.sender.charAt(0)}</div>
-                                <div className="conversation-details">
-                                    <p className="conversation-sender">{msg.sender}</p>
-                                    <p className="conversation-preview">{msg.preview}</p>
-                                </div>
-                                <div className="conversation-meta">
-                                    <p className="conversation-timestamp">{msg.timestamp}</p>
-                                    {msg.unread > 0 && <div className="unread-badge">{msg.unread}</div>}
-                                </div>
-                            </div>
+                <nav className="nav-menu">
+                    <ul>
+                        {navItems.map(item => (
+                             <li key={item}>
+                                <a
+                                    href="#"
+                                    className={`nav-item ${currentPage === item ? 'active' : ''}`}
+                                    onClick={(e) => { e.preventDefault(); navigate(item); }}
+                                >
+                                    {navIcons[item]}
+                                    <span>{item}</span>
+                                </a>
+                            </li>
                         ))}
-                    </div>
-                </div>
-                <div className="chat-window">
-                    {selectedConversation ? (
-                        <>
-                            <div className="chat-header">
-                                <h3>{selectedConversation.sender}</h3>
-                            </div>
-                            <div className="chat-body" ref={chatBodyRef}>
-                                {selectedConversation.conversation.map((message, index) => (
-                                    <div key={index} className={`message ${message.sender === 'You' ? 'sent' : 'received'}`}>
-                                        <p>{message.text}</p>
-                                        <span>{message.time}</span>
-                                    </div>
-                                ))}
-                            </div>
-                            <div className="chat-footer">
-                                <form onSubmit={handleFormSubmit}>
-                                    <input type="text" placeholder="Type a message..." value={newMessage} onChange={(e) => setNewMessage(e.target.value)} />
-                                    <button type="submit" className="btn btn-primary">Send</button>
-                                </form>
-                            </div>
-                        </>
-                    ) : (
-                        <div className="no-chat-selected">
-                             <MessagesIcon />
-                             <p>Select a conversation to start chatting</p>
-                        </div>
-                    )}
+                    </ul>
+                </nav>
+                <div className="sidebar-footer">
+                    <a href="#" className="nav-item" onClick={(e) => {e.preventDefault(); onLogout()}}>
+                        <LogoutIcon />
+                        <span>Logout</span>
+                    </a>
                 </div>
             </div>
-        </div>
+            <div className={`sidebar-overlay ${isOpen ? 'active' : ''}`} onClick={() => setIsOpen(false)}></div>
+        </>
     );
 };
 
-const SettingsPage = () => (
-    <div className="page-container">
-        <div className="card">
-            <h3>Notification Preferences</h3>
-            <p>Manage your notification settings here. (Feature coming soon)</p>
-        </div>
-        <div className="card">
-            <h3>Account Settings</h3>
-            <p>Manage your account details here. (Feature coming soon)</p>
-        </div>
-    </div>
-);
-
-const SearchResultsPage = ({ onNavigate, searchQuery, athletes, coaches, events, payments, onViewAthlete, onViewCoach, onViewEvent }) => {
-    const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 5;
-
-    const allResults = useMemo(() => {
-        if (!searchQuery) return [];
-        const athleteResults = athletes.filter(a => fuzzyMatch(searchQuery, a.name)).map(a => ({ ...a, type: 'Athlete' }));
-        const coachResults = coaches.filter(c => fuzzyMatch(searchQuery, c.name) || fuzzyMatch(searchQuery, c.email)).map(c => ({ ...c, type: 'Coach' }));
-        const eventResults = events.filter(e => fuzzyMatch(searchQuery, e.name) || fuzzyMatch(searchQuery, e.location)).map(e => ({ ...e, type: 'Event' }));
-        const paymentResults = payments.filter(p => fuzzyMatch(searchQuery, p.name) || fuzzyMatch(searchQuery, p.reference)).map(p => ({ ...p, type: 'Payment' }));
-        return [...athleteResults, ...coachResults, ...eventResults, ...paymentResults];
-    }, [searchQuery, athletes, coaches, events, payments]);
-    
-    const totalPages = Math.ceil(allResults.length / itemsPerPage);
-    const paginatedResults = allResults.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
-
-    const getQuickAction = (result) => {
-        switch(result.type) {
-            case 'Athlete':
-                return { text: 'View Profile', action: () => onViewAthlete(result) };
-            case 'Coach':
-                return { text: 'View Profile', action: () => onViewCoach(result) };
-            case 'Event':
-                return { text: 'View Details', action: () => onViewEvent(result) };
-             case 'Payment':
-                return { text: 'View Details', action: () => onNavigate('Payments') }; // Payments don't have a detail page
-            default:
-                return null;
-        }
-    };
-
-    return (
-        <div className="page-container">
-            <div className="card">
-                <div className="card-header">
-                    <h3>Search Results for "{searchQuery}"</h3>
-                    <p>{allResults.length} result(s) found</p>
-                </div>
-                {paginatedResults.length > 0 ? (
-                    paginatedResults.map(result => {
-                        const quickAction = getQuickAction(result);
-                        return (
-                            <div className="search-result-card" key={`${result.type}-${result.id}`}>
-                               <div className="result-icon">
-                                    {result.type === 'Athlete' && <AthletesIcon />}
-                                    {result.type === 'Coach' && <CoachesIcon />}
-                                    {result.type === 'Event' && <EventsIcon />}
-                                    {result.type === 'Payment' && <PaymentsIcon />}
-                                </div>
-                                <div className="result-details">
-                                    <h4>{result.name}</h4>
-                                    <p>{result.type}</p>
-                                </div>
-                                <div className="result-actions">
-                                    {quickAction && (
-                                        <button className="btn btn-secondary" onClick={quickAction.action}>
-                                            {quickAction.text}
-                                        </button>
-                                    )}
-                                </div>
-                            </div>
-                        );
-                    })
-                ) : (
-                    <div className="empty-state">
-                        <p>No results found.</p>
-                    </div>
-                )}
-                {totalPages > 1 && (
-                    <div className="pagination-controls">
-                        <button className="btn btn-secondary" onClick={() => setCurrentPage(p => p - 1)} disabled={currentPage === 1}>Previous</button>
-                        <span>Page {currentPage} of {totalPages}</span>
-                        <button className="btn btn-secondary" onClick={() => setCurrentPage(p => p + 1)} disabled={currentPage === totalPages}>Next</button>
-                    </div>
-                )}
-            </div>
-        </div>
-    );
-};
-
-
-// --- Common Components --- //
-const ConfirmationDialog = ({ title, message, onConfirm, onCancel }) => (
-    <div className="modal-overlay">
-        <div className="modal-content">
-            <h3>{title}</h3>
-            <p>{message}</p>
-            <div className="modal-actions">
-                <button className="btn btn-secondary" onClick={onCancel}>Cancel</button>
-                <button className="btn btn-danger" onClick={onConfirm}>Confirm Delete</button>
-            </div>
-        </div>
-    </div>
-);
-
-const ToastNotification = ({ onlineStatus }) => {
-    const [visible, setVisible] = useState(false);
-    const [message, setMessage] = useState('');
-    const [type, setType] = useState('');
-    const timerRef = useRef(null);
-
-    useEffect(() => {
-        clearTimeout(timerRef.current);
-        if (onlineStatus) {
-            setMessage('Back Online');
-            setType('online');
-        } else {
-            setMessage('You are offline. Changes will be saved locally.');
-            setType('offline');
-        }
-        setVisible(true);
-        timerRef.current = setTimeout(() => {
-            setVisible(false);
-        }, 3000);
-
-        return () => clearTimeout(timerRef.current);
-    }, [onlineStatus]);
-
-    if (!visible) return null;
-
-    return (
-         <div className={`toast-notification ${type}`}>
-            {type === 'online' && <OnlineIcon />}
-            {type === 'offline' && <OfflineIcon />}
-            {type === 'syncing' && <SyncIcon />}
-            <span>{message}</span>
-        </div>
-    );
-};
-
-const NotificationPanel = ({ notifications, onClose }) => {
-    const sortedNotifications = [...notifications].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    return (
-        <div className="notification-panel">
-            <div className="notification-panel-header">
-                <h3>Notifications</h3>
-                <button className="link-button" onClick={onClose}>Mark all as read</button>
-            </div>
-            <div className="notification-list">
-                {sortedNotifications.length > 0 ? sortedNotifications.map(n => (
-                    <div className={`notification-item ${n.read ? 'read' : ''}`} key={n.id}>
-                        <div className={`notification-icon ${n.type}`}>
-                            {n.type === 'payment' && <PaymentsIcon />}
-                            {n.type === 'event' && <EventsIcon />}
-                        </div>
-                        <div className="notification-content">
-                            <p>{n.text}</p>
-                            <small>{new Date(n.date).toLocaleString()}</small>
-                        </div>
-                    </div>
-                )) : <p style={{padding: '20px', textAlign: 'center', color: 'var(--text-secondary)'}}>No new notifications.</p>}
-            </div>
-        </div>
-    );
-}
-
-const MobileBottomNav = ({ currentPage, onNavigate }) => {
-    const navItems = [
-        { name: 'Dashboard', icon: <DashboardIcon /> },
-        { name: 'Athletes', icon: <AthletesIcon /> },
-        { name: 'Events', icon: <EventsIcon /> },
-        { name: 'Payments', icon: <PaymentsIcon /> },
-    ];
+const MobileBottomNav = ({ role, currentPage, navigate }) => {
+    const navItems = navConfig[role].slice(0, 5); // Show first 5 items
     return (
         <nav className="mobile-bottom-nav">
             {navItems.map(item => (
-                 <a href="#" key={item.name} onClick={(e) => { e.preventDefault(); onNavigate(item.name); }} className={`mobile-nav-item ${currentPage === item.name ? 'active' : ''}`}>
-                    {item.icon}
-                    <span>{item.name}</span>
+                <a 
+                    key={item} 
+                    href="#" 
+                    className={`mobile-nav-item ${currentPage === item ? 'active' : ''}`}
+                    onClick={(e) => { e.preventDefault(); navigate(item); }}
+                >
+                    {navIcons[item]}
+                    <span>{item}</span>
                 </a>
             ))}
         </nav>
+    );
+};
+
+
+// --- UI COMPONENTS --- //
+
+const StatCard = ({ icon, title, value, color }) => (
+    <div className="stat-card">
+        <div className="stat-card-header">
+            <div className={`icon ${color}`}>{icon}</div>
+        </div>
+        <div className="stat-card-body">
+            <h3>{value}</h3>
+            <p>{title}</p>
+        </div>
+    </div>
+);
+
+const CardHeader = ({ title, onViewAll = undefined, children = null }) => (
+    <div className="card-header">
+        <h3>{title}</h3>
+        <div className="card-header-actions">
+          {children}
+          {onViewAll && <a href="#" onClick={(e) => { e.preventDefault(); onViewAll(); }} className="view-all">View All</a>}
+        </div>
+    </div>
+);
+
+const EmptyState = ({ title, message, children = null }) => (
+    <div className="empty-state">
+        <div className="empty-state-icon"><EmptyIcon /></div>
+        <h3>{title}</h3>
+        <p>{message}</p>
+        {children}
+    </div>
+);
+
+const Modal = ({ isOpen, onClose, title, children }) => {
+    if (!isOpen) return null;
+
+    return (
+        <div className="modal-overlay" onClick={onClose}>
+            <div className="modal-content" onClick={e => e.stopPropagation()}>
+                <div className="modal-header">
+                    <h3>{title}</h3>
+                    <button className="close-btn" onClick={onClose}><CloseIcon /></button>
+                </div>
+                <div className="modal-body">
+                    {children}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, message, confirmText = "Confirm", confirmButtonClass = "btn-primary" }) => (
+    <Modal isOpen={isOpen} onClose={onClose} title={title}>
+        <p>{message}</p>
+        <div className="modal-actions">
+            <button className="btn btn-secondary" onClick={onClose}>Cancel</button>
+            <button className={`btn ${confirmButtonClass}`} onClick={onConfirm}>{confirmText}</button>
+        </div>
+    </Modal>
+);
+
+const EditAthleteModal = ({ athlete, onSave, onClose }) => {
+    const [formData, setFormData] = useState({ ...athlete });
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        onSave(formData);
+    };
+
+    return (
+        <Modal isOpen={true} onClose={onClose} title={`Edit ${athlete.name}`}>
+            <form onSubmit={handleSubmit} className="form-layout">
+                <div className="form-group">
+                    <label htmlFor="name">Full Name</label>
+                    <input type="text" id="name" name="name" value={formData.name} onChange={handleChange} required />
+                </div>
+                <div className="form-group">
+                    <label htmlFor="skillLevel">Skill Level</label>
+                    <select id="skillLevel" name="skillLevel" value={formData.skillLevel} onChange={handleChange}>
+                        <option>Beginner</option>
+                        <option>Intermediate</option>
+                        <option>Advanced</option>
+                    </select>
+                </div>
+                 <div className="form-group">
+                    <label htmlFor="activity">Activity</label>
+                    <input type="text" id="activity" name="activity" value={formData.activity} onChange={handleChange} required />
+                </div>
+                <div className="form-group">
+                    <label htmlFor="ageGroup">Age Group</label>
+                    <input type="text" id="ageGroup" name="ageGroup" value={formData.ageGroup} onChange={handleChange} required />
+                </div>
+                <div className="modal-actions">
+                    <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
+                    <button type="submit" className="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </Modal>
     );
 };
 
