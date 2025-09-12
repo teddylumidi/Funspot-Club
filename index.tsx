@@ -2119,7 +2119,7 @@ const UserFormModal = ({ isOpen, onClose, onSave, user, coaches, parents }) => {
             saveData.activity = formData.activity;
             saveData.skillLevel = formData.skillLevel as User['skillLevel'];
             saveData.ageGroup = formData.ageGroup;
-            // FIX: Ensure coachId and parentId are converted to numbers before saving.
+            // Fix: Ensure coachId and parentId are converted to numbers before saving.
             saveData.coachId = formData.coachId ? Number(formData.coachId) : undefined;
             saveData.parentId = formData.parentId ? Number(formData.parentId) : undefined;
             if(formData.emergencyContactName) {
@@ -2274,7 +2274,7 @@ const AthleteFormModal = ({ isOpen, onClose, onSave, coaches, parents }) => {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         const { emergencyContactName, emergencyContactPhone, emergencyContactRelation, medicalNotes, parentId, coachId, ...rest } = formData;
-        // FIX: Convert parentId and coachId from string to number.
+        // Fix: Convert parentId and coachId from string to number.
         const athleteData = {
             ...rest,
             parentId: parentId ? Number(parentId) : undefined,
@@ -2481,7 +2481,7 @@ const TaskFormModal = ({ isOpen, onClose, onSave, task, users }) => {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        // FIX: Convert assignedTo from string to number before saving.
+        // Fix: Convert assignedTo from string to number before saving.
         onSave({ ...formData, assignedTo: Number(formData.assignedTo) });
     };
 
