@@ -779,7 +779,8 @@ const MobileBottomNav = ({ currentPage, navigate, currentUser }) => {
 }
 
 const MainHeader = ({ onMenuClick, page, currentUser, onRoleChange, unreadNotificationCount, onNotificationClick, isNotificationPanelOpen, notificationPanelRef, notifications, setNotifications, navigate, isRoleSwitcherOpen, onRoleSwitcherClick, roleSwitcherRef, handleSearch, searchTerm, setSearchTerm }) => {
-    const { name: pageName, query } = page;
+    const pageName = page.name;
+    const query = page.query || page.params?.query;
 
     const pageTitle = pageName === 'search' && query
         ? 'Search Results'
@@ -1747,20 +1748,20 @@ const SettingsPage = () => {
 };
 
 const SearchResultsPage = ({ page, users, events, navigate, currentUser, onEditUser }) => {
-    const query = page.query || '';
+    const query = page.query || page.params?.query || '';
     const lowercasedQuery = query.toLowerCase();
 
-    const userResults = users.filter(u =>
+    const userResults = query ? users.filter(u =>
         u.name.toLowerCase().includes(lowercasedQuery) ||
         u.role.toLowerCase().includes(lowercasedQuery) ||
         (u.activity && u.activity.toLowerCase().includes(lowercasedQuery))
-    );
+    ) : [];
 
-    const eventResults = events.filter(e =>
+    const eventResults = query ? events.filter(e =>
         e.title.toLowerCase().includes(lowercasedQuery) ||
         e.description.toLowerCase().includes(lowercasedQuery) ||
         e.category.toLowerCase().includes(lowercasedQuery)
-    );
+    ) : [];
 
     const handleViewUser = (user) => {
         if (user.role === 'Athlete') {
@@ -1787,7 +1788,6 @@ const SearchResultsPage = ({ page, users, events, navigate, currentUser, onEditU
 
     return (
         <div className="page-container">
-            <h3>Search Results for "{query}"</h3>
             
             {userResults.length > 0 && (
                 <div className="card">
@@ -2071,6 +2071,8 @@ const UserFormModal = ({ isOpen, onClose, onSave, user, coaches, parents }) => {
         emergencyContactName: '', emergencyContactPhone: '', emergencyContactRelation: '', medicalNotes: '',
         // Coach specific
         certifications: '', availability: '',
+        // Parent specific
+        contactPhone: '', contactEmail: '',
     });
 
     useEffect(() => {
@@ -2078,6 +2080,7 @@ const UserFormModal = ({ isOpen, onClose, onSave, user, coaches, parents }) => {
             id: null, name: '', role: 'Athlete', activity: 'Skating', skillLevel: 'Beginner', ageGroup: 'U10', 
             coachId: '', parentId: '', emergencyContactName: '', emergencyContactPhone: '', 
             emergencyContactRelation: '', medicalNotes: '', certifications: '', availability: '',
+            contactPhone: '', contactEmail: '',
         };
 
         if (user) {
@@ -2092,6 +2095,8 @@ const UserFormModal = ({ isOpen, onClose, onSave, user, coaches, parents }) => {
                 medicalNotes: user.medicalNotes || '',
                 certifications: user.certifications?.join(', ') || '',
                 availability: user.availability || '',
+                contactPhone: user.contactDetails?.phone || '',
+                contactEmail: user.contactDetails?.email || '',
             });
         } else {
             setFormData(resetState);
@@ -2114,9 +2119,8 @@ const UserFormModal = ({ isOpen, onClose, onSave, user, coaches, parents }) => {
             saveData.activity = formData.activity;
             saveData.skillLevel = formData.skillLevel as User['skillLevel'];
             saveData.ageGroup = formData.ageGroup;
-            // [FIX] The value from a select input is a string. It must be converted to a number to match the 'User' type.
+            // FIX: Ensure coachId and parentId are converted to numbers before saving.
             saveData.coachId = formData.coachId ? Number(formData.coachId) : undefined;
-            // [FIX] The value from a select input is a string. It must be converted to a number to match the 'User' type.
             saveData.parentId = formData.parentId ? Number(formData.parentId) : undefined;
             if(formData.emergencyContactName) {
                 saveData.emergencyContact = {
@@ -2131,6 +2135,15 @@ const UserFormModal = ({ isOpen, onClose, onSave, user, coaches, parents }) => {
         if (formData.role === 'Coach') {
             saveData.certifications = formData.certifications.split(',').map(c => c.trim()).filter(Boolean);
             saveData.availability = formData.availability;
+        }
+
+        if (formData.role === 'Parent') {
+            if (formData.contactPhone || formData.contactEmail) {
+                saveData.contactDetails = {
+                    phone: formData.contactPhone,
+                    email: formData.contactEmail,
+                };
+            }
         }
 
         onSave(saveData);
@@ -2221,6 +2234,22 @@ const UserFormModal = ({ isOpen, onClose, onSave, user, coaches, parents }) => {
                         </div>
                     </>
                 )}
+                
+                {formData.role === 'Parent' && (
+                    <>
+                        <div className="form-section-divider">Contact Info</div>
+                        <div className="form-grid">
+                            <div className="form-group">
+                                <label>Phone Number</label>
+                                <input type="tel" name="contactPhone" value={formData.contactPhone} onChange={handleChange} />
+                            </div>
+                            <div className="form-group">
+                                <label>Email Address</label>
+                                <input type="email" name="contactEmail" value={formData.contactEmail} onChange={handleChange} />
+                            </div>
+                        </div>
+                    </>
+                )}
 
                 <div className="form-actions">
                     <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
@@ -2245,11 +2274,10 @@ const AthleteFormModal = ({ isOpen, onClose, onSave, coaches, parents }) => {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         const { emergencyContactName, emergencyContactPhone, emergencyContactRelation, medicalNotes, parentId, coachId, ...rest } = formData;
+        // FIX: Convert parentId and coachId from string to number.
         const athleteData = {
             ...rest,
-            // [FIX] The value from a select input is a string. It must be converted to a number to match the 'User' type.
             parentId: parentId ? Number(parentId) : undefined,
-            // [FIX] The value from a select input is a string. It must be converted to a number to match the 'User' type.
             coachId: coachId ? Number(coachId) : undefined,
             medicalNotes,
             emergencyContact: (emergencyContactName)
@@ -2451,9 +2479,9 @@ const TaskFormModal = ({ isOpen, onClose, onSave, task, users }) => {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        // [FIX] The value for `assignedTo` from the form is a string and needs to be converted to a number.
+        // FIX: Convert assignedTo from string to number before saving.
         onSave({ ...formData, assignedTo: Number(formData.assignedTo) });
     };
 
