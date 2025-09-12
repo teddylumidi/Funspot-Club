@@ -1,5 +1,3 @@
-
-
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { createRoot } from 'react-dom/client';
 
@@ -49,434 +47,650 @@ const useOnClickOutside = (ref, handler) => {
   );
 };
 
+// --- Type Definitions ---
+type Role = 'Admin' | 'Coach' | 'Athlete' | 'Parent' | 'Manager';
+type AttendanceStatus = 'Present' | 'Absent' | 'Late' | 'Unmarked';
+
+interface User {
+    id: number;
+    name: string;
+    role: Role;
+    status: 'Active' | 'Inactive';
+    skillLevel?: 'Beginner' | 'Intermediate' | 'Advanced';
+    activity?: string;
+    ageGroup?: string;
+    parentId?: number;
+    coachId?: number;
+    badges?: string[];
+    height?: string;
+    weight?: string;
+    personalBest?: string;
+    goals?: string;
+    history?: { id: number; date: string; description: string }[];
+    // Fix: Added optional bio and expertise properties for Coach users.
+    bio?: string;
+    expertise?: string;
+}
+
+interface TrainingSession {
+    id: string;
+    title: string;
+    date: string;
+    startTime: string;
+    endTime: string;
+    coachId: number;
+    athleteIds: number[];
+    attendance: Record<number, AttendanceStatus>;
+}
+
+interface Event {
+    id: number;
+    title: string;
+    date: string;
+    description: string;
+    participants: number[];
+    category: 'Competition' | 'Training' | 'Social';
+}
+
+
 // --- Initial Data ---
-const initialUsers = [
+const initialUsers: User[] = [
     // Athletes
-    { id: 1, name: 'Sarah Wanjiku', role: 'Athlete', status: 'Active', skillLevel: 'Beginner', activity: 'Skating', ageGroup: 'U10', parentId: 4, coachId: 6, badges: ['first_competition'], history: [
-        { id: 4, date: '2025-09-12', description: 'New high score: 92 in choreography.' },
-        { id: 3, date: '2025-09-05', description: 'Completed speed circuit. Time: 120 seconds.' },
-        { id: 1, date: '2025-08-28', description: 'Mastered forward swizzles. Freestyle routine score: 85.' },
-        { id: 2, date: '2025-08-20', description: 'First time on ice without assistance.' }
+    { id: 1, name: 'Sarah Wanjiku', role: 'Athlete', status: 'Active', skillLevel: 'Beginner', activity: 'Skating', ageGroup: 'U10', parentId: 4, coachId: 6, badges: ['first_competition'], 
+        height: "5'4\"", weight: "120 lbs", personalBest: "Triple Salchow attempt", goals: "Qualify for regional championship.",
+        history: [
+            { id: 4, date: '2025-09-12', description: 'New high score: 92 in choreography.' },
+            { id: 3, date: '2025-09-05', description: 'Completed speed circuit. Time: 120 seconds.' },
+            { id: 1, date: '2025-08-28', description: 'Mastered forward swizzles. Freestyle routine score: 85.' },
+            { id: 2, date: '2025-08-20', description: 'First time on ice without assistance.' }
     ]},
-    { id: 2, name: 'John Kamau', role: 'Athlete', status: 'Active', skillLevel: 'Intermediate', activity: 'Swimming', ageGroup: '15-18', parentId: 4, coachId: 7, badges: [], history: [] },
-    { id: 3, name: 'Aisha Mwalimu', role: 'Athlete', status: 'Active', skillLevel: 'Advanced', activity: 'Chess', ageGroup: '15-18', parentId: 5, coachId: null, badges: ['first_competition'], history: [
-        { id: 3, date: '2025-09-01', description: 'Won local club tournament.'}
-    ]},
-    { id: 8, name: 'Peter Kiprotich', role: 'Athlete', status: 'Active', skillLevel: 'Beginner', activity: 'Skating', ageGroup: 'U10', parentId: 5, coachId: 6, badges: ['first_competition'], history: [] },
+    { id: 2, name: 'John Kamau', role: 'Athlete', status: 'Active', skillLevel: 'Intermediate', activity: 'Swimming', ageGroup: '15-18', parentId: 4, coachId: 7, badges: ['distance_award'], history: [] },
+    { id: 3, name: 'Emily Akinyi', role: 'Athlete', status: 'Inactive', skillLevel: 'Advanced', activity: 'Skating', ageGroup: 'U10', parentId: 5, coachId: 6, badges: [], history: [] },
+
     // Parents
-    { id: 4, name: 'Jane Wanjiku', role: 'Parent/Athlete', status: 'Active', childrenIds: [1, 2] },
-    { id: 5, name: 'Ahmed Mwalimu', role: 'Parent/Athlete', status: 'Inactive', childrenIds: [3, 8] },
+    { id: 4, name: 'David Odhiambo', role: 'Parent', status: 'Active' },
+    { id: 5, name: 'Maryanne Wambui', role: 'Parent', status: 'Active' },
+
     // Coaches
-    { id: 6, name: 'David Omondi', role: 'Coach', status: 'Active', email: 'david.o@example.com', phone: '0712345678', expertise: 'Skating' },
-    { id: 7, name: 'Grace Njeri', role: 'Coach', status: 'Active', email: 'grace.n@example.com', phone: '0787654321', expertise: 'Swimming' },
+    { id: 6, name: 'Coach Brian', role: 'Coach', status: 'Active', skillLevel: 'Advanced', activity: 'Skating', bio: "10+ years of competitive skating experience.", expertise: "Figure Skating Choreography" },
+    { id: 7, name: 'Coach Alice', role: 'Coach', status: 'Active', skillLevel: 'Intermediate', activity: 'Swimming', bio: "Certified swimming instructor specializing in youth programs.", expertise: "Freestyle & Butterfly" },
+    
     // Admin
-    { id: 9, name: 'Admin User', role: 'Admin', status: 'Active' },
+    { id: 8, name: 'Admin User', role: 'Admin', status: 'Active' },
+    { id: 9, name: 'Alice Admin', role: 'Admin', status: 'Active' },
+
+    // Manager
+    { id: 10, name: 'Grace Nakimuli', role: 'Manager', status: 'Active' },
 ];
 
+const initialTrainingSessions: TrainingSession[] = [
+    { id: 'ts1', title: 'Morning Skate', date: '2025-08-20', startTime: '09:00', endTime: '11:00', coachId: 6, athleteIds: [1, 3], attendance: { 1: 'Present', 3: 'Absent' } },
+    { id: 'ts2', title: 'Pool Drills', date: '2025-08-20', startTime: '14:00', endTime: '15:30', coachId: 7, athleteIds: [2], attendance: { 2: 'Unmarked' } },
+    { id: 'ts3', title: 'Advanced Choreography', date: '2025-08-22', startTime: '10:00', endTime: '12:00', coachId: 6, athleteIds: [3], attendance: { 3: 'Unmarked' } },
+];
 
-const getTomorrowDate = () => {
-    const today = new Date();
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    return tomorrow.toISOString().split('T')[0];
-};
-
-const initialEvents = [
-    { id: 1, name: 'Annual Skating Gala', date: getTomorrowDate(), time: '09:00', location: 'Moi Stadium Kasarani', description: 'Our biggest skating event of the year. All levels welcome!', attendees: [1, 8] },
-    { id: 2, name: 'Club Chess Tournament', date: '2025-08-15', time: '13:00', location: 'Club House', description: 'A friendly competition for all our chess enthusiasts.', attendees: [3] },
-    { id: 3, name: 'Summer Swim Meet', date: '2026-01-10', time: '10:00', location: 'Aquatics Center', description: 'Join us for a fun day of swimming races and relays.', attendees: [] },
+const initialEvents: Event[] = [
+    { id: 1, title: 'Summer Skate-a-thon', date: '2025-08-30', description: 'Annual club-wide skating marathon and fundraiser.', participants: [1, 3], category: 'Social' },
+    { id: 2, title: 'Regional Qualifiers', date: '2025-09-15', description: 'Qualifier event for the national championships.', participants: [3], category: 'Competition' },
+    { id: 3, title: 'Swim Meet vs. Sharks', date: '2025-09-20', description: 'Friendly local swim meet.', participants: [2], category: 'Competition' },
 ];
 
 const initialPayments = [
-    { id: 1, name: 'Jane Wanjiku', amount: 2500, method: 'M-Pesa', reference: 'ABC123456789', date: '2025-09-02T10:30:00Z'},
-    { id: 2, name: 'Ahmed Mwalimu', amount: 1200, method: 'Card', reference: '**** **** **** 4532', date: '2025-08-15T07:45:00Z'},
-    { id: 3, name: 'Ahmed Mwalimu', amount: 800, method: 'Cash', reference: 'CASH001', date: '2025-07-01T15:00:00Z'},
-    { id: 4, name: 'Jane Wanjiku', amount: 2500, method: 'M-Pesa', reference: 'DEF123456789', date: '2025-08-02T11:00:00Z'},
+    { id: 'p1', userId: 4, amount: 150, date: '2025-08-01', status: 'Paid', description: 'August Fees (S. Wanjiku)' },
+    { id: 'p2', userId: 4, amount: 75, date: '2025-08-05', status: 'Paid', description: 'Swim Meet Entry (J. Kamau)' },
+    { id: 'p3', userId: 5, amount: 150, date: '2025-08-01', status: 'Overdue', description: 'August Fees (E. Akinyi)' },
 ];
 
-
-const initialAnnouncements = [
-    { id: 1, title: 'Upcoming Holiday Closure', content: 'The club will be closed for the public holiday on October 10th. All sessions will be rescheduled.', date: '2025-09-15' },
-    { id: 2, title: 'New Intermediate Skating Class', content: 'We are excited to announce a new intermediate skating class starting next month. Please register at the front desk.', date: '2025-09-10' },
-];
-
-const initialMessages = [
-    {
-        id: 1,
-        sender: 'David Omondi',
-        preview: 'Hi Sarah, great job today! Let\'s work...',
-        timestamp: '10:47 AM',
-        unread: 0,
-        conversation: [
-            {sender: 'David Omondi', text: 'Hi Sarah, great job today! Let\'s work on stops next week.', time: '10:45 AM'},
-            {sender: 'You', text: 'Thanks, Coach! Sounds good.', time: '10:47 AM'}
-        ]
-    },
-    {
-        id: 2,
-        sender: 'Grace Njeri',
-        preview: 'Reminder: Swim meet practice is at 4pm...',
-        timestamp: 'Yesterday',
-        unread: 2,
-        conversation: [
-             {sender: 'Grace Njeri', text: 'Reminder: Swim meet practice is at 4pm tomorrow.', time: 'Yesterday'},
-        ]
-    }
+const initialNotifications = [
+    { id: 1, userId: 4, type: 'payment', message: 'Your payment of $150 was successful.', timestamp: '2025-08-01T10:00:00Z', read: true },
+    { id: 2, userId: 4, type: 'event', message: 'Reminder: Summer Skate-a-thon is this Saturday!', timestamp: '2025-08-28T09:00:00Z', read: false },
+    { id: 3, userId: 5, type: 'payment', message: 'Your payment for August fees is overdue.', timestamp: '2025-08-15T11:00:00Z', read: false, page: 'payments' },
 ];
 
 const initialTasks = [
-    { id: 1, title: 'Prepare U10 skating routine', completed: false, dueDate: '2025-10-15', assignedTo: 'David Omondi' },
-    { id: 2, title: 'Finalize swim meet schedule', completed: true, dueDate: '2025-09-30', assignedTo: 'Grace Njeri' },
-    { id: 3, title: 'Order new team uniforms', completed: false, dueDate: '2025-11-01', assignedTo: 'Admin' },
-    { id: 4, title: 'Update club website with Gala info', completed: true, dueDate: '2025-09-25', assignedTo: 'Admin' },
+    { id: 't1', title: 'Finalize competition roster', assignedTo: 6, completed: false, dueDate: '2025-09-10' },
+    { id: 't2', title: 'Service skating equipment', assignedTo: 8, completed: true, dueDate: '2025-08-15' },
+    { id: 't3', title: 'Update swimmer progress reports', assignedTo: 7, completed: false, dueDate: '2025-08-25' },
 ];
 
-const initialBadges = [
-    { id: 'first_competition', name: 'First Competition', description: 'Participated in your first official event!', icon: 'trophy' },
+const initialConversations = [
+    {
+        id: 'c1',
+        participantIds: [4, 6], // Parent David, Coach Brian
+        messages: [
+            { id: 'm1', senderId: 4, text: "Hi Coach, how is Sarah's new routine coming along?", timestamp: '2025-08-19T14:30:00Z' },
+            { id: 'm2', senderId: 6, text: "Excellent! She's landing the double salchow consistently now. We'll be adding it to her program this week.", timestamp: '2025-08-19T15:05:00Z' },
+        ],
+        lastMessageTimestamp: '2025-08-19T15:05:00Z',
+        unreadCount: { 4: 0, 6: 0 }
+    },
+    {
+        id: 'c2',
+        participantIds: [8, 7], // Admin User, Coach Alice
+        messages: [
+            { id: 'm3', senderId: 8, text: "Just a reminder that pool maintenance is scheduled for next Monday.", timestamp: '2025-08-20T10:00:00Z' },
+        ],
+        lastMessageTimestamp: '2025-08-20T10:00:00Z',
+        unreadCount: { 8: 0, 7: 1 }
+    }
 ];
-
-const initialSessions = [
-    { id: 1, name: 'U10 Skating Practice', date: '2025-09-20', coachId: 6, athleteIds: [1, 8] },
-    { id: 2, name: 'Advanced Swimming Drills', date: '2025-09-21', coachId: 7, athleteIds: [2] }
-];
-
 
 // --- SVG Icons ---
-const LogoIcon = () => (
-    <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1.5 6.29c.18-.05.36-.09.55-.12.21-.03.43-.05.65-.05.43 0 .82.04 1.18.13.4.09.76.23 1.09.43.32.19.6.44.82.74.22.3.39.65.51 1.05.12.4.18.84.18 1.33 0 .49-.06.94-.18 1.35s-.29.77-.51 1.07-.49.54-.81.74-.69.34-1.09.43c-.36.09-.75.13-1.18.13-.22 0-.44-.02-.65-.05s-.37-.07-.55-.12V8.29zm-1.5 0v7.42c-.22.06-.44.1-.66.13-.24.03-.48.04-.72.04-.59 0-1.13-.08-1.62-.23s-.9-.38-1.24-.68-.6-.68-.78-1.13-.27-.96-.27-1.53c0-.57.09-1.08.27-1.54s.44-.85.78-1.16.75-.54 1.24-.71c.49-.17 1.03-.25 1.62-.25.24 0 .48.01.72.04.22.03.44.07.66.13z"/>
-    </svg>
-);
-const HomeIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h7.5" /></svg>;
-const UsersIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-4.663M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM12 12.75c-1.875 0-3.75-.465-5.25-1.32" /></svg>;
-const CalendarIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0h18M-4.5 12h22.5" /></svg>;
-const PaymentsIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h6m3-3.75l-3 1.5m3-1.5l-3-1.5m3 1.5V15m-2.25 1.5l-3-1.5m3 1.5l-3 1.5m3-1.5V15m1.5-1.5l3-1.5m-3 1.5l3 1.5m-3 1.5V15M9 12l-3 1.5m3-1.5l-3-1.5m3 1.5V15" /></svg>;
-const MessagesIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" /></svg>;
-const TasksIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>;
-const SettingsIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.438.995s.145.755.438.995l1.003.827c.48.398.668 1.03.26 1.431l-1.296 2.247a1.125 1.125 0 01-1.37.49l-1.217-.456c-.355-.133-.75-.072-1.075.124a6.57 6.57 0 01-.22.127c-.332.183-.582.495-.645.87l-.213 1.281c-.09.543-.56.94-1.11.94h-2.593c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.063-.374-.313-.686-.645-.87a6.52 6.52 0 01-.22-.127c-.324-.196-.72-.257-1.075-.124l-1.217.456a1.125 1.125 0 01-1.37-.49l-1.296-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.437-.995s-.145-.755-.437-.995l-1.004-.827a1.125 1.125 0 01-.26-1.431l1.296-2.247a1.125 1.125 0 011.37-.49l1.217.456c.355.133.75.072 1.075-.124.073-.044.146-.087.22-.127.332-.183.582-.495.645-.87l.213-1.281z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>;
-const LogoutIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" /></svg>;
-const SearchIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>;
-const NotificationIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" /></svg>;
-const AuditLogIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-12v.75m0 3v.75m0 3v.75m0 3V18m-3-12v.75m0 3v.75m0 3v.75m0 3V18m12-12v.75m0 3v.75m0 3v.75m0 3V18M9.75 6h4.5m-4.5 3h4.5m-4.5 3h4.5m-4.5 3h4.5m-6.75-12h1.5m-1.5 3h1.5m-1.5 3h1.5m-1.5 3h1.5m-6.75-12h1.5m-1.5 3h1.5m-1.5 3h1.5m-1.5 3h1.5" /></svg>;
-const HamburgerIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>;
-const CloseIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>;
-const AddIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>;
-const EditIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" /></svg>;
-const DeleteIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>;
-const BackIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>;
-const CheckCircleIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>;
-const InfoIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" /></svg>;
-const WarningIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg>;
-const DangerIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg>;
-const AdminIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-8.25 6L3 16.5v-9a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v9l-4.25-2.25m-10.5 2.25a.75.75 0 001.14.63l3.86-1.93a.75.75 0 000-1.26l-3.86-1.93a.75.75 0 00-1.14.63v4.5z" /></svg>;
-const CoachIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>;
-const TrophyIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 18.75h-9a9.75 9.75 0 01-4.874-1.956 2.25 2.25 0 01-.868-1.956V5.25A2.25 2.25 0 015.25 3h13.5A2.25 2.25 0 0121 5.25v9.6c0 .835-.412 1.624-.868 1.956a9.75 9.75 0 01-4.874 1.956zM16.5 18.75v-6.75a3.375 3.375 0 00-3.375-3.375h-1.5a3.375 3.375 0 00-3.375 3.375v6.75" /></svg>;
-const ChevronDownIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>;
-const ChartIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1.5-1.5m1.5 1.5l1.5-1.5m-1.5 1.5V12m6.75-9v2.25m-6.75-2.25v2.25m-6.75-2.25v2.25m16.5-2.25v2.25" /></svg>;
+const HomeIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" /></svg>;
+const UsersIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-2.253-9.527 9.527 0 0 0-4.121-2.253M15 19.128v-3.86a2.25 2.25 0 0 1 3-1.732a2.25 2.25 0 0 1 3 1.732V19.128M15 19.128A2.25 2.25 0 0 1 12.75 21a2.25 2.25 0 0 1-2.25-1.872M7.5 14.25v-3.86a2.25 2.25 0 0 1 3-1.732a2.25 2.25 0 0 1 3 1.732V14.25M3 14.25a2.25 2.25 0 0 1-2.25-2.25V7.5A2.25 2.25 0 0 1 3 5.25h1.5A2.25 2.25 0 0 1 6.75 7.5v4.5a2.25 2.25 0 0 1-2.25 2.25H3Z" /></svg>;
+const CalendarIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0h18M-4.5 12h22.5" /></svg>;
+const WalletIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M21 12a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 12m18 0v6a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 18v-6m18 0V9M3 12V9m18 3a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 12m18 0a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 12m18 0h-2.25M3 12h-2.25" /></svg>;
+const ChartIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3v11.25A2.25 2.25 0 0 0 6 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0 1 18 16.5h-2.25m-7.5 0h7.5m-7.5 0-1 3m8.5-3 1 3m0 0 .5 1.5m-.5-1.5h-9.5m0 0-.5 1.5M9 11.25v1.5M12 9v3.75m3-6v6" /></svg>;
+const MessageIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193l-3.72-3.72a1.05 1.05 0 0 0-1.485 0l-3.72 3.72A2.11 2.11 0 0 1 3 14.893v-4.286c0-.97 0.616-1.813 1.5-2.097M14.25 7.5a2.25 2.25 0 0 0-2.25 2.25v4.5a2.25 2.25 0 0 0 2.25 2.25h1.5a2.25 2.25 0 0 0 2.25-2.25v-4.5a2.25 2.25 0 0 0-2.25-2.25h-1.5Z" /></svg>;
+const SettingsIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" /></svg>;
+const LogoutIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15m-3 0-3-3m0 0 3-3m-3 3H15" /></svg>;
+const MenuIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>;
+const CloseIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>;
+const SearchIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" /></svg>;
+const BellIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" /></svg>;
+const ChevronDownIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" /></svg>;
+const EditIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" /></svg>;
+const DeleteIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.134-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.067-2.09.92-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg>;
+const PlusIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>;
+const EyeIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.432 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg>;
+const SkatingIcon = () => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M22 20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-3c0-1.1.9-2 2-2h16a2 2 0 0 1 2 2v3Zm-9-1h-2v-1h2v1Zm4 0h-2v-1h2v1Z"/><path d="M19 2H5C3.35 2 2 3.35 2 5v7h2V5c0-.55.45-1 1-1h14c.55 0 1 .45 1 1v7h2V5c0-1.65-1.35-3-3-3Z"/></svg>;
+const EmptyIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" /></svg>;
+const ChevronLeftIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" /></svg>;
+const ChevronRightIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" /></svg>;
+const TrophyIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 18.75h-9a9 9 0 1 1 9 0Z" /><path strokeLinecap="round" strokeLinejoin="round" d="M12 15.75h.008v.008H12v-.008Z" /><path strokeLinecap="round" strokeLinejoin="round" d="M12 12.75c.497 0 .974.197 1.325.55l.288.288a.5.5 0 0 0 .707 0l1.414-1.414a.5.5 0 0 0 0-.707l-.288-.288A2.25 2.25 0 0 0 12 10.5v2.25Z" /><path strokeLinecap="round" strokeLinejoin="round" d="M12 12.75c-.497 0-.974.197-1.325.55l-.288.288a.5.5 0 0 1-.707 0L8.266 12.17a.5.5 0 0 1 0-.707l.288-.288A2.25 2.25 0 0 1 12 10.5v2.25Z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /><path strokeLinecap="round" strokeLinejoin="round" d="M3 13.5s.448-1.105 1.5-1.5 2.052-.5 2.052-.5l.288-.288a.5.5 0 0 0 0-.707L5.424 9.17a.5.5 0 0 0-.707 0l-.288.288s-1.052.052-2.052.5S3 13.5 3 13.5Z" /><path strokeLinecap="round" strokeLinejoin="round" d="M21 13.5s-.448-1.105-1.5-1.5-2.052-.5-2.052-.5l-.288-.288a.5.5 0 0 1 0-.707l1.414-1.414a.5.5 0 0 1 .707 0l.288.288s1.052.052 2.052.5 1.5 1.5 1.5 1.5Z" /></svg>;
+const CheckCircleIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>;
+const ExclamationCircleIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" /></svg>;
+const InformationCircleIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" /></svg>;
+const UserCircleIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg>;
+const BriefcaseIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M20.25 14.15v4.098a2.25 2.25 0 0 1-2.25 2.25h-13.5a2.25 2.25 0 0 1-2.25-2.25V14.15M12 12.375a.375.375 0 0 1 .375.375v1.875c0 .207-.168.375-.375.375h-1.5a.375.375 0 0 1-.375-.375V12.75c0-.207.168-.375.375-.375h1.5Z" /><path strokeLinecap="round" strokeLinejoin="round" d="M12 12.375a.375.375 0 0 0-.375-.375h-1.5a.375.375 0 0 0-.375.375v1.875c0 .207.168.375.375.375h1.5a.375.375 0 0 0 .375-.375V12.75Zm-6-9h12c.621 0 1.125.504 1.125 1.125v3.375c0 .621-.504 1.125-1.125 1.125h-12A1.125 1.125 0 0 1 4.5 7.875V4.5A1.125 1.125 0 0 1 5.625 3.375Z" /></svg>;
+const DocumentTextIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m-1.5 12.5h-1.5a3.375 3.375 0 0 1-3.375-3.375V8.625c0-1.002.413-1.911 1.096-2.594A3.375 3.375 0 0 1 5.625 5.25h12.75c1.002 0 1.911.413 2.594 1.096A3.375 3.375 0 0 1 21 8.625v2.625m-15 4.5h15M7.5 15h7.5" /></svg>;
+const CheckBadgeIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z" /></svg>;
+const ArrowUpOnSquareIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M9 8.25H7.5a2.25 2.25 0 0 0-2.25 2.25v9a2.25 2.25 0 0 0 2.25 2.25h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25H15M12 12V3m0 0-3.75 3.75M12 3l3.75 3.75" /></svg>;
+const PaperAirplaneIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" /></svg>;
 
-
-// --- Helper Components ---
-// FIX: Add ...props to allow passing additional props like onClick.
-const Card = ({ children, className = '', ...props }) => <div className={`card ${className}`} {...props}>{children}</div>;
-const CardHeader = ({ title, action = null, children = null }) => (
-    <div className="card-header">
-        <h3>{title}</h3>
-        {action && action}
-        {children && <div className="card-header-actions">{children}</div>}
-    </div>
-);
-
-const EmptyState = ({ icon, title, message, children = null }) => (
-    <div className="empty-state">
-        <div className="empty-state-icon">{icon}</div>
-        <h3>{title}</h3>
-        <p>{message}</p>
-        <div>{children}</div>
-    </div>
-);
-
-const Pill = ({ text, type }) => <span className={`pill ${type}`}>{text}</span>;
-
-const Modal = ({ show, onClose, title, children }) => {
-    if (!show) return null;
-    return (
-        <div className="modal-overlay" onClick={onClose}>
-            <div className="modal-content" onClick={e => e.stopPropagation()}>
-                <div className="modal-header">
-                    <h3>{title}</h3>
-                    <button onClick={onClose} className="close-btn" aria-label="Close modal"><CloseIcon /></button>
-                </div>
-                <div className="modal-body">
-                    {children}
-                </div>
-            </div>
-        </div>
-    );
+const ROLES = {
+    Admin: <BriefcaseIcon />,
+    Manager: <CheckBadgeIcon />,
+    Coach: <UsersIcon />,
+    Athlete: <SkatingIcon />,
+    Parent: <UserCircleIcon />,
 };
 
-const ToastNotification = ({ message, type, onDismiss }) => {
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            onDismiss();
-        }, 3000);
-        return () => clearTimeout(timer);
-    }, [onDismiss]);
+// --- Main App Component ---
+const App = () => {
+    // --- State Management ---
+    const [page, setPage] = useStickyState({ name: 'dashboard' }, 'app_page');
+    const [currentUser, setCurrentUser] = useStickyState(initialUsers[8], 'app_currentUser'); // Default to Admin
+    const [users, setUsers] = useStickyState(initialUsers, 'app_users');
+    const [trainingSessions, setTrainingSessions] = useStickyState(initialTrainingSessions, 'app_trainingSessions');
+    const [events, setEvents] = useStickyState(initialEvents, 'app_events');
+    const [payments, setPayments] = useStickyState(initialPayments, 'app_payments');
+    const [notifications, setNotifications] = useStickyState(initialNotifications, 'app_notifications');
+    const [tasks, setTasks] = useStickyState(initialTasks, 'app_tasks');
+    const [conversations, setConversations] = useStickyState(initialConversations, 'app_conversations');
 
-    const icons = {
-        success: <CheckCircleIcon />,
-        danger: <DangerIcon />,
-        warning: <WarningIcon />,
-        info: <InfoIcon />,
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [isNotificationPanelOpen, setNotificationPanelOpen] = useState(false);
+    const [isRoleSwitcherOpen, setRoleSwitcherOpen] = useState(false);
+    const [toast, setToast] = useState(null);
+    const [isUserModalOpen, setIsUserModalOpen] = useState(false);
+    const [isEventModalOpen, setIsEventModalOpen] = useState(false);
+    const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+    const [isAthleteModalOpen, setIsAthleteModalOpen] = useState(false);
+    const [editingUser, setEditingUser] = useState(null);
+    const [editingEvent, setEditingEvent] = useState(null);
+    const [editingTask, setEditingTask] = useState(null);
+    const [deleteConfirmation, setDeleteConfirmation] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
+    
+    // --- Refs ---
+    const notificationPanelRef = useRef(null);
+    const roleSwitcherRef = useRef(null);
+    
+    // --- Derived State & Memos ---
+    const athletes = useMemo(() => users.filter(u => u.role === 'Athlete'), [users]);
+    const coaches = useMemo(() => users.filter(u => u.role === 'Coach'), [users]);
+    const parents = useMemo(() => users.filter(u => u.role === 'Parent'), [users]);
+    const unreadNotificationCount = useMemo(() => notifications.filter(n => n.userId === currentUser.id && !n.read).length, [notifications, currentUser.id]);
+
+    const showToast = (message, type = 'success') => {
+        setToast({ message, type });
+        setTimeout(() => setToast(null), 3000);
     };
 
-    return (
-        <div className={`toast-notification ${type}`}>
-            {icons[type]}
-            <span>{message}</span>
-        </div>
-    );
-};
-
-const NotificationPanel = ({ notifications, setNotifications, onClose }) => {
-    const panelRef = useRef(null);
-    useOnClickOutside(panelRef, onClose);
-
-    const handleMarkAllRead = () => {
-        setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    // --- Data Handlers ---
+    const handleSaveUser = (userData) => {
+        if (userData.id) {
+            setUsers(users.map(u => u.id === userData.id ? { ...u, ...userData } : u));
+            showToast('User updated successfully!');
+        } else {
+            const newUser = { ...userData, id: Math.max(...users.map(u => u.id)) + 1, status: 'Active' };
+            setUsers([...users, newUser]);
+            showToast('User added successfully!');
+        }
+        setIsUserModalOpen(false);
+        setEditingUser(null);
     };
 
-    const handleNotificationClick = (notification) => {
-        notification.link();
-        setNotifications(prev => prev.map(n => n.id === notification.id ? { ...n, read: true } : n));
-        onClose();
+    const handleDeleteUser = (userId) => {
+        setUsers(users.filter(u => u.id !== userId));
+        setDeleteConfirmation(null);
+        showToast('User deleted successfully.', 'danger');
     };
     
-    const unreadCount = notifications.filter(n => !n.read).length;
+    const handleSaveAthlete = (athleteData) => {
+        const newAthlete = { 
+            ...athleteData, 
+            id: Math.max(...users.map(u => u.id)) + 1, 
+            role: 'Athlete',
+            status: 'Active',
+            parentId: parseInt(athleteData.parentId, 10) || undefined,
+            coachId: parseInt(athleteData.coachId, 10) || undefined,
+            badges: [],
+            history: []
+        };
+        setUsers([...users, newAthlete]);
+        showToast('Athlete registered successfully!');
+        setIsAthleteModalOpen(false);
+    };
 
+    const handleSaveEvent = (eventData) => {
+        if (eventData.id) {
+            setEvents(events.map(e => e.id === eventData.id ? { ...e, ...eventData } : e));
+            showToast('Event updated successfully!');
+        } else {
+            const newEvent = { ...eventData, id: Math.max(...events.map(e => e.id)) + 1, participants: eventData.participants || [] };
+            setEvents([...events, newEvent]);
+            showToast('Event created successfully!');
+        }
+        setIsEventModalOpen(false);
+        setEditingEvent(null);
+    };
+
+    const handleDeleteEvent = (eventId) => {
+        setEvents(events.filter(e => e.id !== eventId));
+        setDeleteConfirmation(null);
+        showToast('Event deleted successfully.', 'danger');
+        setPage({ name: 'events' }); // Navigate away from the deleted event
+    };
+
+    const handleSaveTask = (taskData) => {
+        if (taskData.id) {
+            setTasks(tasks.map(t => t.id === taskData.id ? { ...t, ...taskData } : t));
+            showToast('Task updated successfully!');
+        } else {
+            const newTask = { ...taskData, id: `t${Date.now()}`, completed: false };
+            setTasks([...tasks, newTask]);
+            showToast('Task added successfully!');
+        }
+        setIsTaskModalOpen(false);
+        setEditingTask(null);
+    };
+
+    const handleDeleteTask = (taskId) => {
+        setTasks(tasks.filter(t => t.id !== taskId));
+        setDeleteConfirmation(null);
+        showToast('Task deleted successfully.', 'danger');
+    };
+
+    const handleToggleTask = (taskId) => {
+        setTasks(tasks.map(t => t.id === taskId ? { ...t, completed: !t.completed } : t));
+    };
+
+    const handleAttendanceChange = (sessionId, athleteId, status) => {
+        setTrainingSessions(prevSessions =>
+            prevSessions.map(session =>
+                session.id === sessionId
+                    ? {
+                        ...session,
+                        attendance: {
+                            ...session.attendance,
+                            [athleteId]: status,
+                        },
+                    }
+                    : session
+            )
+        );
+    };
+
+    const handleSearch = (e) => {
+        e.preventDefault();
+        if(searchTerm.trim()) {
+            setPage({ name: 'search', query: searchTerm });
+        }
+    };
+    
+    // --- Event Handlers for UI ---
+    useOnClickOutside(notificationPanelRef, () => setNotificationPanelOpen(false));
+    useOnClickOutside(roleSwitcherRef, () => setRoleSwitcherOpen(false));
+
+    const navigate = (pageName, params = {}) => {
+        setPage({ name: pageName, params });
+        setIsSidebarOpen(false);
+        window.scrollTo(0, 0);
+    };
+
+    const switchRole = (role) => {
+        const firstUserOfRole = users.find(u => u.role === role);
+        if (firstUserOfRole) {
+            setCurrentUser(firstUserOfRole);
+            setRoleSwitcherOpen(false);
+            setPage({ name: 'dashboard' }); // Go to dashboard on role switch
+            showToast(`Switched to ${role} view`, 'info');
+        } else {
+            showToast(`No user found with role: ${role}`, 'warning');
+        }
+    };
+
+    const onLogin = (user) => {
+        setCurrentUser(user);
+        setPage({ name: 'dashboard' });
+    };
+
+    const onLogout = () => {
+        setPage({ name: 'login' });
+    };
+
+    // --- Render Logic ---
+    if (page.name === 'login') {
+        return <LoginPage onLogin={onLogin} users={users} />;
+    }
+
+    // Main dashboard layout
     return (
-        <div className="notification-panel" ref={panelRef}>
-            <div className="notification-panel-header">
-                <h3>Notifications</h3>
-                {unreadCount > 0 && <button className="link-button" onClick={handleMarkAllRead}>Mark all as read</button>}
+        <div className="dashboard-layout">
+            <Sidebar
+                isOpen={isSidebarOpen}
+                onClose={() => setIsSidebarOpen(false)}
+                currentPage={page.name}
+                navigate={navigate}
+                onLogout={onLogout}
+                currentUser={currentUser}
+            />
+            <div className="main-content">
+                <MainHeader
+                    onMenuClick={() => setIsSidebarOpen(true)}
+                    pageName={page.name}
+                    currentUser={currentUser}
+                    onRoleChange={switchRole}
+                    unreadNotificationCount={unreadNotificationCount}
+                    onNotificationClick={() => setNotificationPanelOpen(!isNotificationPanelOpen)}
+                    isNotificationPanelOpen={isNotificationPanelOpen}
+                    notificationPanelRef={notificationPanelRef}
+                    notifications={notifications.filter(n => n.userId === currentUser.id)}
+                    setNotifications={setNotifications}
+                    navigate={navigate}
+                    isRoleSwitcherOpen={isRoleSwitcherOpen}
+                    onRoleSwitcherClick={() => setRoleSwitcherOpen(!isRoleSwitcherOpen)}
+                    roleSwitcherRef={roleSwitcherRef}
+                    handleSearch={handleSearch}
+                    searchTerm={searchTerm}
+                    setSearchTerm={setSearchTerm}
+                />
+                <PageContent
+                    page={page}
+                    navigate={navigate}
+                    currentUser={currentUser}
+                    users={users}
+                    athletes={athletes}
+                    coaches={coaches}
+                    parents={parents}
+                    trainingSessions={trainingSessions}
+                    events={events}
+                    payments={payments}
+                    tasks={tasks}
+                    conversations={conversations}
+                    setUsers={setUsers}
+                    setTrainingSessions={setTrainingSessions}
+                    setEvents={setEvents}
+                    setPayments={setPayments}
+                    setTasks={setTasks}
+                    setConversations={setConversations}
+                    onEditUser={user => { setEditingUser(user); setIsUserModalOpen(true); }}
+                    onDeleteUser={user => setDeleteConfirmation({ type: 'user', data: user, onConfirm: () => handleDeleteUser(user.id) })}
+                    onEditEvent={event => { setEditingEvent(event); setIsEventModalOpen(true); }}
+                    onDeleteEvent={event => setDeleteConfirmation({ type: 'event', data: event, onConfirm: () => handleDeleteEvent(event.id) })}
+                    onEditTask={task => { setEditingTask(task); setIsTaskModalOpen(true); }}
+                    onDeleteTask={task => setDeleteConfirmation({ type: 'task', data: task, onConfirm: () => handleDeleteTask(task.id) })}
+                    onToggleTask={handleToggleTask}
+                    onAddUserClick={() => { setEditingUser(null); setIsUserModalOpen(true); }}
+                    onAddEventClick={() => { setEditingEvent(null); setIsEventModalOpen(true); }}
+                    onAddTaskClick={() => { setEditingTask(null); setIsTaskModalOpen(true); }}
+                    onAddAthleteClick={() => setIsAthleteModalOpen(true)}
+                    handleAttendanceChange={handleAttendanceChange}
+                />
             </div>
-            <div className="notification-list">
-                {notifications.length > 0 ? (
-                    notifications.map(n => (
-                        <div key={n.id} className={`notification-item ${n.read ? 'read' : ''}`} onClick={() => handleNotificationClick(n)}>
-                            <div className={`notification-icon ${n.type}`}>
-                                {n.type === 'event' && <CalendarIcon />}
-                                {n.type === 'payment' && <PaymentsIcon />}
-                            </div>
-                            <div className="notification-content">
-                                <p><strong>{n.title}</strong></p>
-                                <p>{n.message}</p>
-                                <small>{new Date(n.date).toLocaleString()}</small>
-                            </div>
-                        </div>
-                    ))
-                ) : (
-                    <p style={{padding: '20px', textAlign: 'center', color: 'var(--text-secondary)'}}>No new notifications.</p>
-                )}
-            </div>
+            <MobileBottomNav currentPage={page.name} navigate={navigate} currentUser={currentUser} />
+
+            {toast && <ToastNotification message={toast.message} type={toast.type} />}
+            {isUserModalOpen && <UserFormModal isOpen={isUserModalOpen} onClose={() => { setIsUserModalOpen(false); setEditingUser(null); }} onSave={handleSaveUser} user={editingUser} coaches={coaches} parents={parents} />}
+            {isEventModalOpen && <EventFormModal isOpen={isEventModalOpen} onClose={() => { setIsEventModalOpen(false); setEditingEvent(null); }} onSave={handleSaveEvent} event={editingEvent} athletes={athletes} />}
+            {isTaskModalOpen && <TaskFormModal isOpen={isTaskModalOpen} onClose={() => { setIsTaskModalOpen(false); setEditingTask(null); }} onSave={handleSaveTask} task={editingTask} coaches={coaches} users={users} />}
+            {isAthleteModalOpen && <AthleteFormModal isOpen={isAthleteModalOpen} onClose={() => setIsAthleteModalOpen(false)} onSave={handleSaveAthlete} coaches={coaches} parents={parents} />}
+            {deleteConfirmation && <ConfirmDeleteModal isOpen={!!deleteConfirmation} onClose={() => setDeleteConfirmation(null)} onConfirm={deleteConfirmation.onConfirm} itemType={deleteConfirmation.type} itemName={deleteConfirmation.data.name || deleteConfirmation.data.title} />}
         </div>
     );
 };
 
-// --- Main App Components ---
-const LoginPage = ({ onLogin }) => {
-    const [isLogin, setIsLogin] = useState(true);
+
+// --- Components ---
+
+const LoginPage = ({ onLogin, users }) => {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     const [error, setError] = useState('');
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        const email = e.target.email.value;
-        if (!email) {
-            setError('Please enter a valid email.');
-            return;
+        // This is a mock authentication. In a real app, you'd verify credentials against a backend.
+        const foundUser = users.find(u => u.name.toLowerCase().replace(' ', '.') + '@club.com' === email.toLowerCase());
+        if (foundUser && password === 'password') { // Using a generic password for all users
+            setError('');
+            onLogin(foundUser);
+        } else {
+            setError('Invalid credentials. Please try again.');
         }
-        setError('');
-        onLogin();
     };
 
     return (
         <div className="login-container">
             <div className="login-card">
-                <div className="login-header">
-                    <div className="logo"><LogoIcon /></div>
+                <header className="login-header">
+                    <div className="logo"><SkatingIcon /></div>
                     <h1>Welcome Back</h1>
-                    <p>{isLogin ? 'Sign in to continue to Funpot' : 'Create an account to get started'}</p>
-                </div>
+                    <p>Sign in to your Funpot Skating Club account.</p>
+                </header>
                 <form className="login-form" onSubmit={handleSubmit}>
                     {error && <p className="form-error">{error}</p>}
                     <div className="input-group">
                         <label htmlFor="email">Email</label>
-                        <input type="email" id="email" name="email" placeholder="you@example.com" />
+                        <input
+                            type="email"
+                            id="email"
+                            placeholder="e.g., sarah.wanjiku@club.com"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                        />
                     </div>
                     <div className="input-group">
                         <label htmlFor="password">Password</label>
-                        <input type="password" id="password" name="password" placeholder="••••••••" />
+                        <input
+                            type="password"
+                            id="password"
+                            placeholder="Default: password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                        />
                     </div>
                     <div className="form-options">
                         <div className="remember-me">
-                            <input type="checkbox" id="remember" />
+                            <input type="checkbox" id="remember"/>
                             <label htmlFor="remember">Remember me</label>
                         </div>
-                        {isLogin && <a href="#" className="forgot-password">Forgot password?</a>}
+                        <a href="#" className="forgot-password">Forgot password?</a>
                     </div>
-                    <button type="submit" className="btn btn-primary">{isLogin ? 'Sign In' : 'Sign Up'}</button>
+                    <button type="submit" className="btn btn-primary">Sign In</button>
+                    <p className="form-toggle">
+                        Don't have an account? <a href="#">Sign up</a>
+                    </p>
                 </form>
-                <div className="form-toggle">
-                    {isLogin ? "Don't have an account?" : "Already have an account?"}
-                    <a href="#" onClick={(e) => { e.preventDefault(); setIsLogin(!isLogin); setError(''); }}>
-                        {isLogin ? ' Sign Up' : ' Sign In'}
-                    </a>
-                </div>
             </div>
         </div>
     );
 };
 
-const Sidebar = ({ activePage, navigate, role, isSidebarOpen, setSidebarOpen }) => {
-    const navItems = {
-        Admin: [
-            { name: 'Dashboard', icon: <HomeIcon />, page: 'dashboard' },
-            { name: 'Manage Users', icon: <UsersIcon />, page: 'manage-users' },
-            { name: 'Events', icon: <CalendarIcon />, page: 'events' },
-            { name: 'Payments', icon: <PaymentsIcon />, page: 'payments' },
-            { name: 'Financial Reports', icon: <ChartIcon />, page: 'financial-reports'},
-            { name: 'Tasks', icon: <TasksIcon />, page: 'tasks' },
-            { name: 'Messages', icon: <MessagesIcon />, page: 'messages' },
-            { name: 'Audit Logs', icon: <AuditLogIcon />, page: 'audit-logs' },
-            { name: 'Settings', icon: <SettingsIcon />, page: 'notification-settings' },
-        ],
-        Coach: [
-            { name: 'Dashboard', icon: <HomeIcon />, page: 'dashboard' },
-            { name: 'My Athletes', icon: <UsersIcon />, page: 'athletes' },
-            { name: 'Attendance', icon: <CheckCircleIcon />, page: 'attendance' },
-            { name: 'Events', icon: <CalendarIcon />, page: 'events' },
-            { name: 'Tasks', icon: <TasksIcon />, page: 'tasks' },
-            { name: 'Messages', icon: <MessagesIcon />, page: 'messages' },
-            { name: 'Settings', icon: <SettingsIcon />, page: 'notification-settings' },
-        ],
-        'Parent/Athlete': [
-            { name: 'Dashboard', icon: <HomeIcon />, page: 'dashboard' },
-            { name: 'My Child(ren)', icon: <UsersIcon />, page: 'athlete-profile', params: { athleteId: 1 } },
-            { name: 'Events', icon: <CalendarIcon />, page: 'events' },
-            { name: 'Payments', icon: <PaymentsIcon />, page: 'payments' },
-            { name: 'Messages', icon: <MessagesIcon />, page: 'messages' },
-            { name: 'Settings', icon: <SettingsIcon />, page: 'notification-settings' },
-        ],
-    };
+const navConfig = {
+    admin: [
+        { name: 'dashboard', icon: <HomeIcon />, label: 'Dashboard' },
+        { name: 'users', icon: <UsersIcon />, label: 'Manage Users' },
+        { name: 'events', icon: <CalendarIcon />, label: 'Events' },
+        { name: 'payments', icon: <WalletIcon />, label: 'Payments' },
+        { name: 'messages', icon: <MessageIcon />, label: 'Messages' },
+        { name: 'settings', icon: <SettingsIcon />, label: 'Settings' },
+    ],
+    manager: [
+        { name: 'dashboard', icon: <HomeIcon />, label: 'Dashboard' },
+        { name: 'athletes', icon: <UsersIcon />, label: 'Athletes' },
+        { name: 'schedule', icon: <CalendarIcon />, label: 'Schedule' },
+        { name: 'events', icon: <CalendarIcon />, label: 'Events' },
+        { name: 'payments', icon: <WalletIcon />, label: 'Payments' },
+        { name: 'messages', icon: <MessageIcon />, label: 'Messages' },
+        { name: 'settings', icon: <SettingsIcon />, label: 'Settings' },
+    ],
+    coach: [
+        { name: 'dashboard', icon: <HomeIcon />, label: 'Dashboard' },
+        { name: 'athletes', icon: <UsersIcon />, label: 'My Athletes' },
+        { name: 'schedule', icon: <CalendarIcon />, label: 'Schedule' },
+        { name: 'attendance', icon: <CheckBadgeIcon />, label: 'Attendance' },
+        { name: 'materials', icon: <ArrowUpOnSquareIcon />, label: 'Materials' },
+        { name: 'messages', icon: <MessageIcon />, label: 'Messages' },
+        { name: 'profile', icon: <UserCircleIcon />, label: 'My Profile'},
+        { name: 'settings', icon: <SettingsIcon />, label: 'Settings' },
+    ],
+    athlete: [
+        { name: 'dashboard', icon: <HomeIcon />, label: 'Dashboard' },
+        { name: 'schedule', icon: <CalendarIcon />, label: 'My Schedule' },
+        { name: 'events', icon: <CalendarIcon />, label: 'Events' },
+        { name: 'progress', icon: <ChartIcon />, label: 'My Progress' },
+        { name: 'payments', icon: <WalletIcon />, label: 'Payments' },
+        { name: 'messages', icon: <MessageIcon />, label: 'Messages' },
+        { name: 'settings', icon: <SettingsIcon />, label: 'Settings' },
+    ],
+    parent: [
+        { name: 'dashboard', icon: <HomeIcon />, label: 'Dashboard' },
+        { name: 'children', icon: <UsersIcon />, label: 'My Children' },
+        { name: 'events', icon: <CalendarIcon />, label: 'Events' },
+        { name: 'payments', icon: <WalletIcon />, label: 'Payments' },
+        { name: 'messages', icon: <MessageIcon />, label: 'Messages' },
+        { name: 'settings', icon: <SettingsIcon />, label: 'Settings' },
+    ],
+};
+
+const Sidebar = ({ isOpen, onClose, currentPage, navigate, onLogout, currentUser }) => {
+    const navItems = navConfig[currentUser.role.toLowerCase()];
 
     return (
         <>
-            <div className={`sidebar ${isSidebarOpen ? 'active' : ''}`}>
+            <div className={`sidebar ${isOpen ? 'active' : ''}`}>
                 <div className="sidebar-header">
-                    <div className="logo"><LogoIcon /></div>
+                    <div className="logo"><SkatingIcon /></div>
                     <h2>Funpot Club</h2>
-                    <button className="close-sidebar-btn" onClick={() => setSidebarOpen(false)} aria-label="Close sidebar"><CloseIcon /></button>
+                    <button className="close-sidebar-btn" onClick={onClose} aria-label="Close sidebar"><CloseIcon /></button>
                 </div>
                 <nav className="nav-menu">
                     <ul>
-                        {navItems[role].map(item => (
+                        {navItems.map(item => (
                             <li key={item.name}>
-                                <a href="#" onClick={(e) => { e.preventDefault(); navigate(item.page, item.params || {}); setSidebarOpen(false); }} className={`nav-item ${activePage === item.page ? 'active' : ''}`}>
+                                <a href="#" onClick={() => navigate(item.name)} className={`nav-item ${currentPage === item.name ? 'active' : ''}`}>
                                     {item.icon}
-                                    <span>{item.name}</span>
+                                    <span>{item.label}</span>
                                 </a>
                             </li>
                         ))}
                     </ul>
                 </nav>
-                 <div className="sidebar-footer">
-                    <a href="#" onClick={(e) => { e.preventDefault(); navigate('login'); }} className="nav-item">
+                <div className="sidebar-footer">
+                     <a href="#" onClick={onLogout} className="nav-item">
                         <LogoutIcon />
                         <span>Logout</span>
                     </a>
                 </div>
             </div>
-             <div className={`sidebar-overlay ${isSidebarOpen ? 'active' : ''}`} onClick={() => setSidebarOpen(false)}></div>
+            <div className={`sidebar-overlay ${isOpen ? 'active' : ''}`} onClick={onClose}></div>
         </>
     );
 };
 
-const RoleSwitcherDropdown = ({ role, setRole }) => {
-    const [isOpen, setIsOpen] = useState(false);
-    const dropdownRef = useRef(null);
-    useOnClickOutside(dropdownRef, () => setIsOpen(false));
-
-    const roles = {
-        Admin: <AdminIcon />,
-        Coach: <CoachIcon />,
-        'Parent/Athlete': <UsersIcon />,
-    };
-
-    const handleRoleChange = (newRole) => {
-        setRole(newRole);
-        setIsOpen(false);
-    };
+const MobileBottomNav = ({ currentPage, navigate, currentUser }) => {
+    const navItems = navConfig[currentUser.role.toLowerCase()];
+    // Select up to 5 main items for the bottom nav
+    const mobileNavItems = navItems.slice(0, 5);
 
     return (
-        <div className="role-switcher-custom" ref={dropdownRef}>
-            <button className="role-switcher-trigger" onClick={() => setIsOpen(!isOpen)} aria-haspopup="true" aria-expanded={isOpen}>
-                <span className="role-icon">{roles[role]}</span>
-                <span className="role-name">{role}</span>
-                <ChevronDownIcon />
-            </button>
-            {isOpen && (
-                <div className="role-switcher-menu">
-                    <ul>
-                        {Object.keys(roles).map((roleName) => (
-                            <li key={roleName} onClick={() => handleRoleChange(roleName)}>
-                                <span className="role-icon">{roles[roleName]}</span>
-                                <span>{roleName}</span>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-            )}
-        </div>
+        <nav className="mobile-bottom-nav">
+            {mobileNavItems.map(item => (
+                 <a href="#" key={item.name} onClick={() => navigate(item.name)} className={`mobile-nav-item ${currentPage === item.name ? 'active' : ''}`}>
+                    {item.icon}
+                    <span>{item.label.split(' ')[0]}</span>
+                </a>
+            ))}
+        </nav>
     );
-};
+}
 
-const Header = ({ title, onMenuClick, role, setRole, navigate, notifications, setNotifications }) => {
-    const searchRef = useRef(null);
-    const [showNotifications, setShowNotifications] = useState(false);
+const MainHeader = ({ onMenuClick, pageName, currentUser, onRoleChange, unreadNotificationCount, onNotificationClick, isNotificationPanelOpen, notificationPanelRef, notifications, setNotifications, navigate, isRoleSwitcherOpen, onRoleSwitcherClick, roleSwitcherRef, handleSearch, searchTerm, setSearchTerm }) => {
+    const pageTitle = pageName.charAt(0).toUpperCase() + pageName.slice(1).replace(/([A-Z])/g, ' $1').trim();
+    const today = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
     
-    const unreadCount = notifications.filter(n => !n.read).length;
-
-    const handleSearch = (e) => {
-        e.preventDefault();
-        const searchTerm = searchRef.current.value;
-        if (searchTerm.trim()) {
-            navigate('search-results', { query: searchTerm.trim() });
-            searchRef.current.value = '';
-        }
-    };
-
     return (
         <header className="main-header">
             <div className="header-left">
-                <button className="hamburger-menu" onClick={onMenuClick} aria-label="Open sidebar"><HamburgerIcon /></button>
+                <button className="hamburger-menu" onClick={onMenuClick} aria-label="Open menu"><MenuIcon /></button>
                 <div>
-                    <h1>{title}</h1>
-                    <p className="current-date">{new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                    <h1>{pageTitle}</h1>
+                    <p className="current-date">{today}</p>
                 </div>
             </div>
             <div className="header-right">
                 <form className="search-bar" onSubmit={handleSearch}>
                     <SearchIcon />
-                    <input type="search" ref={searchRef} placeholder="Search..." />
+                    <input type="search" placeholder="Search..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
                 </form>
                 <div className="header-actions">
-                     <RoleSwitcherDropdown role={role} setRole={setRole} />
-                    <button className="action-btn" onClick={() => setShowNotifications(s => !s)} aria-label="Toggle notifications">
-                        <NotificationIcon />
-                        {unreadCount > 0 && <span className="notification-badge">{unreadCount}</span>}
+                    <div className="role-switcher-custom" ref={roleSwitcherRef}>
+                        <button className="role-switcher-trigger" onClick={onRoleSwitcherClick}>
+                             <span className="role-icon">{ROLES[currentUser.role]}</span>
+                            <span>{currentUser.role}</span>
+                            <ChevronDownIcon />
+                        </button>
+                        {isRoleSwitcherOpen && (
+                            <div className="role-switcher-menu">
+                                <ul>
+                                    {Object.entries(ROLES).map(([role, icon]) => (
+                                        <li key={role} onClick={() => onRoleChange(role)}>
+                                            {icon}
+                                            <span>{role}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+                    </div>
+
+                    <button className="action-btn" onClick={onNotificationClick} aria-label="View notifications">
+                        <BellIcon />
+                        {unreadNotificationCount > 0 && <span className="notification-badge">{unreadNotificationCount}</span>}
                     </button>
-                    {showNotifications && <NotificationPanel notifications={notifications} setNotifications={setNotifications} onClose={() => setShowNotifications(false)} />}
+                    {isNotificationPanelOpen && <NotificationPanel panelRef={notificationPanelRef} notifications={notifications} setNotifications={setNotifications} navigate={navigate} />}
+
                     <div className="header-user-profile">
-                        <div className="avatar">AD</div>
+                        <div className="avatar">{currentUser.name.charAt(0)}</div>
+                        <div>
+                            <p style={{fontWeight: 500}}>{currentUser.name}</p>
+                            <p style={{fontSize: 12, color: 'var(--text-secondary)'}}>{currentUser.role}</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -484,1148 +698,1181 @@ const Header = ({ title, onMenuClick, role, setRole, navigate, notifications, se
     );
 };
 
-const MobileBottomNav = ({ activePage, navigate, role }) => {
-    const navItems = {
-        Admin: [
-            { name: 'Home', icon: <HomeIcon />, page: 'dashboard' },
-            { name: 'Users', icon: <UsersIcon />, page: 'manage-users' },
-            { name: 'Events', icon: <CalendarIcon />, page: 'events' },
-            { name: 'Reports', icon: <ChartIcon />, page: 'financial-reports' },
-            { name: 'Settings', icon: <SettingsIcon />, page: 'notification-settings' },
-        ],
-        Coach: [
-            { name: 'Home', icon: <HomeIcon />, page: 'dashboard' },
-            { name: 'My Athletes', icon: <UsersIcon />, page: 'athletes' },
-            { name: 'Attendance', icon: <CheckCircleIcon />, page: 'attendance' },
-            { name: 'Events', icon: <CalendarIcon />, page: 'events' },
-            { name: 'Tasks', icon: <TasksIcon />, page: 'tasks' },
-        ],
-        'Parent/Athlete': [
-            { name: 'Home', icon: <HomeIcon />, page: 'dashboard' },
-            { name: 'My Child(ren)', icon: <UsersIcon />, page: 'athlete-profile', params: { athleteId: 1 } },
-            { name: 'Events', icon: <CalendarIcon />, page: 'events' },
-            { name: 'Payments', icon: <PaymentsIcon />, page: 'payments' },
-            { name: 'Settings', icon: <SettingsIcon />, page: 'notification-settings' },
-        ],
+const NotificationPanel = ({ panelRef, notifications, setNotifications, navigate }) => {
+    const markAllAsRead = () => {
+        setNotifications(notifications.map(n => ({...n, read: true})));
     };
-    return (
-        <nav className="mobile-bottom-nav">
-            {navItems[role].map(item => (
-                <a href="#" key={item.name} onClick={(e) => { e.preventDefault(); navigate(item.page, item.params || {}); }} className={`mobile-nav-item ${activePage === item.page ? 'active' : ''}`}>
-                    {item.icon}
-                    <span>{item.name}</span>
-                </a>
-            ))}
-        </nav>
-    );
-};
 
-const AdminDashboard = ({ navigate, users, events }) => {
-    const athletes = users.filter(u => u.role === 'Athlete');
-    const coaches = users.filter(u => u.role === 'Coach');
-    return (
-        <div className="dashboard-admin">
-            <div className="stats-grid">
-                <Card className="stat-card-lg" onClick={() => navigate('manage-users')}><h3>{athletes.length}</h3><p>Total Athletes</p></Card>
-                <Card className="stat-card-lg" onClick={() => navigate('manage-users')}><h3>{coaches.length}</h3><p>Coaches</p></Card>
-                <Card className="stat-card-lg" onClick={() => navigate('events')}><h3>{events.length}</h3><p>Events</p></Card>
-                <Card className="stat-card-lg" onClick={() => navigate('financial-reports')}><h3>Ksh 4,500</h3><p>Fees Collected</p></Card>
-            </div>
-            <div className="dashboard-grid">
-                <Card onClick={() => navigate('manage-users')}><CardHeader title="User Management"/></Card>
-                <Card><CardHeader title="Activities Control"/></Card>
-                <Card onClick={() => navigate('payments')}><CardHeader title="Payments & Subscriptions"/></Card>
-                <Card onClick={() => navigate('events')}><CardHeader title="Events"/></Card>
-                <Card><CardHeader title="Communication"/></Card>
-                <Card onClick={() => navigate('audit-logs')}><CardHeader title="Recent Logs"/></Card>
-            </div>
-        </div>
-    );
-};
-
-const CoachDashboard = ({ navigate, athletes, events }) => {
-    return (
-        <div className="dashboard-coach">
-            <div className="dashboard-grid">
-                <Card className="grid-col-span-2">
-                    <CardHeader title="My Athletes" action={<a href="#" onClick={(e) => { e.preventDefault(); navigate('athletes'); }} className="view-all">View All</a>} />
-                    <div className="athlete-list-widget">
-                        {(athletes || []).map(athlete => (
-                             <div key={athlete.id} className="athlete-list-item" onClick={() => navigate('athlete-profile', {athleteId: athlete.id})}>
-                                <p>{athlete.name}</p>
-                                <Pill text={athlete.skillLevel} type={athlete.skillLevel.toLowerCase()}/>
-                            </div>
-                        ))}
-                    </div>
-                </Card>
-                <Card>
-                    <CardHeader title="Performance Reports" />
-                     {athletes.length > 0 && <ProgressChart history={athletes[0].history} />}
-                </Card>
-                <Card><CardHeader title="Training Management"/></Card>
-                <Card onClick={() => navigate('attendance')}><CardHeader title="Attendance Tracker"/></Card>
-                <Card><CardHeader title="Messaging"/></Card>
-            </div>
-        </div>
-    );
-};
-
-const ParentDashboard = ({ navigate, athletes, events }) => {
-     const myChildren = athletes; // athletes are pre-filtered
-    return (
-        <div className="dashboard-parent">
-            <div className="stats-grid">
-                 <Card className="stat-card-lg balance-due" onClick={() => navigate('payments')}><h3>Ksh 2,500</h3><p>Balance Due</p></Card>
-            </div>
-            <div className="dashboard-grid">
-                <Card className="grid-col-span-2">
-                    <CardHeader title="My Child(ren)" />
-                    {myChildren.map(child => (
-                         <div key={child.id} className="athlete-list-item" onClick={() => navigate('athlete-profile', {athleteId: child.id})}>
-                            <div>
-                                <p>{child.name}</p>
-                                <small>{child.activity}</small>
-                            </div>
-                            <Pill text={child.skillLevel} type={child.skillLevel.toLowerCase()}/>
-                        </div>
-                    ))}
-                </Card>
-                <Card>
-                    <CardHeader title="Progress Tracker" />
-                     {myChildren.length > 0 && <ProgressChart history={myChildren[0].history} />}
-                </Card>
-                <Card onClick={() => navigate('payments')}><CardHeader title="Payments & Balance"/></Card>
-                <Card onClick={() => navigate('events')}><CardHeader title="Upcoming Events"/></Card>
-                <Card onClick={() => navigate('messages')}><CardHeader title="Messages"/></Card>
-            </div>
-        </div>
-    );
-};
-
-
-const DashboardPage = ({ navigate, users, events, role, currentCoachId, currentParentId }) => {
-    const upcomingEvent = useMemo(() => {
-        const now = new Date();
-        return events
-            .filter(event => new Date(`${event.date}T${event.time}`) >= now)
-            .sort((a, b) => new Date(`${a.date}T${a.time}`).getTime() - new Date(`${b.date}T${b.time}`).getTime())[0];
-    }, [events]);
-
-    const renderDashboard = () => {
-        switch(role) {
-            case 'Admin':
-                return <AdminDashboard navigate={navigate} users={users} events={events} />;
-            case 'Coach':
-                const myAthletes = users.filter(u => u.role === 'Athlete' && u.coachId === currentCoachId);
-                return <CoachDashboard navigate={navigate} athletes={myAthletes} events={events} />;
-            case 'Parent/Athlete':
-                const parent = users.find(u => u.id === currentParentId);
-                const myChildren = users.filter(u => u.role === 'Athlete' && parent?.childrenIds?.includes(u.id));
-                return <ParentDashboard navigate={navigate} athletes={myChildren} events={events} />;
-            default:
-                return <p>No dashboard available for this role.</p>;
+    const handleNotificationClick = (notification) => {
+        setNotifications(notifications.map(n => n.id === notification.id ? { ...n, read: true } : n));
+        if(notification.page) {
+            navigate(notification.page);
         }
     }
 
+    // Fix: Used .getTime() for date comparison to satisfy TypeScript's type requirements for arithmetic operations.
+    const sortedNotifications = [...notifications].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+
     return (
-        <>
-            {upcomingEvent ? (
-                 <div className="upcoming-event-banner" onClick={() => navigate('event-details', { eventId: upcomingEvent.id })}>
+        <div className="notification-panel" ref={panelRef}>
+            <div className="notification-panel-header">
+                <h3>Notifications</h3>
+                <button className="link-button" onClick={markAllAsRead}>Mark all as read</button>
+            </div>
+            <div className="notification-list">
+                {sortedNotifications.length > 0 ? sortedNotifications.map(n => (
+                    <div key={n.id} className={`notification-item ${n.read ? 'read' : ''}`} onClick={() => handleNotificationClick(n)}>
+                         <div className={`notification-icon ${n.type}`}>
+                            {n.type === 'payment' ? <WalletIcon /> : <CalendarIcon />}
+                        </div>
+                        <div className="notification-content">
+                            <p>{n.message}</p>
+                            <small>{new Date(n.timestamp).toLocaleString()}</small>
+                        </div>
+                    </div>
+                )) : (
+                    <div style={{padding: '20px', textAlign: 'center', color: 'var(--text-secondary)'}}>No new notifications.</div>
+                )}
+            </div>
+        </div>
+    );
+}
+
+const PageContent = (props) => {
+    switch (props.page.name) {
+        case 'dashboard': return <DashboardPage {...props} />;
+        case 'users': return <ManageUsersPage {...props} />;
+        case 'athletes': case 'children': return <AthletesPage {...props} />;
+        case 'athleteProfile': return <AthleteProfilePage {...props} />;
+        case 'events': return <EventsPage {...props} />;
+        case 'eventDetails': return <EventDetailsPage {...props} />;
+        case 'payments': return <PaymentsPage {...props} />;
+        case 'schedule': return <SchedulePage {...props} />;
+        case 'progress': return <ProgressPage {...props} />;
+        case 'messages': return <MessagesPage {...props} />;
+        case 'settings': return <SettingsPage {...props} />;
+        case 'search': return <SearchResultsPage {...props} />;
+        case 'tasks': return <TasksPage {...props} />;
+        case 'attendance': return <AttendancePage {...props} />;
+        case 'materials': return <TrainingMaterialsPage {...props} />;
+        case 'profile': return <CoachProfilePage {...props} />;
+        default: return <div className="card"><h2>Page not found</h2></div>;
+    }
+};
+
+// --- Page Components ---
+
+const DashboardPage = ({ currentUser, users, events, payments, navigate }) => {
+    const upcomingEvent = useMemo(() => {
+        const today = new Date();
+        return events
+            // Fix: Used .getTime() for date comparison to satisfy TypeScript's type requirements for arithmetic operations.
+            .filter(e => new Date(e.date) >= today)
+            .sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime())[0];
+    }, [events]);
+
+    const renderBanner = () => {
+        if (currentUser.role === 'Parent') {
+            const parentUser = users.find(u => u.id === currentUser.id);
+            const overduePayments = payments.filter(p => p.userId === parentUser?.id && p.status === 'Overdue');
+            if (overduePayments.length > 0) {
+                return (
+                    <div className="upcoming-event-banner" onClick={() => navigate('payments')}>
+                        <ExclamationCircleIcon />
+                        <div className="banner-content">
+                            <h4>Action Required: Overdue Payment</h4>
+                            <p>You have an outstanding balance of ${overduePayments.reduce((sum, p) => sum + p.amount, 0)}. Please settle it soon.</p>
+                        </div>
+                        <div className="banner-action">View Payments</div>
+                    </div>
+                );
+            }
+        }
+
+        if (upcomingEvent) {
+            return (
+                <div className="upcoming-event-banner" onClick={() => navigate('eventDetails', { eventId: upcomingEvent.id })}>
                     <CalendarIcon />
                     <div className="banner-content">
-                        <h4>Next Up: {upcomingEvent.name}</h4>
-                        <p>{new Date(`${upcomingEvent.date}T${upcomingEvent.time}`).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })} • {upcomingEvent.location}</p>
+                        <h4>Upcoming Event: {upcomingEvent.title}</h4>
+                        <p>Get ready! Your next big event is on {new Date(upcomingEvent.date).toLocaleDateString()}.</p>
                     </div>
-                    <span className="banner-action">View Details &rarr;</span>
+                    <div className="banner-action">View Details</div>
                 </div>
-            ) : (
-                <div className="upcoming-event-banner info">
-                    <InfoIcon />
-                     <div className="banner-content">
-                        <h4>No Upcoming Events</h4>
-                        <p>Keep an eye on this space for future announcements.</p>
-                    </div>
+            );
+        }
+
+        return (
+            <div className="upcoming-event-banner info">
+                <InformationCircleIcon />
+                <div className="banner-content">
+                    <h4>Welcome, {currentUser.name.split(' ')[0]}!</h4>
+                    <p>No upcoming events right now. Check back soon for updates!</p>
                 </div>
-            )}
-            {renderDashboard()}
-        </>
+            </div>
+        );
+    };
+
+    const renderRoleSpecificDashboard = () => {
+        switch(currentUser.role) {
+            case 'Admin': return <AdminDashboard users={users} events={events} payments={payments} />;
+            case 'Manager': return <ManagerDashboard users={users} events={events} payments={payments} />;
+            case 'Coach': return <CoachDashboard currentUser={currentUser} users={users} navigate={navigate} />;
+            case 'Athlete': return <AthleteDashboard currentUser={currentUser} events={events} />;
+            case 'Parent': return <ParentDashboard currentUser={currentUser} users={users} payments={payments} />;
+            default: return null;
+        }
+    };
+
+    return (
+        <div className={`page-container dashboard-${currentUser.role.toLowerCase()}`}>
+            {renderBanner()}
+            {renderRoleSpecificDashboard()}
+        </div>
     );
 };
 
-const AthletesPage = ({ users, navigate, setUsers, showToast, logAction, role, currentCoachId }) => {
-    const athletes = users.filter(u => u.role === 'Athlete');
-    const [activityFilter, setActivityFilter] = useState('all');
-    const [ageGroupFilter, setAgeGroupFilter] = useState('all');
-    
-    const athletesToShow = useMemo(() => {
-        if (role === 'Coach') {
-            return athletes.filter(a => a.coachId === currentCoachId);
-        }
-        return athletes; // Admins and Parents see all athletes on this page
-    }, [athletes, role, currentCoachId]);
+// Role-specific dashboard components
+const AdminDashboard = ({ users, events, payments }) => (
+    <>
+        <div className="stats-grid">
+            <div className="card stat-card-lg"><h3>{users.length}</h3><p>Total Users</p></div>
+            <div className="card stat-card-lg"><h3>{users.filter(u => u.role === 'Athlete').length}</h3><p>Athletes</p></div>
+            <div className="card stat-card-lg"><h3>{events.length}</h3><p>Events</p></div>
+            <div className="card stat-card-lg"><h3>${payments.filter(p => p.status === 'Paid').reduce((acc, p) => acc + p.amount, 0)}</h3><p>Revenue</p></div>
+        </div>
+        <div className="dashboard-grid">
+            <div className="card grid-col-span-2">
+                <div className="card-header">
+                    <h3>Recent Transactions</h3>
+                    <a href="#" className="view-all">View All</a>
+                </div>
+                <div className="transaction-list">
+                    {payments.slice(0, 3).map(p => <TransactionItem key={p.id} transaction={p} users={users} />)}
+                </div>
+            </div>
+        </div>
+    </>
+);
 
-    const uniqueActivities = useMemo(() => ['all', ...Array.from(new Set(athletesToShow.map(a => a.activity)))], [athletesToShow]);
-    const uniqueAgeGroups = useMemo(() => ['all', ...Array.from(new Set(athletesToShow.map(a => a.ageGroup)))], [athletesToShow]);
+const ManagerDashboard = ({ users, events, payments }) => (
+    <>
+        <div className="stats-grid">
+            <div className="card stat-card-lg"><h3>{users.filter(u => u.role === 'Athlete').length}</h3><p>Total Athletes</p></div>
+            <div className="card stat-card-lg"><h3>{users.filter(u => u.role === 'Coach').length}</h3><p>Coaches</p></div>
+            <div className="card stat-card-lg"><h3>{events.length}</h3><p>Total Events</p></div>
+            <div className="card stat-card-lg"><h3>${payments.filter(p => p.status === 'Paid').reduce((acc, p) => acc + p.amount, 0)}</h3><p>Total Revenue</p></div>
+        </div>
+        <div className="card">
+            <div className="card-header">
+                <h3>Team Overview</h3>
+            </div>
+            <p>Welcome, Manager. You can oversee athlete progress, manage event schedules, and review financial reports.</p>
+        </div>
+    </>
+);
+
+const CoachDashboard = ({ currentUser, users, navigate }) => {
+    const myAthletes = users.filter(u => u.role === 'Athlete' && u.coachId === currentUser.id);
+    return (
+        <>
+            <div className="stats-grid">
+                <div className="card stat-card-lg"><h3>{myAthletes.length}</h3><p>My Athletes</p></div>
+                <div className="card stat-card-lg"><h3>3</h3><p>Upcoming Sessions</p></div>
+            </div>
+            <div className="card athlete-list-widget">
+                <div className="card-header"><h3>My Athletes</h3><a href="#" className="view-all" onClick={() => navigate('athletes')}>View All</a></div>
+                {myAthletes.map(athlete => (
+                    <div key={athlete.id} className="athlete-list-item" onClick={() => navigate('athleteProfile', { athleteId: athlete.id })}>
+                        <p>{athlete.name}</p>
+                        <Pill text={athlete.skillLevel} type={athlete.skillLevel.toLowerCase()} />
+                    </div>
+                ))}
+            </div>
+        </>
+    );
+};
+const AthleteDashboard = ({ currentUser, events }) => {
+    const myEvents = events.filter(e => e.participants.includes(currentUser.id));
+    return (
+        <div className="dashboard-grid">
+            <div className="card">
+                <h3>My Next Session</h3>
+                <p>Morning Skate: Tomorrow at 9:00 AM</p>
+            </div>
+             <div className="card">
+                <h3>My Registered Events</h3>
+                <p>{myEvents.length} events coming up.</p>
+            </div>
+        </div>
+    )
+};
+const ParentDashboard = ({ currentUser, users, payments }) => {
+    const myChildren = users.filter(u => u.role === 'Athlete' && u.parentId === currentUser.id);
+    const totalDue = payments.filter(p => p.userId === currentUser.id && p.status !== 'Paid').reduce((sum, p) => sum + p.amount, 0);
+    return (
+        <div className="dashboard-grid">
+             <div className={`card ${totalDue > 0 ? 'balance-due' : ''}`}>
+                <h3>Account Balance</h3>
+                <p>{totalDue > 0 ? `You have an outstanding balance of $${totalDue}` : 'All payments are up to date.'}</p>
+            </div>
+            <div className="card">
+                <h3>My Children</h3>
+                <ul>{myChildren.map(c => <li key={c.id}>{c.name} ({c.activity})</li>)}</ul>
+            </div>
+        </div>
+    )
+};
+
+const ManageUsersPage = ({ users, onEditUser, onDeleteUser, onAddUserClick }) => {
+    const [roleFilter, setRoleFilter] = useState('All');
+    
+    const filteredUsers = useMemo(() => {
+        if (roleFilter === 'All') return users;
+        return users.filter(u => u.role === roleFilter);
+    }, [users, roleFilter]);
+
+    return (
+        <div className="page-container">
+            <div className="page-controls">
+                <div className="filters">
+                    <select value={roleFilter} onChange={e => setRoleFilter(e.target.value)}>
+                        <option value="All">All Roles</option>
+                        {Object.keys(ROLES).map(role => <option key={role} value={role}>{role}</option>)}
+                    </select>
+                </div>
+                 <button className="btn btn-primary" onClick={onAddUserClick}><PlusIcon/> Add User</button>
+            </div>
+            <div className="card">
+                <UserListTable users={filteredUsers} onEdit={onEditUser} onDelete={onDeleteUser} />
+            </div>
+        </div>
+    );
+};
+
+const UserListTable = ({ users, onEdit, onDelete }) => {
+    if (users.length === 0) return <EmptyState title="No Users Found" message="There are no users matching the current filters." />;
+    
+    return (
+        <div className="list-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {users.map(user => (
+                        <tr key={user.id}>
+                            <td data-label="Name">{user.name}</td>
+                            <td data-label="Role"><Pill text={user.role} type={user.role.toLowerCase().replace('/', '')} /></td>
+                            <td data-label="Status"><Pill text={user.status} type={user.status.toLowerCase()} /></td>
+                            <td data-label="Actions">
+                                <div className="action-buttons">
+                                    <button className="action-btn-icon edit-btn" onClick={() => onEdit(user)} aria-label={`Edit ${user.name}`}><EditIcon /></button>
+                                    <button className="action-btn-icon delete-btn" onClick={() => onDelete(user)} aria-label={`Delete ${user.name}`}><DeleteIcon /></button>
+                                </div>
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+    );
+}
+
+const AthletesPage = ({ currentUser, users, navigate, onAddAthleteClick }) => {
+    let athletesToList = [];
+    let pageTitle = "Athletes";
+    
+    if (currentUser.role === 'Coach') {
+        athletesToList = users.filter(u => u.role === 'Athlete' && u.coachId === currentUser.id);
+        pageTitle = "My Athletes";
+    } else if (currentUser.role === 'Parent') {
+        athletesToList = users.filter(u => u.role === 'Athlete' && u.parentId === currentUser.id);
+        pageTitle = "My Children";
+    } else { // Admin or Manager
+        athletesToList = users.filter(u => u.role === 'Athlete');
+    }
+
+    const [filters, setFilters] = useState({ activity: 'All', skillLevel: 'All', ageGroup: 'All' });
+    
+    const handleFilterChange = (e) => {
+        const { name, value } = e.target;
+        setFilters(prev => ({ ...prev, [name]: value }));
+    };
 
     const filteredAthletes = useMemo(() => {
-        return athletesToShow.filter(athlete => {
-            const activityMatch = activityFilter === 'all' || athlete.activity === activityFilter;
-            const ageGroupMatch = ageGroupFilter === 'all' || athlete.ageGroup === ageGroupFilter;
-            return activityMatch && ageGroupMatch;
+        return athletesToList.filter(athlete => {
+            return (filters.activity === 'All' || athlete.activity === filters.activity) &&
+                   (filters.skillLevel === 'All' || athlete.skillLevel === filters.skillLevel) &&
+                   (filters.ageGroup === 'All' || athlete.ageGroup === filters.ageGroup);
         });
-    }, [athletesToShow, activityFilter, ageGroupFilter]);
+    }, [athletesToList, filters]);
 
-    const [athleteToDelete, setAthleteToDelete] = useState(null);
-
-    const handleDeleteClick = (athlete) => {
-        setAthleteToDelete(athlete);
-    };
-
-    const confirmDelete = () => {
-        logAction(`Deleted athlete: ${athleteToDelete.name}`);
-        setUsers(prev => prev.filter(a => a.id !== athleteToDelete.id));
-        showToast('Athlete deleted successfully!', 'success');
-        setAthleteToDelete(null);
-    };
+    const canAddAthlete = ['Admin', 'Coach', 'Manager'].includes(currentUser.role);
     
     return (
         <div className="page-container">
             <div className="page-controls">
                 <div className="filters">
-                    <select value={activityFilter} onChange={e => setActivityFilter(e.target.value)}>
-                        {uniqueActivities.filter((v): v is string => !!v).map(activity => <option key={activity} value={activity}>{activity === 'all' ? 'All Activities' : activity}</option>)}
+                    <select name="activity" value={filters.activity} onChange={handleFilterChange}>
+                        <option value="All">All Activities</option>
+                        {[...new Set(athletesToList.map(a => a.activity))].map(act => <option key={act} value={act}>{act}</option>)}
                     </select>
-                    <select value={ageGroupFilter} onChange={e => setAgeGroupFilter(e.target.value)}>
-                        {uniqueAgeGroups.filter((v): v is string => !!v).map(group => <option key={group} value={group}>{group === 'all' ? 'All Age Groups' : group}</option>)}
+                    <select name="skillLevel" value={filters.skillLevel} onChange={handleFilterChange}>
+                        <option value="All">All Skill Levels</option>
+                        <option value="Beginner">Beginner</option>
+                        <option value="Intermediate">Intermediate</option>
+                        <option value="Advanced">Advanced</option>
                     </select>
                 </div>
+                {canAddAthlete && (
+                    <button className="btn btn-primary" onClick={onAddAthleteClick}>
+                        <PlusIcon /> Add Athlete
+                    </button>
+                )}
             </div>
-            
-            <Card>
-                <CardHeader title={role === 'Coach' ? "My Athletes" : "All Athletes"} />
-                {filteredAthletes.length > 0 ? (
+            <div className="card">
+                {filteredAthletes.length === 0 ? (
+                    <EmptyState title="No Athletes Found" message="Try adjusting your filters or adding a new athlete." />
+                ) : (
                     <div className="list-table">
                         <table>
                             <thead>
-                                <tr><th>Name</th><th>Skill Level</th><th>Activity</th><th>Age Group</th><th>Actions</th></tr>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Activity</th>
+                                    <th>Skill Level</th>
+                                    <th>Status</th>
+                                    <th></th>
+                                </tr>
                             </thead>
                             <tbody>
                                 {filteredAthletes.map(athlete => (
                                     <tr key={athlete.id}>
-                                        <td data-label="Name" data-clickable="true" onClick={() => navigate('athlete-profile', { athleteId: athlete.id })}>{athlete.name}</td>
-                                        <td data-label="Skill Level"><Pill text={athlete.skillLevel} type={athlete.skillLevel.toLowerCase()} /></td>
+                                        <td data-label="Name" data-clickable="true" onClick={() => navigate('athleteProfile', { athleteId: athlete.id })}>{athlete.name}</td>
                                         <td data-label="Activity">{athlete.activity}</td>
-                                        <td data-label="Age Group">{athlete.ageGroup}</td>
-                                        <td data-label="Actions">
-                                            <div className="action-buttons">
-                                                {role === 'Admin' && (
-                                                    <button className="action-btn-icon delete-btn" onClick={() => handleDeleteClick(athlete)} aria-label={`Delete ${athlete.name}`}><DeleteIcon /></button>
-                                                )}
-                                            </div>
+                                        <td data-label="Skill Level"><Pill text={athlete.skillLevel} type={athlete.skillLevel.toLowerCase()} /></td>
+                                        <td data-label="Status"><Pill text={athlete.status} type={athlete.status.toLowerCase()} /></td>
+                                        <td>
+                                            <button className="action-btn-icon" onClick={() => navigate('athleteProfile', { athleteId: athlete.id })} aria-label={`View ${athlete.name}'s profile`}>
+                                                <EyeIcon />
+                                            </button>
                                         </td>
                                     </tr>
                                 ))}
                             </tbody>
                         </table>
                     </div>
-                ) : (
-                    <EmptyState icon={<UsersIcon />} title="No Athletes Found" message="Try adjusting your filters or add a new athlete." />
                 )}
-            </Card>
-
-            <Modal show={!!athleteToDelete} onClose={() => setAthleteToDelete(null)} title="Confirm Deletion">
-                <p>Are you sure you want to delete <strong>{athleteToDelete?.name}</strong>? This action cannot be undone.</p>
-                <div className="modal-actions">
-                    <button className="btn btn-secondary" onClick={() => setAthleteToDelete(null)}>Cancel</button>
-                    <button className="btn btn-danger" onClick={confirmDelete}>Delete Athlete</button>
-                </div>
-            </Modal>
+            </div>
         </div>
     );
 };
 
-const AthleteProfilePage = ({ navigate, params, users, setUsers, showToast, logAction, badges }) => {
-    const athlete = users.find(a => a.id === params.athleteId);
-    const [historyFilter, setHistoryFilter] = useState('');
 
-    const [logDate, setLogDate] = useState(new Date().toISOString().split('T')[0]);
-    const [logDescription, setLogDescription] = useState('');
+const AthleteProfilePage = ({ page, users, navigate, showToast }) => {
+    const { athleteId } = page.params;
+    const athlete = users.find(u => u.id === athleteId);
+    const coach = users.find(u => u.id === athlete?.coachId);
+    const parent = users.find(u => u.id === athlete?.parentId);
+
+    const [logEntry, setLogEntry] = useState({ date: '', description: '' });
+
+    const handleLogChange = (e) => {
+        const { name, value } = e.target;
+        setLogEntry(prev => ({ ...prev, [name]: value }));
+    };
 
     const handleAddLog = (e) => {
         e.preventDefault();
-        if(!logDescription.trim()) return;
-
-        const newLog = {
-            id: Date.now(),
-            date: logDate,
-            description: logDescription,
-        };
-        
-        logAction(`Added progress log for ${athlete.name}: "${logDescription}"`);
-        setUsers(prev => prev.map(a => a.id === athlete.id ? {...a, history: [newLog, ...(a.history || [])]} : a));
-        setLogDescription('');
-        showToast('Progress log added successfully!', 'success');
+        // In a real app, this would update the user state
+        console.log("Adding log:", logEntry);
+        showToast("Log entry added!");
+        setLogEntry({ date: '', description: '' });
     };
 
-    const filteredHistory = useMemo(() => {
-        const history = athlete?.history || [];
-        if (!historyFilter) return history;
-        return history.filter(h => h.description.toLowerCase().includes(historyFilter.toLowerCase()));
-    }, [athlete, historyFilter]);
+    if (!athlete) {
+        return <div className="card"><p>Athlete not found.</p></div>;
+    }
     
-    const athleteBadges = useMemo(() => {
-        const currentBadges = athlete?.badges || [];
-        return currentBadges.map(badgeId => badges.find(b => b.id === badgeId)).filter(Boolean);
-    }, [athlete, badges]);
-
-    if (!athlete) return <p>Athlete not found.</p>;
+    const badges = [
+        { key: 'first_competition', name: 'First Competition', icon: <TrophyIcon />, description: 'Participated in their first official competition.' },
+        { key: 'distance_award', name: 'Distance Award', icon: <CheckCircleIcon />, description: 'Achieved a new personal best in a distance event.' },
+    ];
+    
+    const athleteBadges = badges.filter(b => athlete.badges?.includes(b.key));
 
     return (
         <div className="page-container">
-            <Card>
-                <CardHeader title={athlete.name} />
-                <div className="profile-details">
-                    <p><strong>Skill Level:</strong> <Pill text={athlete.skillLevel} type={athlete.skillLevel.toLowerCase()} /></p>
-                    <p><strong>Activity:</strong> {athlete.activity}</p>
-                    <p><strong>Age Group:</strong> {athlete.ageGroup}</p>
+            <div className="card">
+                <div className="card-header">
+                    <h3>{athlete.name}</h3>
+                    <Pill text={athlete.status} type={athlete.status.toLowerCase()} />
                 </div>
-            </Card>
+                <div className="profile-details">
+                    <p><strong>Activity:</strong> {athlete.activity}</p>
+                    <p><strong>Skill Level:</strong> {athlete.skillLevel}</p>
+                    <p><strong>Age Group:</strong> {athlete.ageGroup}</p>
+                    {coach && <p><strong>Coach:</strong> {coach.name}</p>}
+                    {parent && <p><strong>Parent:</strong> {parent.name}</p>}
+                </div>
+            </div>
 
-            {athleteBadges.length > 0 && (
-                <Card>
-                    <CardHeader title="Achievements" />
+            <div className="card">
+                <div className="card-header"><h3>Achievements</h3></div>
+                {athleteBadges.length > 0 ? (
                     <div className="badge-list">
                         {athleteBadges.map(badge => (
-                            <div key={badge.id} className="badge-item">
-                                <div className="badge-icon"><TrophyIcon /></div>
+                            <div key={badge.key} className="badge-item">
+                                <div className="badge-icon">{badge.icon}</div>
                                 <span className="badge-name">{badge.name}</span>
                                 <div className="badge-tooltip">{badge.description}</div>
                             </div>
                         ))}
                     </div>
-                </Card>
-            )}
-
-            <Card>
-                <CardHeader title="Progress History" />
-                 <ProgressChart history={athlete.history} />
-                <div className="add-log-form">
-                     <form onSubmit={handleAddLog} className="form-layout">
-                        <div className="form-grid">
-                             <div className="form-group">
-                                <label>Date</label>
-                                <input type="date" value={logDate} onChange={e => setLogDate(e.target.value)} />
-                            </div>
-                            <div className="form-group">
-                                <label>Description</label>
-                                <input type="text" placeholder="e.g., New high score: 95" value={logDescription} onChange={e => setLogDescription(e.target.value)} />
-                            </div>
-                        </div>
-                        <div className="form-actions">
-                             <button type="submit" className="btn btn-primary">Add Log</button>
-                        </div>
-                    </form>
-                </div>
-                 <div className="page-controls" style={{paddingTop: '1rem', borderTop: '1px solid var(--border-color)'}}>
-                    <input type="search" placeholder="Search history..." value={historyFilter} onChange={e => setHistoryFilter(e.target.value)} style={{width: '100%'}}/>
-                </div>
-                {filteredHistory.length > 0 ? (
-                    <div className="history-list">
-                        {filteredHistory.map(log => (
-                            <div key={log.id} className="history-item">
-                                <div>
-                                    <p>{log.description}</p>
-                                    <small style={{color: 'var(--text-secondary)'}}>{new Date(log.date).toLocaleDateString()}</small>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
                 ) : (
-                    <p>No history entries found.</p>
+                    <p>No achievements earned yet. Keep up the hard work!</p>
                 )}
-            </Card>
-        </div>
-    );
-};
-
-const ProgressChart = ({ history, title = "" }) => {
-    const dataPoints = useMemo(() => {
-        const points = (history || [])
-            .map(log => {
-                const match = log.description.match(/(\bscore\b|\btime\b|\bpoints\b)[\s:]*(\d+(\.\d+)?)/i);
-                if (match) {
-                    return { date: new Date(log.date), value: parseFloat(match[2]) };
-                }
-                return null;
-            })
-            .filter(point => point !== null)
-            .sort((a, b) => a.date.getTime() - b.date.getTime());
-        return points;
-    }, [history]);
-
-    if (!history || history.length < 2 || dataPoints.length < 2) {
-        return (
-            <div className="chart-placeholder">
-                <p>Not enough data to display a chart. Add history logs with keywords like "score", "time", or "points" followed by a number.</p>
             </div>
-        );
-    }
+            
+             <div className="card">
+                <div className="card-header">
+                    <h3>Performance History</h3>
+                </div>
+                
+                <div className="chart-placeholder">
+                    <p>Performance chart coming soon.</p>
+                </div>
 
-    const width = 500;
-    const height = 200;
-    const margin = { top: 20, right: 20, bottom: 30, left: 40 };
+                <form className="add-log-form form-layout" onSubmit={handleAddLog}>
+                    <h4>Add New Log Entry</h4>
+                    <div className="form-grid">
+                        <div className="form-group">
+                            <label htmlFor="logDate">Date</label>
+                            <input type="date" id="logDate" name="date" value={logEntry.date} onChange={handleLogChange} required />
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="logDescription">Description</label>
+                            <input type="text" id="logDescription" name="description" value={logEntry.description} onChange={handleLogChange} placeholder="e.g., Mastered new technique" required />
+                        </div>
+                    </div>
+                    <div className="form-actions">
+                         <button type="submit" className="btn btn-primary">Add Log</button>
+                    </div>
+                </form>
 
-    const xMin = dataPoints[0].date.getTime();
-    const xMax = dataPoints[dataPoints.length - 1].date.getTime();
-    const yMin = Math.min(...dataPoints.map(d => d.value));
-    const yMax = Math.max(...dataPoints.map(d => d.value));
-
-    const xRange = xMax - xMin;
-    const yRange = yMax - yMin;
-
-    const xScale = (date) => margin.left + (xRange === 0 ? (width - margin.left - margin.right) / 2 : (date.getTime() - xMin) / xRange * (width - margin.left - margin.right));
-    const yScale = (value) => height - margin.bottom - (yRange === 0 ? (height - margin.top - margin.bottom) / 2 : (value - yMin) / yRange * (height - margin.top - margin.bottom));
-
-    const pathData = "M" + dataPoints.map(d => `${xScale(d.date)},${yScale(d.value)}`).join(" L ");
-
-    return (
-        <div className="chart-container">
-            {title && <h4>{title}</h4>}
-            <svg viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="xMidYMid meet">
-                {[...Array(5)].map((_, i) => {
-                    const y = yMin + yRange / 4 * i;
-                    const yPos = yScale(y);
-                    return (
-                        <g key={i} className="grid-line">
-                            <line x1={margin.left} x2={width - margin.right} y1={yPos} y2={yPos} />
-                            <text x={margin.left - 8} y={yPos + 4} textAnchor="end">{y.toFixed(0)}</text>
-                        </g>
-                    );
-                })}
-
-                {dataPoints.map((d, i) => (
-                    <text key={i} x={xScale(d.date)} y={height - margin.bottom + 15} textAnchor="middle">
-                        {d.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                    </text>
-                ))}
-
-                <path d={pathData} fill="none" stroke="var(--primary-pink)" strokeWidth="2" />
-
-                {dataPoints.map((d, i) => (
-                    <circle key={i} cx={xScale(d.date)} cy={yScale(d.value)} r="4" fill="var(--primary-pink)" />
-                ))}
-            </svg>
+                <div className="history-list">
+                    {/* Fix: Used .getTime() for date comparison to satisfy TypeScript's type requirements for arithmetic operations. */}
+                     {athlete.history?.length > 0 ? athlete.history.sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map(item => (
+                         <div key={item.id} className="history-item">
+                            <div>
+                                <p>{item.description}</p>
+                                <small style={{color: 'var(--text-secondary)'}}>{new Date(item.date).toLocaleDateString()}</small>
+                            </div>
+                             <button className="action-btn-icon delete-btn"><DeleteIcon /></button>
+                         </div>
+                     )) : <p>No history logged yet.</p>}
+                </div>
+            </div>
         </div>
     );
 };
 
-const EventFormModal = ({ show, onClose, onSave, event }) => {
-    const [name, setName] = useState('');
-    const [date, setDate] = useState('');
-    const [time, setTime] = useState('');
-    const [location, setLocation] = useState('');
-    const [description, setDescription] = useState('');
-
-    useEffect(() => {
-        if (event) {
-            setName(event.name);
-            setDate(event.date);
-            setTime(event.time);
-            setLocation(event.location);
-            setDescription(event.description);
-        } else {
-            // Reset for new event
-            setName('');
-            setDate(new Date().toISOString().split('T')[0]);
-            setTime('12:00');
-            setLocation('');
-            setDescription('');
-        }
-    }, [event, show]);
-
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        onSave({ name, date, time, location, description });
-    };
-
-    return (
-        <Modal show={show} onClose={onClose} title={event ? 'Edit Event' : 'Add New Event'}>
-            <form onSubmit={handleSubmit} className="form-layout">
-                <div className="form-group">
-                    <label htmlFor="eventName">Event Name</label>
-                    <input type="text" id="eventName" value={name} onChange={e => setName(e.target.value)} required />
-                </div>
-                <div className="form-grid">
-                    <div className="form-group">
-                        <label htmlFor="eventDate">Date</label>
-                        <input type="date" id="eventDate" value={date} onChange={e => setDate(e.target.value)} required />
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="eventTime">Time</label>
-                        <input type="time" id="eventTime" value={time} onChange={e => setTime(e.target.value)} required />
-                    </div>
-                </div>
-                <div className="form-group">
-                    <label htmlFor="eventLocation">Location</label>
-                    <input type="text" id="eventLocation" value={location} onChange={e => setLocation(e.target.value)} required />
-                </div>
-                <div className="form-group">
-                    <label htmlFor="eventDescription">Description</label>
-                    <textarea id="eventDescription" rows="4" value={description} onChange={e => setDescription(e.target.value)}></textarea>
-                </div>
-                <div className="modal-actions">
-                    <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
-                    <button type="submit" className="btn btn-primary">Save Event</button>
-                </div>
-            </form>
-        </Modal>
-    );
-};
-
-
-const EventsPage = ({ events, setEvents, navigate, role, showToast, logAction }) => {
-    const [isModalOpen, setIsModalOpen] = useState(false);
-
-    const upcomingEvents = events.filter(e => new Date(e.date) >= new Date()).sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-    const pastEvents = events.filter(e => new Date(e.date) < new Date()).sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
-    const handleSaveEvent = (eventData) => {
-        const newEvent = {
-            id: Date.now(),
-            ...eventData,
-            attendees: []
-        };
-        setEvents(prev => [newEvent, ...prev]);
-        logAction(`Created new event: "${newEvent.name}"`);
-        showToast('Event created successfully!', 'success');
-        setIsModalOpen(false);
-    };
-
+const EventsPage = ({ events, onAddEventClick, navigate, currentUser }) => {
+    const [view, setView] = useState('list'); // 'list' or 'calendar'
+    
     return (
         <div className="page-container">
-             {(role === 'Admin' || role === 'Coach') && (
-                <div className="page-controls" style={{justifyContent: 'flex-end', marginBottom: 0}}>
-                    <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
-                        <AddIcon /> Create Event
-                    </button>
+            <div className="card">
+                <div className="filters-and-actions">
+                    <div className="view-switcher">
+                         <button className={`btn ${view === 'list' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setView('list')}>List</button>
+                         <button className={`btn ${view === 'calendar' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setView('calendar')}>Calendar</button>
+                    </div>
+                    {['Admin', 'Manager'].includes(currentUser.role) && (
+                        <button className="btn btn-primary" onClick={onAddEventClick}>
+                            <PlusIcon /> Add Event
+                        </button>
+                    )}
                 </div>
+            </div>
+            {view === 'list' ? (
+                 <EventListView events={events} navigate={navigate} />
+            ) : (
+                <EventCalendarView events={events} navigate={navigate} />
             )}
-            <section>
-                <h2 className="section-title">Upcoming Events</h2>
+        </div>
+    );
+};
+
+const EventListView = ({ events, navigate }) => {
+    // Fix: Used .getTime() for date comparison to satisfy TypeScript's type requirements for arithmetic operations.
+    const upcomingEvents = events.filter(e => new Date(e.date) >= new Date()).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    // Fix: Used .getTime() for date comparison to satisfy TypeScript's type requirements for arithmetic operations.
+    const pastEvents = events.filter(e => new Date(e.date) < new Date()).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+    return (
+        <>
+            <div className="page-container">
+                <h3 className="section-title">Upcoming Events</h3>
                 {upcomingEvents.length > 0 ? (
                     <div className="events-grid">
-                        {upcomingEvents.map(event => (
-                            <div key={event.id} className="event-card" onClick={() => navigate('event-details', { eventId: event.id })}>
-                                <div className="event-card-header">
-                                    <h4>{event.name}</h4>
-                                </div>
-                                <div className="event-card-body">
-                                    <p>{new Date(event.date).toDateString()} • {event.location}</p>
-                                </div>
-                            </div>
-                        ))}
+                        {upcomingEvents.map(event => <EventCard key={event.id} event={event} navigate={navigate} />)}
                     </div>
-                ) : <p>No upcoming events.</p>}
-            </section>
-             <section>
-                <h2 className="section-title">Past Events</h2>
+                ) : <div className="card"><p>No upcoming events.</p></div>}
+            </div>
+            <div className="page-container">
+                <h3 className="section-title">Past Events</h3>
                 {pastEvents.length > 0 ? (
-                    <div className="events-grid">
-                        {pastEvents.map(event => (
-                           <div key={event.id} className="event-card" onClick={() => navigate('event-details', { eventId: event.id })}>
-                                <div className="event-card-header">
-                                    <h4>{event.name}</h4>
-                                </div>
-                                <div className="event-card-body">
-                                    <p>{new Date(event.date).toDateString()} • {event.location}</p>
-                                </div>
-                            </div>
-                        ))}
+                     <div className="events-grid">
+                        {pastEvents.map(event => <EventCard key={event.id} event={event} navigate={navigate} />)}
                     </div>
-                ) : <p>No past events.</p>}
-            </section>
-            <EventFormModal 
-                show={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                onSave={handleSaveEvent}
-                event={null}
-            />
+                ) : <div className="card"><p>No past events found.</p></div>}
+            </div>
+        </>
+    );
+};
+
+const EventCalendarView = ({ events, navigate }) => {
+    const [currentDate, setCurrentDate] = useState(new Date());
+    const [selectedDate, setSelectedDate] = useState(new Date());
+
+    const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+    const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+    const startDate = new Date(startOfMonth);
+    startDate.setDate(startDate.getDate() - startDate.getDay());
+
+    const days = [];
+    let date = new Date(startDate);
+    while (days.length < 42) {
+        days.push(new Date(date));
+        date.setDate(date.getDate() + 1);
+    }
+    
+    const eventsOnSelectedDate = events.filter(event => new Date(event.date).toDateString() === selectedDate.toDateString());
+
+    const changeMonth = (offset) => {
+        setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + offset, 1));
+    };
+
+    return (
+        <div className="card">
+            <div className="calendar-header">
+                <button className="nav-btn" onClick={() => changeMonth(-1)}><ChevronLeftIcon/></button>
+                <h3>{currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}</h3>
+                <button className="nav-btn" onClick={() => changeMonth(1)}><ChevronRightIcon/></button>
+            </div>
+            <div className="calendar-grid weekdays">
+                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => <div key={day} className="weekday">{day}</div>)}
+            </div>
+            <div className="calendar-grid">
+                {days.map(day => {
+                    const isCurrentMonth = day.getMonth() === currentDate.getMonth();
+                    const isSelected = day.toDateString() === selectedDate.toDateString();
+                    const eventsOnDay = events.filter(event => new Date(event.date).toDateString() === day.toDateString());
+                    return (
+                        <div
+                            key={day}
+                            className={`calendar-day ${!isCurrentMonth ? 'empty' : ''} ${isSelected ? 'selected' : ''}`}
+                            onClick={() => isCurrentMonth && setSelectedDate(day)}
+                        >
+                            <span className="day-number">{day.getDate()}</span>
+                            {eventsOnDay.length > 0 && <div className="event-dot"></div>}
+                        </div>
+                    );
+                })}
+            </div>
+            <div className="selected-day-events">
+                <h4>Events on {selectedDate.toLocaleDateString()}</h4>
+                 {eventsOnSelectedDate.length > 0 ? (
+                    eventsOnSelectedDate.map(event => (
+                        <div key={event.id} className="event-card-small" onClick={() => navigate('eventDetails', { eventId: event.id })}>
+                            <p className="event-name">{event.title}</p>
+                        </div>
+                    ))
+                ) : <p>No events scheduled for this day.</p>}
+            </div>
         </div>
     );
 };
 
-const EventDetailsPage = ({ params, events, users, setEvents, role, showToast, onRegister }) => {
-    const event = events.find(e => e.id === params.eventId);
-    const athletes = users.filter(u => u.role === 'Athlete');
+const EventCard = ({ event, navigate }) => (
+    <div className="event-card" onClick={() => navigate('eventDetails', { eventId: event.id })}>
+        <div className="event-card-header">
+            <h4>{event.title}</h4>
+            <Pill text={event.category} type={event.category.toLowerCase()} />
+        </div>
+        <div className="event-card-body">
+            <p>{new Date(event.date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+            <p style={{ marginTop: 8 }}>{event.description.substring(0, 100)}...</p>
+        </div>
+    </div>
+);
 
-    const eventAttendees = useMemo(() => {
-        if (!event) return [];
-        return (event.attendees || []).map(id => athletes.find(a => a.id === id)).filter(Boolean);
-    }, [event, athletes]);
+const EventDetailsPage = ({ page, events, users, currentUser, onEditEvent, onDeleteEvent }) => {
+    const { eventId } = page.params;
+    const event = events.find(e => e.id === Number(eventId));
     
-    // For demo: assume Parent/Athlete role is for athleteId=1
-    const isRegistered = role === 'Parent/Athlete' && event?.attendees?.includes(1);
-    const athleteIdToRegister = 1; // Demo athlete
+    if (!event) return <div className="card">Event not found.</div>;
 
-    const handleRegister = () => {
-        if (role !== 'Parent/Athlete') return;
-        setEvents(prevEvents => prevEvents.map(e => 
-            e.id === event.id ? { ...e, attendees: [...(e.attendees || []), athleteIdToRegister] } : e
-        ));
-        onRegister(athleteIdToRegister); // Trigger badge check
-        showToast(`Successfully registered for ${event.name}!`, 'success');
-    };
-
-    if (!event) return <p>Event not found.</p>;
-
+    const participants = users.filter(u => event.participants.includes(u.id));
+    const isRegistered = event.participants.includes(currentUser.id);
+    const canManage = ['Admin', 'Manager'].includes(currentUser.role);
+    
     return (
         <div className="page-container">
-            <Card>
-                <CardHeader title={event.name} />
-                <div className="event-details-page-card">
-                    <p><strong>Date & Time:</strong> {new Date(`${event.date}T${event.time}`).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}</p>
-                    <p><strong>Location:</strong> {event.location}</p>
-                    <p><strong>Description:</strong> {event.description}</p>
-                    
-                    {role === 'Parent/Athlete' && new Date(event.date) >= new Date() && (
-                        <div className="form-actions" style={{justifyContent: "flex-start", borderTop: 'none', paddingTop: 0}}>
-                            <button className="btn btn-primary" onClick={handleRegister} disabled={isRegistered}>
-                                {isRegistered ? 'Registered' : 'Register Now'}
-                            </button>
+            <div className="card event-details-page-card">
+                 <div className="card-header">
+                    <h3>{event.title}</h3>
+                     {canManage && (
+                        <div className="action-buttons">
+                            <button className="action-btn-icon edit-btn" onClick={() => onEditEvent(event)}><EditIcon /></button>
+                            <button className="action-btn-icon delete-btn" onClick={() => onDeleteEvent(event)}><DeleteIcon /></button>
+                        </div>
+                     )}
+                </div>
+                <p><strong>Date:</strong> {new Date(event.date).toLocaleDateString()}</p>
+                <p><strong>Category:</strong> {event.category}</p>
+                <p><strong>Description:</strong> {event.description}</p>
+
+                {currentUser.role === 'Athlete' && (
+                    <div style={{marginTop: '16px'}}>
+                        <button className="btn btn-primary" disabled={isRegistered}>
+                            {isRegistered ? 'Registered' : 'Register Now'}
+                        </button>
+                    </div>
+                )}
+            </div>
+             <div className="card">
+                <h3>Participants ({participants.length})</h3>
+                {participants.length > 0 ? (
+                    <ul>
+                        {participants.map(p => <li key={p.id}>{p.name}</li>)}
+                    </ul>
+                ) : <p>No participants registered yet.</p>}
+            </div>
+        </div>
+    );
+};
+
+const PaymentsPage = ({ payments, users, currentUser }) => {
+    let userPayments = [];
+    if (currentUser.role === 'Admin' || currentUser.role === 'Manager') {
+        userPayments = payments;
+    } else if (currentUser.role === 'Parent') {
+        userPayments = payments.filter(p => p.userId === currentUser.id);
+    } else if (currentUser.role === 'Athlete') {
+        const parent = users.find(u => u.id === currentUser.parentId);
+        userPayments = parent ? payments.filter(p => p.userId === parent.id) : [];
+    }
+    
+    const totalPaid = userPayments.filter(p=>p.status === 'Paid').reduce((acc, p) => acc + p.amount, 0);
+    const totalDue = userPayments.filter(p=>p.status !== 'Paid').reduce((acc, p) => acc + p.amount, 0);
+
+    return (
+         <div className="page-container">
+            <div className="stats-grid">
+                <div className="card"><h4>${totalPaid}</h4><p>Total Paid</p></div>
+                <div className="card"><h4>${totalDue}</h4><p>Total Due</p></div>
+            </div>
+            <div className="card">
+                 <div className="card-header">
+                    <h3>Transaction History</h3>
+                 </div>
+                 <div className="transaction-list">
+                    {userPayments.length > 0 ? userPayments.map(p => <TransactionItem key={p.id} transaction={p} users={users} />) : <p>No transactions found.</p>}
+                </div>
+            </div>
+         </div>
+    );
+};
+
+const TransactionItem = ({ transaction, users }) => {
+    const user = users.find(u => u.id === transaction.userId);
+    return (
+        <div className="transaction-item">
+            <div className="transaction-details">
+                <h4>{transaction.description}</h4>
+                <p>Paid by: {user ? user.name : 'Unknown'} on {new Date(transaction.date).toLocaleDateString()}</p>
+            </div>
+            <div className="transaction-amount">
+                <h4 style={{ color: transaction.status === 'Paid' ? 'var(--success)' : 'var(--danger)' }}>
+                    ${transaction.amount}
+                </h4>
+                <Pill text={transaction.status} type={transaction.status.toLowerCase()} />
+            </div>
+        </div>
+    );
+};
+
+
+const SchedulePage = () => <div className="card"><h2>Schedule Page</h2><p>Feature coming soon.</p></div>;
+const ProgressPage = () => <div className="card"><h2>Progress Page</h2><p>Feature coming soon.</p></div>;
+
+const MessagesPage = ({ conversations, currentUser, users }) => {
+    const [activeConversationId, setActiveConversationId] = useState(null);
+
+    const myConversations = conversations.filter(c => c.participantIds.includes(currentUser.id));
+    const activeConversation = myConversations.find(c => c.id === activeConversationId);
+
+    return (
+        <div className="page-container messages-page">
+            <div className="card">
+                <div className="messages-layout">
+                    <div className="conversations-list">
+                        <div className="conversations-header"><h3>Conversations</h3></div>
+                        <div className="conversation-items">
+                            {/* Fix: Used .getTime() for date comparison to satisfy TypeScript's type requirements for arithmetic operations. */}
+                            {myConversations.sort((a, b) => new Date(b.lastMessageTimestamp).getTime() - new Date(a.lastMessageTimestamp).getTime()).map(conv => {
+                                const otherParticipantId = conv.participantIds.find(id => id !== currentUser.id);
+                                const otherParticipant = users.find(u => u.id === otherParticipantId);
+                                const lastMessage = conv.messages[conv.messages.length - 1];
+                                const unreadCount = conv.unreadCount[currentUser.id] || 0;
+
+                                return (
+                                    <div key={conv.id} className={`conversation-item ${conv.id === activeConversationId ? 'active' : ''}`} onClick={() => setActiveConversationId(conv.id)}>
+                                        <div className="conversation-avatar">{otherParticipant ? otherParticipant.name.charAt(0) : '?'}</div>
+                                        <div className="conversation-details">
+                                            <p className="conversation-sender">{otherParticipant ? otherParticipant.name : 'Unknown User'}</p>
+                                            <p className="conversation-preview">{lastMessage.text}</p>
+                                        </div>
+                                        <div className="conversation-meta">
+                                            <p className="conversation-timestamp">{new Date(lastMessage.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
+                                            {unreadCount > 0 && <span className="unread-badge">{unreadCount}</span>}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                    {activeConversation ? (
+                        <ChatWindow conversation={activeConversation} currentUser={currentUser} users={users} />
+                    ) : (
+                        <div className="no-chat-selected">
+                            <MessageIcon />
+                            <p>Select a conversation to start chatting.</p>
                         </div>
                     )}
                 </div>
-            </Card>
-            <Card>
-                <CardHeader title="Attendees" />
-                {eventAttendees.length > 0 ? (
-                    <ul>
-                        {eventAttendees.map(attendee => <li key={attendee.id}>{attendee.name}</li>)}
-                    </ul>
-                ) : <p>No one is registered for this event yet.</p>}
-            </Card>
+            </div>
         </div>
     );
 };
 
-const PaymentsPage = ({ payments }) => {
+const ChatWindow = ({ conversation, currentUser, users }) => {
+    const chatBodyRef = useRef(null);
+    const otherParticipant = users.find(u => u.id === conversation.participantIds.find(id => id !== currentUser.id));
+
+    useEffect(() => {
+        if(chatBodyRef.current) {
+            chatBodyRef.current.scrollTop = chatBodyRef.current.scrollHeight;
+        }
+    }, [conversation]);
+
+    return (
+        <div className="chat-window">
+            <div className="chat-header">
+                {otherParticipant ? otherParticipant.name : 'Chat'}
+            </div>
+            <div className="chat-body" ref={chatBodyRef}>
+                {conversation.messages.map(msg => (
+                    <div key={msg.id} className={`message ${msg.senderId === currentUser.id ? 'sent' : 'received'}`}>
+                        <p>{msg.text}</p>
+                        <span>{new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                    </div>
+                ))}
+            </div>
+            <div className="chat-footer">
+                <form>
+                    <input type="text" placeholder="Type a message..." />
+                    <button type="submit" className="btn btn-primary"><PaperAirplaneIcon /></button>
+                </form>
+            </div>
+        </div>
+    );
+}
+
+const SettingsPage = () => {
+    const [settings, setSettings] = useState({
+        emailNotifications: true,
+        smsNotifications: false,
+        pushNotifications: true,
+        notificationTiming: 'immediate',
+    });
+
+    const handleToggle = (e) => {
+        const { name, checked } = e.target;
+        setSettings(prev => ({ ...prev, [name]: checked }));
+    };
+
+    const handleTimingChange = (e) => {
+        setSettings(prev => ({...prev, notificationTiming: e.target.value}));
+    };
+
     return (
         <div className="page-container">
-            <Card>
-                <CardHeader title="Transaction History" />
-                <div className="transaction-list">
-                    {payments.map(payment => (
-                        <div className="transaction-item" key={payment.id}>
-                            <div className="transaction-details">
-                                <h4>{payment.name}</h4>
-                                <p>{payment.method} - {payment.reference}</p>
+            <div className="card">
+                <div className="card-header"><h3>Notification Settings</h3></div>
+                 <div className="settings-list">
+                     <div className="settings-item">
+                         <div>
+                            <h4>Email Notifications</h4>
+                            <p>Receive updates and reminders via your registered email address.</p>
+                         </div>
+                         <label className="toggle-switch">
+                            <input type="checkbox" name="emailNotifications" checked={settings.emailNotifications} onChange={handleToggle} />
+                            <span className="slider"></span>
+                         </label>
+                     </div>
+                     <div className="settings-item">
+                         <div>
+                            <h4>SMS Notifications</h4>
+                            <p>Get critical alerts sent directly to your mobile phone.</p>
+                         </div>
+                         <label className="toggle-switch">
+                            <input type="checkbox" name="smsNotifications" checked={settings.smsNotifications} onChange={handleToggle} />
+                            <span className="slider"></span>
+                         </label>
+                     </div>
+                      <div className="settings-item">
+                         <div>
+                            <h4>Push Notifications</h4>
+                            <p>Enable in-app push notifications for real-time updates.</p>
+                         </div>
+                         <label className="toggle-switch">
+                            <input type="checkbox" name="pushNotifications" checked={settings.pushNotifications} onChange={handleToggle} />
+                            <span className="slider"></span>
+                         </label>
+                     </div>
+                     <div className="settings-item">
+                         <div>
+                            <h4>Notification Digest</h4>
+                            <p>Choose how often you receive summary notifications.</p>
+                         </div>
+                        <select value={settings.notificationTiming} onChange={handleTimingChange}>
+                            <option value="immediate">Immediate</option>
+                            <option value="daily">Daily Digest</option>
+                            <option value="weekly">Weekly Digest</option>
+                        </select>
+                     </div>
+                 </div>
+            </div>
+        </div>
+    );
+};
+
+const SearchResultsPage = ({ page, users, events, navigate }) => {
+    const { query } = page;
+    const lowercasedQuery = query.toLowerCase();
+
+    const userResults = users.filter(u => u.name.toLowerCase().includes(lowercasedQuery));
+    const eventResults = events.filter(e => e.title.toLowerCase().includes(lowercasedQuery) || e.description.toLowerCase().includes(lowercasedQuery));
+
+    return (
+        <div className="page-container">
+            <h3>Search Results for "{query}"</h3>
+            
+            {userResults.length > 0 && (
+                <div className="card">
+                    <div className="card-header"><h4>Users</h4></div>
+                    <div className="search-results-list">
+                    {userResults.map(user => (
+                        <div key={user.id} className="search-result-card">
+                            <div className="result-icon">{ROLES[user.role]}</div>
+                            <div className="result-details">
+                                <h4>{user.name}</h4>
+                                <p>{user.role}</p>
                             </div>
-                            <div className="transaction-amount">
-                                <h4>Ksh {payment.amount.toLocaleString()}</h4>
-                                <p>{new Date(payment.date).toLocaleDateString()}</p>
+                            <div className="result-actions">
+                                <button className="btn btn-secondary" onClick={() => user.role === 'Athlete' ? navigate('athleteProfile', { athleteId: user.id }) : null}>View</button>
                             </div>
                         </div>
                     ))}
-                </div>
-            </Card>
-        </div>
-    );
-};
-
-const TasksPage = ({ tasks, setTasks, users, showToast, logAction }) => {
-    const coaches = users.filter(u => u.role === 'Coach');
-    const [taskFilter, setTaskFilter] = useState('all');
-    const [taskSort, setTaskSort] = useState('desc');
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [taskToEdit, setTaskToEdit] = useState(null);
-    const [taskToDelete, setTaskToDelete] = useState(null);
-
-    const handleAddTask = () => {
-        setTaskToEdit(null);
-        setIsModalOpen(true);
-    };
-
-    const handleEditTask = (task) => {
-        setTaskToEdit(task);
-        setIsModalOpen(true);
-    };
-    
-    const handleDeleteClick = (task) => {
-        setTaskToDelete(task);
-    };
-
-    const confirmDelete = () => {
-        logAction(`Deleted task: "${taskToDelete.title}"`);
-        setTasks(prev => prev.filter(t => t.id !== taskToDelete.id));
-        showToast('Task deleted successfully!', 'success');
-        setTaskToDelete(null);
-    };
-
-    const handleSaveTask = (taskData) => {
-        if(taskToEdit) {
-            logAction(`Updated task: "${taskData.title}"`);
-            setTasks(prev => prev.map(t => t.id === taskToEdit.id ? {...t, ...taskData} : t));
-            showToast('Task updated successfully!', 'success');
-        } else {
-            logAction(`Created new task: "${taskData.title}"`);
-            setTasks(prev => [...prev, { id: Date.now(), ...taskData, completed: false }]);
-            showToast('Task added successfully!', 'success');
-        }
-        setIsModalOpen(false);
-    };
-
-    const toggleTaskCompletion = (taskId) => {
-        setTasks(tasks.map(task => 
-            task.id === taskId ? { ...task, completed: !task.completed } : task
-        ));
-    };
-    
-    const filteredAndSortedTasks = useMemo(() => {
-        return tasks
-            .filter(task => {
-                if (taskFilter === 'all') return true;
-                if (taskFilter === 'completed') return task.completed;
-                if (taskFilter === 'incomplete') return !task.completed;
-                return true;
-            })
-            .sort((a, b) => {
-                const dateA = new Date(a.dueDate).getTime();
-                const dateB = new Date(b.dueDate).getTime();
-                return taskSort === 'asc' ? dateA - dateB : dateB - dateA;
-            });
-    }, [tasks, taskFilter, taskSort]);
-
-    return (
-        <div className="page-container">
-            <div className="page-controls">
-                <div className="filters">
-                    <select value={taskFilter} onChange={e => setTaskFilter(e.target.value)}>
-                        <option value="all">All Statuses</option>
-                        <option value="completed">Completed</option>
-                        <option value="incomplete">Incomplete</option>
-                    </select>
-                     <select value={taskSort} onChange={e => setTaskSort(e.target.value)}>
-                        <option value="desc">Due Date (Newest)</option>
-                        <option value="asc">Due Date (Oldest)</option>
-                    </select>
-                </div>
-                <button className="btn btn-primary" onClick={handleAddTask}><AddIcon /> Add Task</button>
-            </div>
-            
-            <Card>
-                <CardHeader title="Manage Tasks" />
-                 {filteredAndSortedTasks.length > 0 ? (
-                    <div className="task-list">
-                        {filteredAndSortedTasks.map(task => (
-                            <div key={task.id} className={`task-item ${task.completed ? 'completed' : ''}`}>
-                                <div className="task-main">
-                                    <input type="checkbox" className="task-checkbox" checked={task.completed} onChange={() => toggleTaskCompletion(task.id)} />
-                                    <div>
-                                        <p className="task-title">{task.title}</p>
-                                        <p className="task-meta">Due: {task.dueDate} | Assignee: {task.assignedTo}</p>
-                                    </div>
-                                </div>
-                                <div className="action-buttons">
-                                    <button className="action-btn-icon edit-btn" onClick={() => handleEditTask(task)} aria-label={`Edit task ${task.title}`}><EditIcon /></button>
-                                    <button className="action-btn-icon delete-btn" onClick={() => handleDeleteClick(task)} aria-label={`Delete task ${task.title}`}><DeleteIcon /></button>
-                                </div>
-                            </div>
-                        ))}
                     </div>
-                ) : (
-                     <EmptyState icon={<TasksIcon />} title="No Tasks Found" message="Try adjusting filters or adding a new task."/>
-                )}
-            </Card>
-
-            <TaskFormModal 
-                show={isModalOpen} 
-                onClose={() => setIsModalOpen(false)}
-                onSave={handleSaveTask}
-                task={taskToEdit}
-                coaches={coaches}
-            />
+                </div>
+            )}
             
-             <Modal show={!!taskToDelete} onClose={() => setTaskToDelete(null)} title="Confirm Deletion">
-                <p>Are you sure you want to delete the task "<strong>{taskToDelete?.title}</strong>"?</p>
-                <div className="modal-actions">
-                    <button className="btn btn-secondary" onClick={() => setTaskToDelete(null)}>Cancel</button>
-                    <button className="btn btn-danger" onClick={confirmDelete}>Delete Task</button>
-                </div>
-            </Modal>
-        </div>
-    );
-};
-
-const TaskFormModal = ({ show, onClose, onSave, task, coaches }) => {
-    const [title, setTitle] = useState('');
-    const [dueDate, setDueDate] = useState('');
-    const [assignedTo, setAssignedTo] = useState('Admin');
-
-    useEffect(() => {
-        if (task) {
-            setTitle(task.title);
-            setDueDate(task.dueDate);
-            setAssignedTo(task.assignedTo);
-        } else {
-            setTitle('');
-            setDueDate(new Date().toISOString().split('T')[0]);
-            setAssignedTo('Admin');
-        }
-    }, [task, show]);
-
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        onSave({ title, dueDate, assignedTo });
-    };
-
-    return (
-        <Modal show={show} onClose={onClose} title={task ? 'Edit Task' : 'Add Task'}>
-            <form onSubmit={handleSubmit} className="form-layout">
-                <div className="form-group">
-                    <label htmlFor="taskTitle">Title</label>
-                    <input type="text" id="taskTitle" value={title} onChange={e => setTitle(e.target.value)} required/>
-                </div>
-                 <div className="form-group">
-                    <label htmlFor="dueDate">Due Date</label>
-                    <input type="date" id="dueDate" value={dueDate} onChange={e => setDueDate(e.target.value)} required/>
-                </div>
-                 <div className="form-group">
-                    <label htmlFor="assignedTo">Assign To</label>
-                    <select id="assignedTo" value={assignedTo} onChange={e => setAssignedTo(e.target.value)}>
-                        <option>Admin</option>
-                        {coaches.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
-                    </select>
-                </div>
-                <div className="modal-actions">
-                    <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
-                    <button type="submit" className="btn btn-primary">Save Task</button>
-                </div>
-            </form>
-        </Modal>
-    );
-};
-
-const SearchResultsPage = ({ params, navigate, users, events }) => {
-    const query = params.query?.toLowerCase() || '';
-    const athletes = users.filter(u => u.role === 'Athlete');
-    const coaches = users.filter(u => u.role === 'Coach');
-    
-    const results = useMemo(() => {
-        if (!query) return [];
-        const athleteResults = athletes
-            .filter(a => a.name.toLowerCase().includes(query))
-            .map(a => ({ type: 'Athlete', item: a }));
-        const coachResults = coaches
-            .filter(c => c.name.toLowerCase().includes(query))
-            .map(c => ({ type: 'Coach', item: c }));
-        const eventResults = events
-            .filter(e => e.name.toLowerCase().includes(query))
-            .map(e => ({ type: 'Event', item: e }));
-        return [...athleteResults, ...coachResults, ...eventResults];
-    }, [query, athletes, coaches, events]);
-
-    const handleView = (result) => {
-        switch(result.type) {
-            case 'Athlete':
-                navigate('athlete-profile', { athleteId: result.item.id });
-                break;
-            case 'Event':
-                 navigate('event-details', { eventId: result.item.id });
-                break;
-            // Add cases for Coach, etc. later
-            default:
-                break;
-        }
-    };
-    
-    return (
-        <div className="page-container">
-            <Card>
-                <CardHeader title={`Search Results for "${params.query}"`} />
-                 {results.length > 0 ? (
-                    <div className="search-results-list">
-                        {results.map((result) => (
-                            <div key={`${result.type}-${result.item.id}`} className="search-result-card">
-                                <div className="result-icon">
-                                    {result.type === 'Athlete' && <UsersIcon />}
-                                    {result.type === 'Coach' && <UsersIcon />}
-                                    {result.type === 'Event' && <CalendarIcon />}
-                                </div>
+            {eventResults.length > 0 && (
+                 <div className="card">
+                    <div className="card-header"><h4>Events</h4></div>
+                     <div className="search-results-list">
+                        {eventResults.map(event => (
+                            <div key={event.id} className="search-result-card">
+                                <div className="result-icon"><CalendarIcon /></div>
                                 <div className="result-details">
-                                    <h4>{result.item.name}</h4>
-                                     <p>
-                                        {result.type === 'Athlete' && `Activity: ${result.item.activity}`}
-                                        {result.type === 'Coach' && `Expertise: ${result.item.expertise}`}
-                                        {result.type === 'Event' && `Date: ${new Date(result.item.date).toLocaleDateString()} • ${result.item.location}`}
-                                    </p>
+                                    <h4>{event.title}</h4>
+                                    <p>{new Date(event.date).toLocaleDateString()}</p>
                                 </div>
                                 <div className="result-actions">
-                                    <button className="btn btn-secondary" onClick={() => handleView(result)}>View</button>
+                                     <button className="btn btn-secondary" onClick={() => navigate('eventDetails', { eventId: event.id })}>View</button>
                                 </div>
                             </div>
                         ))}
                     </div>
-                ) : (
-                    <EmptyState icon={<SearchIcon/>} title="No Results Found" message="We couldn't find anything matching your search. Please try again."/>
-                )}
-            </Card>
-        </div>
-    );
-};
-
-const MessagesPage = ({ messages }) => {
-    const [activeConversation, setActiveConversation] = useState(messages[0]);
-    
-    return (
-        <div className="messages-page">
-            <Card>
-                <div className="messages-layout">
-                    <div className="conversations-list">
-                        <div className="conversations-header"><h3>All Messages</h3></div>
-                        <div className="conversation-items">
-                            {messages.map(msg => (
-                                <div key={msg.id} className={`conversation-item ${activeConversation.id === msg.id ? 'active' : ''}`} onClick={() => setActiveConversation(msg)}>
-                                    <div className="conversation-avatar">{msg.sender.charAt(0)}</div>
-                                    <div className="conversation-details">
-                                        <p className="conversation-sender">{msg.sender}</p>
-                                        <p className="conversation-preview">{msg.preview}</p>
-                                    </div>
-                                    <div className="conversation-meta">
-                                        <p className="conversation-timestamp">{msg.timestamp}</p>
-                                        {msg.unread > 0 && <span className="unread-badge">{msg.unread}</span>}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                    <div className="chat-window">
-                        {activeConversation ? (
-                             <>
-                                <div className="chat-header">{activeConversation.sender}</div>
-                                <div className="chat-body">
-                                    {activeConversation.conversation.map((c, i) => (
-                                        <div key={i} className={`message ${c.sender === 'You' ? 'sent' : 'received'}`}>
-                                            <p>{c.text}</p>
-                                            <span>{c.time}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                                <div className="chat-footer">
-                                    <form>
-                                        <input type="text" placeholder="Type a message..." />
-                                        <button type="submit" className="btn btn-primary">Send</button>
-                                    </form>
-                                </div>
-                            </>
-                        ) : (
-                             <div className="no-chat-selected">
-                                <MessagesIcon />
-                                <h3>Select a conversation</h3>
-                                <p>Start chatting with your coaches and teammates.</p>
-                            </div>
-                        )}
-                    </div>
                 </div>
-            </Card>
+            )}
+
+            {userResults.length === 0 && eventResults.length === 0 && (
+                <EmptyState title="No Results Found" message={`Your search for "${query}" did not return any results.`} />
+            )}
         </div>
     );
 };
 
-const AuditLogPage = ({ auditLogs }) => {
-    const [searchTerm, setSearchTerm] = useState('');
-
-    const filteredLogs = useMemo(() => {
-        if (!searchTerm) return auditLogs;
-        return auditLogs.filter(log =>
-            log.action.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            log.actor.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-    }, [auditLogs, searchTerm]);
+const TasksPage = ({ tasks, users, currentUser, onAddTaskClick, onEditTask, onDeleteTask, onToggleTask }) => {
+    const myTasks = tasks.filter(t => t.assignedTo === currentUser.id);
 
     return (
         <div className="page-container">
-            <div className="page-controls">
-                <input
-                    type="search"
-                    placeholder="Search logs by action or actor..."
-                    value={searchTerm}
-                    onChange={e => setSearchTerm(e.target.value)}
-                    style={{ width: '100%' }}
+             <div className="page-controls">
+                <div className="filters"></div>
+                <button className="btn btn-primary" onClick={onAddTaskClick}><PlusIcon/> Add Task</button>
+            </div>
+            <div className="card">
+                <div className="card-header">
+                    <h3>My Tasks</h3>
+                </div>
+                {myTasks.length > 0 ? (
+                    <div className="task-list">
+                        {myTasks.map(task => {
+                             const assignedByUser = users.find(u => u.id === task.assignedBy) || { name: 'System' };
+                             return (
+                                <div key={task.id} className={`task-item ${task.completed ? 'completed' : ''}`}>
+                                    <div className="task-main">
+                                        <input type="checkbox" className="task-checkbox" checked={task.completed} onChange={() => onToggleTask(task.id)} />
+                                        <div>
+                                            <p className="task-title">{task.title}</p>
+                                            <p className="task-meta">Due: {new Date(task.dueDate).toLocaleDateString()}</p>
+                                        </div>
+                                    </div>
+                                    <div className="action-buttons">
+                                        <button className="action-btn-icon edit-btn" onClick={() => onEditTask(task)}><EditIcon /></button>
+                                        <button className="action-btn-icon delete-btn" onClick={() => onDeleteTask(task)}><DeleteIcon /></button>
+                                    </div>
+                                </div>
+                             );
+                        })}
+                    </div>
+                ) : (
+                    <EmptyState title="No tasks assigned" message="You're all caught up!" />
+                )}
+            </div>
+        </div>
+    );
+}
+
+const AttendancePage = ({ trainingSessions, users, currentUser, handleAttendanceChange }) => {
+    const mySessions = trainingSessions.filter(s => s.coachId === currentUser.id);
+    const [selectedSessionId, setSelectedSessionId] = useState(mySessions[0]?.id || null);
+
+    const selectedSession = mySessions.find(s => s.id === selectedSessionId);
+    const athletesInSession = users.filter(u => selectedSession?.athleteIds.includes(u.id));
+
+    return (
+        <div className="page-container attendance-layout">
+            <div className="card session-list-card">
+                <div className="card-header"><h3>Training Sessions</h3></div>
+                {mySessions.map(session => (
+                    <div key={session.id} 
+                        className={`athlete-list-item ${session.id === selectedSessionId ? 'active' : ''}`}
+                        onClick={() => setSelectedSessionId(session.id)}
+                        style={{backgroundColor: session.id === selectedSessionId ? 'var(--primary-pink)' : 'transparent', borderRadius: '8px', padding: '10px'}}
+                    >
+                        <div>
+                            <p>{session.title}</p>
+                            <small>{new Date(session.date).toLocaleDateString()}</small>
+                        </div>
+                    </div>
+                ))}
+            </div>
+            <div className="card attendance-sheet-card">
+                 <div className="card-header"><h3>Attendance Sheet</h3></div>
+                 {selectedSession ? (
+                    <div className="attendance-list">
+                        {athletesInSession.map(athlete => {
+                             const attendanceStatus = selectedSession.attendance[athlete.id] || 'Unmarked';
+                             return (
+                                <div key={athlete.id} className="attendance-row">
+                                    <p>{athlete.name}</p>
+                                    <div className="attendance-actions">
+                                        <button className={`btn-attendance present ${attendanceStatus === 'Present' ? 'active' : ''}`} onClick={() => handleAttendanceChange(selectedSession.id, athlete.id, 'Present')}>Present</button>
+                                        <button className={`btn-attendance absent ${attendanceStatus === 'Absent' ? 'active' : ''}`} onClick={() => handleAttendanceChange(selectedSession.id, athlete.id, 'Absent')}>Absent</button>
+                                        <button className={`btn-attendance late ${attendanceStatus === 'Late' ? 'active' : ''}`} onClick={() => handleAttendanceChange(selectedSession.id, athlete.id, 'Late')}>Late</button>
+                                    </div>
+                                </div>
+                             )
+                        })}
+                    </div>
+                 ) : (
+                    <EmptyState title="No Session Selected" message="Please select a session from the list to view attendance." />
+                 )}
+            </div>
+        </div>
+    );
+};
+
+const TrainingMaterialsPage = () => {
+    return (
+        <div className="page-container">
+            <div className="card">
+                <div className="card-header">
+                    <h3>Training Materials</h3>
+                    <button className="btn btn-primary"><ArrowUpOnSquareIcon /> Upload PDF</button>
+                </div>
+                <EmptyState
+                    title="No Materials Uploaded"
+                    message="Upload training documents, schedules, or guides for your athletes."
                 />
             </div>
-            <Card>
-                <CardHeader title="Audit Logs" />
-                {filteredLogs.length > 0 ? (
-                    <div className="list-table">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Timestamp</th>
-                                    <th>Action</th>
-                                    <th>Actor</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {filteredLogs.map(log => (
-                                    <tr key={log.id}>
-                                        <td data-label="Timestamp">{new Date(log.timestamp).toLocaleString()}</td>
-                                        <td data-label="Action">{log.action}</td>
-                                        <td data-label="Actor">{log.actor}</td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                ) : (
-                    <EmptyState
-                        icon={<AuditLogIcon />}
-                        title="No Logs Found"
-                        message="No actions have been logged yet, or your search returned no results."
-                    />
-                )}
-            </Card>
         </div>
     );
 };
 
-const NotificationSettingsPage = ({ settings, setSettings, showToast }) => {
-    const handleToggle = () => {
-        setSettings(prev => ({ ...prev, enabled: !prev.enabled }));
-        showToast(`Notifications ${!settings.enabled ? 'enabled' : 'disabled'}!`, 'success');
-    };
-
-    // FIX: Add explicit type for the event object to resolve type errors.
-    const handleTimingChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        setSettings(prev => ({ ...prev, timing: Number(e.target.value) }));
-        showToast('Notification timing updated!', 'success');
-    };
+const CoachProfilePage = ({ currentUser, users }) => {
+    const coachAthletes = users.filter(u => u.role === 'Athlete' && u.coachId === currentUser.id);
 
     return (
         <div className="page-container">
-            <Card>
-                <CardHeader title="Notification Settings" />
-                <div className="settings-list">
-                    <div className="settings-item">
-                        <div>
-                            <h4>Event Reminders</h4>
-                            <p>Receive push notifications for upcoming events.</p>
-                        </div>
-                        <label className="toggle-switch">
-                            <input type="checkbox" checked={settings.enabled} onChange={handleToggle} />
-                            <span className="slider"></span>
-                        </label>
-                    </div>
-                    {settings.enabled && (
-                        <div className="settings-item">
-                            <div>
-                                <h4>Reminder Time</h4>
-                                <p>How far in advance would you like to be notified?</p>
-                            </div>
-                            <div className="form-group" style={{ marginBottom: 0 }}>
-                                <select value={settings.timing} onChange={handleTimingChange} style={{minWidth: '150px'}}>
-                                    <option value={1}>1 hour before</option>
-                                    <option value={12}>12 hours before</option>
-                                    <option value={24}>24 hours before</option>
-                                </select>
-                            </div>
-                        </div>
-                    )}
+            <div className="card">
+                <div className="card-header">
+                    <h3>{currentUser.name}'s Profile</h3>
                 </div>
-            </Card>
-        </div>
-    );
-};
-
-const ManageUsersPage = ({ users, setUsers, showToast, logAction }) => {
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [userToEdit, setUserToEdit] = useState(null);
-
-    const handleAddUser = () => {
-        setUserToEdit(null);
-        setIsModalOpen(true);
-    };
-
-    const handleEditUser = (user) => {
-        setUserToEdit(user);
-        setIsModalOpen(true);
-    };
-
-    const handleSaveUser = (userData) => {
-        if (userToEdit) {
-            logAction(`Updated user: ${userData.name}`);
-            setUsers(prev => prev.map(u => u.id === userToEdit.id ? { ...u, ...userData } : u));
-            showToast('User updated successfully!', 'success');
-        } else {
-            logAction(`Created new user: ${userData.name}`);
-            const newUser = { id: Date.now(), status: 'Active', ...userData };
-            setUsers(prev => [...prev, newUser]);
-            showToast('User created successfully!', 'success');
-        }
-        setIsModalOpen(false);
-    };
-    
-    return (
-         <div className="page-container">
-            <div className="page-controls">
-                <div/>
-                <button className="btn btn-primary" onClick={handleAddUser}><AddIcon /> Add User</button>
+                <div className="profile-details">
+                    <p><strong>Activity Specialization:</strong> {currentUser.activity}</p>
+                    <p><strong>Bio:</strong> {currentUser.bio || 'Not provided.'}</p>
+                    <p><strong>Areas of Expertise:</strong> {currentUser.expertise || 'Not specified.'}</p>
+                </div>
             </div>
-            <Card>
-                <CardHeader title="All Users" />
+             <div className="card">
+                <div className="card-header">
+                    <h3>Assigned Athletes ({coachAthletes.length})</h3>
+                </div>
                 <div className="list-table">
-                    <table>
-                        <thead>
-                            <tr><th>Name</th><th>Role</th><th>Status</th><th>Actions</th></tr>
-                        </thead>
+                     <table>
+                        <thead><tr><th>Name</th><th>Skill Level</th></tr></thead>
                         <tbody>
-                            {users.map(user => (
-                                <tr key={user.id}>
-                                    <td data-label="Name">{user.name}</td>
-                                    <td data-label="Role"><Pill text={user.role} type={user.role.toLowerCase().replace(/[^a-z]/g,'')} /></td>
-                                    <td data-label="Status"><Pill text={user.status} type={user.status.toLowerCase()} /></td>
-                                    <td data-label="Actions">
-                                        <div className="action-buttons">
-                                            <button className="action-btn-icon edit-btn" onClick={() => handleEditUser(user)} aria-label={`Edit ${user.name}`}><EditIcon /></button>
-                                        </div>
-                                    </td>
+                            {coachAthletes.map(athlete => (
+                                <tr key={athlete.id}>
+                                    <td data-label="Name">{athlete.name}</td>
+                                    <td data-label="Skill Level"><Pill text={athlete.skillLevel} type={athlete.skillLevel.toLowerCase()} /></td>
                                 </tr>
                             ))}
                         </tbody>
                     </table>
                 </div>
-            </Card>
-            <UserFormModal 
-                show={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                onSave={handleSaveUser}
-                user={userToEdit}
-                users={users}
-            />
+            </div>
+        </div>
+    );
+}
+
+// --- Modals and Utility Components ---
+
+const Pill = ({ text, type }) => <span className={`pill ${type}`}>{text}</span>;
+
+// Fix: Made the 'children' prop optional and added explicit types for props to resolve TypeScript errors.
+const EmptyState = ({ title, message, children }: { title: string; message: string; children?: React.ReactNode }) => (
+    <div className="empty-state">
+        <div className="empty-state-icon"><EmptyIcon /></div>
+        <h3>{title}</h3>
+        <p>{message}</p>
+        {children}
+    </div>
+);
+
+const ToastNotification = ({ message, type }) => {
+    const icon = {
+        success: <CheckCircleIcon />,
+        danger: <ExclamationCircleIcon />,
+        warning: <ExclamationCircleIcon />,
+        info: <InformationCircleIcon />,
+    }[type];
+
+    return (
+        <div className={`toast-notification ${type}`}>
+            {icon}
+            <span>{message}</span>
         </div>
     );
 };
 
-const UserFormModal = ({ show, onClose, onSave, user, users }) => {
-    // FIX: Initialize useState with <any> to allow for dynamic properties on formData and prevent property access errors.
-    const [formData, setFormData] = useState<any>({});
+const ConfirmDeleteModal = ({ isOpen, onClose, onConfirm, itemType, itemName }) => {
+    if (!isOpen) return null;
+    return (
+        <div className="modal-overlay">
+            <div className="modal-content">
+                <div className="modal-header">
+                    <h3>Confirm Deletion</h3>
+                    <button className="close-btn" onClick={onClose}><CloseIcon /></button>
+                </div>
+                <div className="modal-body">
+                    <p>Are you sure you want to delete the {itemType} "<strong>{itemName}</strong>"? This action cannot be undone.</p>
+                </div>
+                <div className="modal-actions">
+                    <button className="btn btn-secondary" onClick={onClose}>Cancel</button>
+                    <button className="btn btn-danger" onClick={onConfirm}>Delete</button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const FormModal = ({ isOpen, onClose, title, children }) => {
+    if (!isOpen) return null;
+    return (
+        <div className="modal-overlay">
+            <div className="modal-content">
+                <div className="modal-header">
+                    <h3>{title}</h3>
+                    <button className="close-btn" onClick={onClose}><CloseIcon /></button>
+                </div>
+                <div className="modal-body form-layout">
+                    {children}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const UserFormModal = ({ isOpen, onClose, onSave, user, coaches, parents }) => {
+    const [formData, setFormData] = useState({
+        id: null,
+        name: '',
+        role: 'Athlete',
+        // Athlete specific
+        activity: 'Skating',
+        skillLevel: 'Beginner',
+        ageGroup: 'U10',
+        coachId: '',
+        parentId: '',
+    });
 
     useEffect(() => {
         if (user) {
-            setFormData(user);
+            setFormData({
+                id: user.id || null,
+                name: user.name || '',
+                role: user.role || 'Athlete',
+                activity: user.activity || 'Skating',
+                skillLevel: user.skillLevel || 'Beginner',
+                ageGroup: user.ageGroup || 'U10',
+                coachId: user.coachId || '',
+                parentId: user.parentId || '',
+            });
         } else {
-            setFormData({ role: 'Athlete', name: '', status: 'Active' });
+            setFormData({
+                id: null, name: '', role: 'Athlete', activity: 'Skating', skillLevel: 'Beginner', ageGroup: 'U10', coachId: '', parentId: ''
+            });
         }
-    }, [user, show]);
+    }, [user]);
 
-    // FIX: Type the event parameter as 'any' to handle both standard event objects and custom objects passed to it. This resolves the 'e.target' access error.
-    const handleChange = (e: any) => {
+    const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
-    };
-    
-    const handleMultiSelectChange = (e, field) => {
-        const values = Array.from(e.target.selectedOptions, option => Number(option.value));
-        setFormData(prev => ({...prev, [field]: values}));
     };
 
     const handleSubmit = (e) => {
@@ -1633,402 +1880,281 @@ const UserFormModal = ({ show, onClose, onSave, user, users }) => {
         onSave(formData);
     };
 
-    const coaches = users.filter(u => u.role === 'Coach');
-    const parents = users.filter(u => u.role === 'Parent/Athlete');
-    const athletes = users.filter(u => u.role === 'Athlete');
-
     return (
-        <Modal show={show} onClose={onClose} title={user ? 'Edit User' : 'Add User'}>
-            <form onSubmit={handleSubmit} className="form-layout">
-                 <div className="form-grid">
-                    <div className="form-group">
-                        <label>Full Name</label>
-                        <input type="text" name="name" value={formData.name || ''} onChange={handleChange} required />
-                    </div>
-                     <div className="form-group">
-                        <label>Role</label>
-                        <select name="role" value={formData.role || ''} onChange={handleChange}>
-                            <option>Athlete</option>
-                            <option>Coach</option>
-                            <option>Parent/Athlete</option>
-                            <option>Admin</option>
-                        </select>
-                    </div>
-                </div>
-                {formData.role === 'Athlete' && (
-                     <div className="form-grid">
-                        <div className="form-group">
-                            <label>Activity</label>
-                            <input type="text" name="activity" value={formData.activity || ''} onChange={handleChange} />
-                        </div>
-                         <div className="form-group">
-                            <label>Skill Level</label>
-                            <select name="skillLevel" value={formData.skillLevel || 'Beginner'} onChange={handleChange}>
-                                <option>Beginner</option>
-                                <option>Intermediate</option>
-                                <option>Advanced</option>
-                            </select>
-                        </div>
-                        <div className="form-group">
-                            <label>Coach</label>
-                            <select name="coachId" value={formData.coachId || ''} onChange={e => handleChange({ target: { name: 'coachId', value: Number(e.target.value) }})}>
-                                <option value="">None</option>
-                                {coaches.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                            </select>
-                        </div>
-                         <div className="form-group">
-                            <label>Parent</label>
-                            <select name="parentId" value={formData.parentId || ''} onChange={e => handleChange({ target: { name: 'parentId', value: Number(e.target.value) }})}>
-                                <option value="">None</option>
-                                {parents.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                            </select>
-                        </div>
-                    </div>
-                )}
-                 {formData.role === 'Parent/Athlete' && (
-                     <div className="form-group">
-                        <label>Children</label>
-                        <select multiple name="childrenIds" value={formData.childrenIds || []} onChange={(e) => handleMultiSelectChange(e, 'childrenIds')}>
-                            {athletes.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
-                        </select>
-                    </div>
-                )}
+        <FormModal isOpen={isOpen} onClose={onClose} title={user ? 'Edit User' : 'Add User'}>
+            <form onSubmit={handleSubmit}>
                 <div className="form-group">
-                    <label>Status</label>
-                     <select name="status" value={formData.status || 'Active'} onChange={handleChange}>
-                        <option>Active</option>
-                        <option>Inactive</option>
+                    <label>Role</label>
+                    <select name="role" value={formData.role} onChange={handleChange}>
+                        {Object.keys(ROLES).map(r => <option key={r} value={r}>{r}</option>)}
                     </select>
                 </div>
-                <div className="modal-actions">
+                <div className="form-group">
+                    <label htmlFor="name">Full Name</label>
+                    <input type="text" id="name" name="name" value={formData.name} onChange={handleChange} required />
+                </div>
+                {formData.role === 'Athlete' && (
+                    <>
+                         <div className="form-group">
+                            <label>Activity</label>
+                            <select name="activity" value={formData.activity} onChange={handleChange}>
+                                <option value="Skating">Skating</option>
+                                <option value="Swimming">Swimming</option>
+                                <option value="Gymnastics">Gymnastics</option>
+                            </select>
+                        </div>
+                        <div className="form-group">
+                            <label>Skill Level</label>
+                            <select name="skillLevel" value={formData.skillLevel} onChange={handleChange}>
+                                <option value="Beginner">Beginner</option>
+                                <option value="Intermediate">Intermediate</option>
+                                <option value="Advanced">Advanced</option>
+                            </select>
+                        </div>
+                         <div className="form-group">
+                            <label>Coach</label>
+                            <select name="coachId" value={formData.coachId} onChange={handleChange}>
+                                <option value="">Assign a coach</option>
+                                {coaches.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                            </select>
+                        </div>
+                        <div className="form-group">
+                            <label>Parent</label>
+                            <select name="parentId" value={formData.parentId} onChange={handleChange}>
+                                <option value="">Assign a parent</option>
+                                {parents.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+                            </select>
+                        </div>
+                    </>
+                )}
+                <div className="form-actions">
                     <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
-                    <button type="submit" className="btn btn-primary">Save User</button>
+                    <button type="submit" className="btn btn-primary">Save Changes</button>
                 </div>
             </form>
-        </Modal>
+        </FormModal>
     );
 };
 
-const AttendancePage = ({ sessions, users, attendance, setAttendance, currentCoachId, showToast, logAction }) => {
-    const [selectedSession, setSelectedSession] = useState(null);
-    const athletes = users.filter(u => u.role === 'Athlete');
-    
-    const mySessions = sessions.filter(s => s.coachId === currentCoachId);
-    
-    const handleAttendanceChange = (athleteId, status) => {
-        setAttendance(prev => ({
-            ...prev,
-            [selectedSession.id]: {
-                ...prev[selectedSession.id],
-                [athleteId]: status
-            }
-        }));
-        const athleteName = athletes.find(a => a.id === athleteId)?.name;
-        logAction(`Marked ${athleteName} as ${status} for ${selectedSession.name}`);
-        showToast('Attendance updated!', 'success');
+const AthleteFormModal = ({ isOpen, onClose, onSave, coaches, parents }) => {
+    const [formData, setFormData] = useState({
+        name: '',
+        activity: 'Skating',
+        skillLevel: 'Beginner',
+        ageGroup: 'U10',
+        coachId: '',
+        parentId: '',
+    });
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const sessionAthletes = useMemo(() => {
-        if (!selectedSession) return [];
-        return athletes.filter(a => selectedSession.athleteIds.includes(a.id));
-    }, [selectedSession, athletes]);
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        onSave(formData);
+        // Reset form for next entry
+        setFormData({ name: '', activity: 'Skating', skillLevel: 'Beginner', ageGroup: 'U10', coachId: '', parentId: '' });
+    };
 
     return (
-        <div className="page-container">
-            <div className="attendance-layout">
-                <Card className="session-list-card">
-                    <CardHeader title="My Training Sessions" />
-                    <div className="session-list">
-                        {mySessions.map(session => (
-                            <div 
-                                key={session.id} 
-                                className={`session-item ${selectedSession?.id === session.id ? 'active' : ''}`}
-                                onClick={() => setSelectedSession(session)}
-                            >
-                                <p>{session.name}</p>
-                                <small>{new Date(session.date).toLocaleDateString()}</small>
-                            </div>
-                        ))}
+        <FormModal isOpen={isOpen} onClose={onClose} title="Register New Athlete">
+            <form onSubmit={handleSubmit}>
+                <div className="form-group">
+                    <label htmlFor="athleteName">Full Name</label>
+                    <input type="text" id="athleteName" name="name" value={formData.name} onChange={handleChange} required />
+                </div>
+                 <div className="form-grid">
+                    <div className="form-group">
+                        <label>Age Group</label>
+                        <select name="ageGroup" value={formData.ageGroup} onChange={handleChange}>
+                            <option value="U10">Under 10</option>
+                            <option value="10-14">10-14</option>
+                            <option value="15-18">15-18</option>
+                            <option value="Adult">Adult</option>
+                        </select>
                     </div>
-                </Card>
-                <Card className="attendance-sheet-card">
-                    <CardHeader title={selectedSession ? selectedSession.name : "Select a Session"} />
-                    {selectedSession ? (
-                        <div className="attendance-sheet">
-                            {sessionAthletes.map(athlete => {
-                                const currentStatus = attendance[selectedSession.id]?.[athlete.id];
-                                return (
-                                    <div key={athlete.id} className="attendance-row">
-                                        <p>{athlete.name}</p>
-                                        <div className="attendance-actions">
-                                            <button 
-                                                className={`btn-attendance present ${currentStatus === 'present' ? 'active' : ''}`}
-                                                onClick={() => handleAttendanceChange(athlete.id, 'present')}
-                                            >
-                                                Present
-                                            </button>
-                                            <button 
-                                                className={`btn-attendance absent ${currentStatus === 'absent' ? 'active' : ''}`}
-                                                onClick={() => handleAttendanceChange(athlete.id, 'absent')}
-                                            >
-                                                Absent
-                                            </button>
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    ) : (
-                        <EmptyState icon={<CheckCircleIcon />} title="No Session Selected" message="Please select a session from the list to mark attendance." />
-                    )}
-                </Card>
-            </div>
-        </div>
+                     <div className="form-group">
+                        <label>Activity</label>
+                        <select name="activity" value={formData.activity} onChange={handleChange}>
+                            <option value="Skating">Skating</option>
+                            <option value="Swimming">Swimming</option>
+                            <option value="Gymnastics">Gymnastics</option>
+                        </select>
+                    </div>
+                </div>
+                 <div className="form-group">
+                    <label>Skill Level</label>
+                    <select name="skillLevel" value={formData.skillLevel} onChange={handleChange}>
+                        <option value="Beginner">Beginner</option>
+                        <option value="Intermediate">Intermediate</option>
+                        <option value="Advanced">Advanced</option>
+                    </select>
+                </div>
+                 <div className="form-group">
+                    <label>Assign Coach</label>
+                    <select name="coachId" value={formData.coachId} onChange={handleChange}>
+                        <option value="">(Optional) Select a coach</option>
+                        {coaches.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                    </select>
+                </div>
+                <div className="form-group">
+                    <label>Assign Parent/Guardian</label>
+                    <select name="parentId" value={formData.parentId} onChange={handleChange}>
+                        <option value="">(Optional) Select a parent</option>
+                        {parents.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                    </select>
+                </div>
+                <div className="form-actions">
+                    <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
+                    <button type="submit" className="btn btn-primary">Register Athlete</button>
+                </div>
+            </form>
+        </FormModal>
     );
 };
 
-const FinancialReportsPage = ({ payments }) => {
-    const monthlyIncome = useMemo(() => {
-        const data = {};
-        payments.forEach(p => {
-            const month = new Date(p.date).toLocaleString('default', { month: 'short', year: 'numeric' });
-            data[month] = (data[month] || 0) + p.amount;
-        });
-        // FIX: Use .getTime() for explicit date comparison to satisfy TypeScript's strict arithmetic operation rules.
-        return Object.entries(data).map(([label, value]) => ({ date: new Date(label), value, label })).sort((a,b) => a.date.getTime() - b.date.getTime());
-    }, [payments]);
-    
-    const paymentMethodBreakdown = useMemo(() => {
-        const data = {};
-        payments.forEach(p => {
-            data[p.method] = (data[p.method] || 0) + 1;
-        });
-        return data;
-    }, [payments]);
-
-    const totalRevenue = payments.reduce((sum, p) => sum + p.amount, 0);
-    const outstandingBalance = 2500; // Mock data
-    const mostUsedMethod = Object.keys(paymentMethodBreakdown).reduce((a, b) => paymentMethodBreakdown[a] > paymentMethodBreakdown[b] ? a : b, '');
-
-    return (
-        <div className="page-container">
-            <div className="stats-grid">
-                <Card className="stat-card-lg"><h3>Ksh {totalRevenue.toLocaleString()}</h3><p>Total Revenue (All Time)</p></Card>
-                <Card className="stat-card-lg balance-due"><h3>Ksh {outstandingBalance.toLocaleString()}</h3><p>Outstanding Balances</p></Card>
-                <Card className="stat-card-lg"><h3>{mostUsedMethod}</h3><p>Most Used Payment Method</p></Card>
-            </div>
-            <Card>
-                <CardHeader title="Income Over Time" />
-                <ProgressChart 
-                    history={monthlyIncome.map(item => ({ date: item.date.toISOString(), description: `score: ${item.value}`}))}
-                    title=""
-                />
-            </Card>
-        </div>
-    );
-};
-
-
-
-const App = () => {
-    const [isAuthenticated, setIsAuthenticated] = useStickyState(false, 'auth');
-    const [page, setPage] = useState({ name: 'dashboard', params: {} });
-    const [isSidebarOpen, setSidebarOpen] = useState(false);
-    
-    const [role, setRole] = useStickyState('Admin', 'userRole');
-    const [users, setUsers] = useStickyState(initialUsers, 'usersV2');
-    const [events, setEvents] = useStickyState(initialEvents, 'events');
-    const [payments, setPayments] = useStickyState(initialPayments, 'payments');
-    const [tasks, setTasks] = useStickyState(initialTasks, 'tasks');
-    const [messages, setMessages] = useStickyState(initialMessages, 'messages');
-    const [badges, setBadges] = useStickyState(initialBadges, 'badges');
-    const [notifications, setNotifications] = useStickyState([], 'notifications');
-    const [auditLogs, setAuditLogs] = useStickyState([], 'auditLogs');
-    const [notificationSettings, setNotificationSettings] = useStickyState({ enabled: true, timing: 24 }, 'notificationSettings');
-    const [sessions, setSessions] = useStickyState(initialSessions, 'sessions');
-    const [attendance, setAttendance] = useStickyState({}, 'attendance');
-
-
-    const [toast, setToast] = useState({ show: false, message: '', type: 'info' });
-
-    // --- FOR DEMO: Define current user IDs ---
-    const currentCoachId = 6; // Logged in as David Omondi
-    const currentParentId = 4; // Logged in as Jane Wanjiku
-
-    const showToast = (message, type = 'info') => {
-        setToast({ show: true, message, type });
-    };
-
-    const logAction = useCallback((action) => {
-        const newLog = {
-            id: Date.now(),
-            timestamp: new Date().toISOString(),
-            action: action,
-            actor: role,
-        };
-        setAuditLogs(prev => [newLog, ...prev]);
-    }, [role, setAuditLogs]);
-    
-    const navigate = useCallback((pageName, params = {}) => {
-        window.scrollTo(0, 0);
-        setPage({ name: pageName, params });
-        if(pageName === 'login') {
-            setIsAuthenticated(false);
-        }
-    }, [setIsAuthenticated]);
-
-    const navigateRef = useRef(navigate);
-    navigateRef.current = navigate;
-    
-    const awardBadges = useCallback((athleteId) => {
-        setUsers(prevUsers => {
-            const athlete = prevUsers.find(a => a.id === athleteId);
-            if (!athlete) return prevUsers;
-
-            let updatedBadges = [...(athlete.badges || [])];
-            let badgeAwarded = false;
-
-            // Badge 1: First Competition
-            const hasCompetitionBadge = updatedBadges.includes('first_competition');
-            if (!hasCompetitionBadge) {
-                const hasAttendedEvent = events.some(e => (e.attendees || []).includes(athleteId));
-                if (hasAttendedEvent) {
-                    updatedBadges.push('first_competition');
-                    badgeAwarded = true;
-                    logAction(`Awarded 'First Competition' badge to ${athlete.name}`);
-                }
-            }
-
-            if (badgeAwarded) {
-                return prevUsers.map(a => a.id === athleteId ? { ...a, badges: updatedBadges } : a);
-            }
-            return prevUsers;
-        });
-    }, [events, setUsers, logAction]);
-
-    // Check for badges on initial load
-    useEffect(() => {
-        users.filter(u => u.role === 'Athlete').forEach(athlete => awardBadges(athlete.id));
-    }, []); // Run only once
+const EventFormModal = ({ isOpen, onClose, onSave, event, athletes }) => {
+    const [formData, setFormData] = useState({
+        id: null, title: '', date: '', description: '', category: 'Training', participants: []
+    });
 
     useEffect(() => {
-        if (!notificationSettings.enabled) {
-            return; 
+        if (event) {
+            setFormData({
+                id: event.id || null,
+                title: event.title || '',
+                date: event.date || '',
+                description: event.description || '',
+                category: event.category || 'Training',
+                participants: event.participants || []
+            });
+        } else {
+            setFormData({ id: null, title: '', date: '', description: '', category: 'Training', participants: [] });
         }
+    }, [event]);
 
-        const now = new Date().getTime();
-        const notificationWindow = notificationSettings.timing * 60 * 60 * 1000;
-
-        const upcomingEventNotifications = events
-            .filter(event => {
-                const eventTime = new Date(`${event.date}T${event.time}`).getTime();
-                return eventTime > now && (eventTime - now < notificationWindow);
-            })
-            .map(event => ({
-                id: `event-${event.id}`,
-                type: 'event',
-                title: 'Upcoming Event Reminder',
-                message: `${event.name} is starting soon!`,
-                date: new Date().toISOString(),
-                read: false,
-                link: () => navigateRef.current('event-details', { eventId: event.id })
-            }));
-
-        setNotifications(prev => {
-            const existingIds = new Set(prev.map(n => n.id));
-            const newNotifications = upcomingEventNotifications.filter(n => !existingIds.has(n.id));
-            if (newNotifications.length > 0) {
-              return [...prev, ...newNotifications].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-            }
-            return prev;
-        });
-    }, [events, setNotifications, notificationSettings]);
+    // Fix: Added explicit types to event handlers to allow TypeScript to correctly infer types down the line.
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
     
-    const pageTitles = {
-        'dashboard': 'Dashboard',
-        'athletes': 'Athletes',
-        'athlete-profile': 'Athlete Profile',
-        'events': 'Events',
-        'event-details': 'Event Details',
-        'payments': 'Payments',
-        'tasks': 'Tasks',
-        'messages': 'Messages',
-        'search-results': 'Search Results',
-        'audit-logs': 'Audit Logs',
-        'notification-settings': 'Settings',
-        'manage-users': 'User Management',
-        'attendance': 'Attendance Tracker',
-        'financial-reports': 'Financial Reports'
+    // Fix: Added explicit type to the event object to resolve property access on 'unknown' type.
+    const handleParticipantsChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const values = Array.from(e.target.selectedOptions, option => Number(option.value));
+        setFormData(prev => ({ ...prev, participants: values }));
     };
 
-    const renderPage = () => {
-        const pageName = page.name;
-        const params = page.params;
-        switch (pageName) {
-            case 'dashboard':
-                return <DashboardPage navigate={navigate} users={users} events={events} role={role} currentCoachId={currentCoachId} currentParentId={currentParentId} />;
-            case 'athletes':
-                return <AthletesPage users={users} setUsers={setUsers} navigate={navigate} showToast={showToast} logAction={logAction} role={role} currentCoachId={currentCoachId} />;
-            case 'athlete-profile':
-                return <AthleteProfilePage navigate={navigate} params={params} users={users} setUsers={setUsers} showToast={showToast} logAction={logAction} badges={badges} />;
-            case 'events':
-                return <EventsPage events={events} setEvents={setEvents} navigate={navigate} role={role} showToast={showToast} logAction={logAction} />;
-            case 'event-details':
-                return <EventDetailsPage params={params} events={events} users={users} setEvents={setEvents} role={role} showToast={showToast} onRegister={awardBadges} />;
-            case 'payments':
-                return <PaymentsPage payments={payments} />;
-            case 'tasks':
-                return <TasksPage tasks={tasks} setTasks={setTasks} users={users} showToast={showToast} logAction={logAction} />;
-            case 'messages':
-                return <MessagesPage messages={messages} />;
-            case 'search-results':
-                return <SearchResultsPage params={params} navigate={navigate} users={users} events={events} />;
-            case 'audit-logs':
-                return <AuditLogPage auditLogs={auditLogs} />;
-            case 'notification-settings':
-                return <NotificationSettingsPage settings={notificationSettings} setSettings={setNotificationSettings} showToast={showToast} />;
-            case 'manage-users':
-                return <ManageUsersPage users={users} setUsers={setUsers} showToast={showToast} logAction={logAction} />;
-             case 'attendance':
-                return <AttendancePage sessions={sessions} users={users} attendance={attendance} setAttendance={setAttendance} currentCoachId={currentCoachId} showToast={showToast} logAction={logAction} />;
-            case 'financial-reports':
-                return <FinancialReportsPage payments={payments} />;
-            default:
-                return <DashboardPage navigate={navigate} users={users} events={events} role={role} currentCoachId={currentCoachId} currentParentId={currentParentId} />;
-        }
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        onSave(formData);
     };
-
-    if (!isAuthenticated) {
-        return <LoginPage onLogin={() => { setIsAuthenticated(true); navigate('dashboard'); }} />;
-    }
 
     return (
-        <div className="dashboard-layout">
-            <Sidebar activePage={page.name} navigate={navigate} role={role} isSidebarOpen={isSidebarOpen} setSidebarOpen={setSidebarOpen} />
-            <div className="main-content">
-                <Header 
-                    title={pageTitles[page.name] || 'Dashboard'} 
-                    onMenuClick={() => setSidebarOpen(true)}
-                    role={role}
-                    setRole={setRole}
-                    navigate={navigate}
-                    notifications={notifications}
-                    setNotifications={setNotifications}
-                />
-                {renderPage()}
-            </div>
-            <MobileBottomNav activePage={page.name} navigate={navigate} role={role} />
-            {toast.show && (
-                <ToastNotification 
-                    message={toast.message} 
-                    type={toast.type} 
-                    onDismiss={() => setToast({ ...toast, show: false })} 
-                />
-            )}
-        </div>
+        <FormModal isOpen={isOpen} onClose={onClose} title={event ? 'Edit Event' : 'Create Event'}>
+            <form onSubmit={handleSubmit}>
+                <div className="form-group">
+                    <label htmlFor="eventTitle">Event Title</label>
+                    <input type="text" id="eventTitle" name="title" value={formData.title} onChange={handleChange} required />
+                </div>
+                 <div className="form-grid">
+                    <div className="form-group">
+                        <label htmlFor="eventDate">Date</label>
+                        <input type="date" id="eventDate" name="date" value={formData.date} onChange={handleChange} required />
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="eventCategory">Category</label>
+                        <select id="eventCategory" name="category" value={formData.category} onChange={handleChange}>
+                            <option value="Training">Training</option>
+                            <option value="Competition">Competition</option>
+                            <option value="Social">Social</option>
+                        </select>
+                    </div>
+                </div>
+                <div className="form-group">
+                    <label htmlFor="eventDescription">Description</label>
+                    <textarea id="eventDescription" name="description" rows="3" value={formData.description} onChange={handleChange}></textarea>
+                </div>
+                 <div className="form-group">
+                    <label htmlFor="eventParticipants">Participants</label>
+                    <select id="eventParticipants" name="participants" multiple value={formData.participants.map(String)} onChange={handleParticipantsChange}>
+                       {athletes.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+                    </select>
+                </div>
+                <div className="form-actions">
+                    <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
+                    <button type="submit" className="btn btn-primary">Save Event</button>
+                </div>
+            </form>
+        </FormModal>
     );
 };
 
-const container = document.getElementById('root');
-const root = createRoot(container);
+const TaskFormModal = ({ isOpen, onClose, onSave, task, coaches, users }) => {
+    const [formData, setFormData] = useState({
+        id: null, title: '', assignedTo: '', dueDate: ''
+    });
+
+    useEffect(() => {
+        if (task) {
+            setFormData({
+                id: task.id || null,
+                title: task.title || '',
+                // Fix: Ensured 'assignedTo' is always a string in the form state to prevent type mismatch errors.
+                assignedTo: task.assignedTo ? String(task.assignedTo) : '',
+                dueDate: task.dueDate || ''
+            });
+        } else {
+            setFormData({ id: null, title: '', assignedTo: '', dueDate: '' });
+        }
+    }, [task]);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        // Fix: Converted 'assignedTo' back to a number on save to maintain data consistency.
+        onSave({
+            ...formData,
+            assignedTo: parseInt(formData.assignedTo as string, 10),
+        });
+    };
+
+    const assignableUsers = users.filter(u => ['Admin', 'Coach', 'Manager'].includes(u.role));
+
+    return (
+        <FormModal isOpen={isOpen} onClose={onClose} title={task ? 'Edit Task' : 'Add Task'}>
+            <form onSubmit={handleSubmit}>
+                <div className="form-group">
+                    <label>Task Title</label>
+                    <input type="text" name="title" value={formData.title} onChange={handleChange} required />
+                </div>
+                <div className="form-grid">
+                    <div className="form-group">
+                        <label>Assign To</label>
+                        <select name="assignedTo" value={formData.assignedTo} onChange={handleChange} required>
+                            <option value="" disabled>Select a user</option>
+                            {assignableUsers.map(u => <option key={u.id} value={u.id}>{u.name} ({u.role})</option>)}
+                        </select>
+                    </div>
+                    <div className="form-group">
+                        <label>Due Date</label>
+                        <input type="date" name="dueDate" value={formData.dueDate} onChange={handleChange} required />
+                    </div>
+                </div>
+                <div className="form-actions">
+                    <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
+                    <button type="submit" className="btn btn-primary">Save Task</button>
+                </div>
+            </form>
+        </FormModal>
+    );
+};
+
+const root = createRoot(document.getElementById('root'));
 root.render(<App />);
