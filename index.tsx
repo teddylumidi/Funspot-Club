@@ -546,7 +546,7 @@ const App = () => {
             <div className="main-content">
                 <MainHeader
                     onMenuClick={() => setIsSidebarOpen(true)}
-                    pageName={page.name}
+                    page={page}
                     currentUser={currentUser}
                     onRoleChange={switchRole}
                     unreadNotificationCount={unreadNotificationCount}
@@ -778,9 +778,16 @@ const MobileBottomNav = ({ currentPage, navigate, currentUser }) => {
     );
 }
 
-const MainHeader = ({ onMenuClick, pageName, currentUser, onRoleChange, unreadNotificationCount, onNotificationClick, isNotificationPanelOpen, notificationPanelRef, notifications, setNotifications, navigate, isRoleSwitcherOpen, onRoleSwitcherClick, roleSwitcherRef, handleSearch, searchTerm, setSearchTerm }) => {
-    const pageTitle = pageName.charAt(0).toUpperCase() + pageName.slice(1).replace(/([A-Z])/g, ' $1').trim();
-    const today = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+const MainHeader = ({ onMenuClick, page, currentUser, onRoleChange, unreadNotificationCount, onNotificationClick, isNotificationPanelOpen, notificationPanelRef, notifications, setNotifications, navigate, isRoleSwitcherOpen, onRoleSwitcherClick, roleSwitcherRef, handleSearch, searchTerm, setSearchTerm }) => {
+    const { name: pageName, query } = page;
+
+    const pageTitle = pageName === 'search' && query
+        ? 'Search Results'
+        : pageName.charAt(0).toUpperCase() + pageName.slice(1).replace(/([A-Z])/g, ' $1').trim();
+
+    const subTitle = pageName === 'search' && query
+        ? `Results for "${query}"`
+        : new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
     
     return (
         <header className="main-header">
@@ -788,7 +795,7 @@ const MainHeader = ({ onMenuClick, pageName, currentUser, onRoleChange, unreadNo
                 <button className="hamburger-menu" onClick={onMenuClick} aria-label="Open menu"><MenuIcon /></button>
                 <div>
                     <h1>{pageTitle}</h1>
-                    <p className="current-date">{today}</p>
+                    <p className="current-date">{subTitle}</p>
                 </div>
             </div>
             <div className="header-right">
@@ -1739,8 +1746,8 @@ const SettingsPage = () => {
     );
 };
 
-const SearchResultsPage = ({ page, users, events, navigate }) => {
-    const { query } = page;
+const SearchResultsPage = ({ page, users, events, navigate, currentUser, onEditUser }) => {
+    const query = page.query || '';
     const lowercasedQuery = query.toLowerCase();
 
     const userResults = users.filter(u =>
@@ -1755,6 +1762,29 @@ const SearchResultsPage = ({ page, users, events, navigate }) => {
         e.category.toLowerCase().includes(lowercasedQuery)
     );
 
+    const handleViewUser = (user) => {
+        if (user.role === 'Athlete') {
+            navigate('athleteProfile', { athleteId: user.id });
+        } else if (user.role === 'Coach' && user.id === currentUser.id) {
+            navigate('profile');
+        } else if (currentUser.role === 'Admin' || currentUser.role === 'Manager') {
+            onEditUser(user);
+        }
+    };
+
+    const getUserActionInfo = (user) => {
+        if (user.role === 'Athlete') {
+            return { visible: true, text: 'View Profile' };
+        }
+        if (user.role === 'Coach' && user.id === currentUser.id) {
+            return { visible: true, text: 'View Profile' };
+        }
+        if (currentUser.role === 'Admin' || currentUser.role === 'Manager') {
+            return { visible: true, text: 'Edit User' };
+        }
+        return { visible: false, text: '' };
+    };
+
     return (
         <div className="page-container">
             <h3>Search Results for "{query}"</h3>
@@ -1763,18 +1793,23 @@ const SearchResultsPage = ({ page, users, events, navigate }) => {
                 <div className="card">
                     <div className="card-header"><h4>Users</h4></div>
                     <div className="search-results-list">
-                    {userResults.map(user => (
-                        <div key={user.id} className="search-result-card">
-                            <div className="result-icon">{ROLES[user.role]}</div>
-                            <div className="result-details">
-                                <h4>{user.name}</h4>
-                                <p>{user.role}</p>
+                    {userResults.map(user => {
+                        const actionInfo = getUserActionInfo(user);
+                        return (
+                            <div key={user.id} className="search-result-card">
+                                <div className="result-icon">{ROLES[user.role]}</div>
+                                <div className="result-details">
+                                    <h4>{user.name}</h4>
+                                    <p>{user.role}</p>
+                                </div>
+                                <div className="result-actions">
+                                    {actionInfo.visible && (
+                                        <button className="btn btn-secondary" onClick={() => handleViewUser(user)}>{actionInfo.text}</button>
+                                    )}
+                                </div>
                             </div>
-                            <div className="result-actions">
-                                <button className="btn btn-secondary" onClick={() => user.role === 'Athlete' ? navigate('athleteProfile', { athleteId: user.id }) : null}>View</button>
-                            </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                     </div>
                 </div>
             )}
@@ -2079,9 +2114,10 @@ const UserFormModal = ({ isOpen, onClose, onSave, user, coaches, parents }) => {
             saveData.activity = formData.activity;
             saveData.skillLevel = formData.skillLevel as User['skillLevel'];
             saveData.ageGroup = formData.ageGroup;
-            // FIX: The value from a select input is a string. It must be parsed to a number before saving.
-            saveData.coachId = formData.coachId ? parseInt(formData.coachId, 10) : undefined;
-            saveData.parentId = formData.parentId ? parseInt(formData.parentId, 10) : undefined;
+            // [FIX] The value from a select input is a string. It must be converted to a number to match the 'User' type.
+            saveData.coachId = formData.coachId ? Number(formData.coachId) : undefined;
+            // [FIX] The value from a select input is a string. It must be converted to a number to match the 'User' type.
+            saveData.parentId = formData.parentId ? Number(formData.parentId) : undefined;
             if(formData.emergencyContactName) {
                 saveData.emergencyContact = {
                     name: formData.emergencyContactName,
@@ -2211,10 +2247,10 @@ const AthleteFormModal = ({ isOpen, onClose, onSave, coaches, parents }) => {
         const { emergencyContactName, emergencyContactPhone, emergencyContactRelation, medicalNotes, parentId, coachId, ...rest } = formData;
         const athleteData = {
             ...rest,
-            // FIX: Parse parentId from string to number. The value from a select input is always a string.
-            parentId: parentId ? parseInt(parentId, 10) : undefined,
-            // FIX: Parse coachId from string to number. The value from a select input is always a string.
-            coachId: coachId ? parseInt(coachId, 10) : undefined,
+            // [FIX] The value from a select input is a string. It must be converted to a number to match the 'User' type.
+            parentId: parentId ? Number(parentId) : undefined,
+            // [FIX] The value from a select input is a string. It must be converted to a number to match the 'User' type.
+            coachId: coachId ? Number(coachId) : undefined,
             medicalNotes,
             emergencyContact: (emergencyContactName)
                 ? { name: emergencyContactName, phone: emergencyContactPhone, relation: emergencyContactRelation }
@@ -2417,8 +2453,8 @@ const TaskFormModal = ({ isOpen, onClose, onSave, task, users }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        // FIX: The value from a select input is a string. It must be parsed to a number before saving.
-        onSave({ ...formData, assignedTo: parseInt(formData.assignedTo, 10) });
+        // [FIX] The value for `assignedTo` from the form is a string and needs to be converted to a number.
+        onSave({ ...formData, assignedTo: Number(formData.assignedTo) });
     };
 
     const assignableUsers = users.filter(u => ['Admin', 'Coach', 'Manager'].includes(u.role));
