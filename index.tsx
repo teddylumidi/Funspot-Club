@@ -1,5 +1,4 @@
 
-
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { createRoot } from 'react-dom/client';
 
@@ -21,7 +20,8 @@ const useStickyState = (defaultValue, key) => {
     useEffect(() => {
         try {
             window.localStorage.setItem(key, JSON.stringify(value));
-        } catch (error) {
+        } catch (error)
+        {
             console.error(`Error setting sticky state for key "${key}":`, error);
         }
     }, [key, value]);
@@ -71,6 +71,12 @@ interface User {
     history?: { id: number; date: string; description: string }[];
     bio?: string;
     expertise?: string;
+    // New fields
+    emergencyContact?: { name: string; phone: string; relation: string; };
+    medicalNotes?: string;
+    contactDetails?: { phone: string; email: string; }; // For parents
+    certifications?: string[]; // For coaches
+    availability?: string; // For coaches
 }
 
 interface TrainingSession {
@@ -99,6 +105,8 @@ const initialUsers: User[] = [
     // Athletes
     { id: 1, name: 'Sarah Wanjiku', role: 'Athlete', status: 'Active', skillLevel: 'Beginner', activity: 'Skating', ageGroup: 'U10', parentId: 4, coachId: 6, badges: ['first_competition'], 
         height: "5'4\"", weight: "120 lbs", personalBest: "Triple Salchow attempt", goals: "Qualify for regional championship.",
+        emergencyContact: { name: 'David Odhiambo', phone: '+254 712 345 678', relation: 'Father' },
+        medicalNotes: 'Mild asthma, carries an inhaler. No known allergies.',
         history: [
             { id: 4, date: '2025-09-12', description: 'New high score: 92 in choreography.' },
             { id: 3, date: '2025-09-05', description: 'Completed speed circuit. Time: 120 seconds.' },
@@ -109,12 +117,14 @@ const initialUsers: User[] = [
     { id: 3, name: 'Emily Akinyi', role: 'Athlete', status: 'Inactive', skillLevel: 'Advanced', activity: 'Skating', ageGroup: 'U10', parentId: 5, coachId: 6, badges: [], history: [] },
 
     // Parents
-    { id: 4, name: 'David Odhiambo', role: 'Parent', status: 'Active' },
-    { id: 5, name: 'Maryanne Wambui', role: 'Parent', status: 'Active' },
+    { id: 4, name: 'David Odhiambo', role: 'Parent', status: 'Active', contactDetails: { phone: '+254 712 345 678', email: 'david.o@example.com' } },
+    { id: 5, name: 'Maryanne Wambui', role: 'Parent', status: 'Active', contactDetails: { phone: '+254 722 987 654', email: 'mary.w@example.com' } },
 
     // Coaches
-    { id: 6, name: 'Coach Brian', role: 'Coach', status: 'Active', skillLevel: 'Advanced', activity: 'Skating', bio: "10+ years of competitive skating experience.", expertise: "Figure Skating Choreography" },
-    { id: 7, name: 'Coach Alice', role: 'Coach', status: 'Active', skillLevel: 'Intermediate', activity: 'Swimming', bio: "Certified swimming instructor specializing in youth programs.", expertise: "Freestyle & Butterfly" },
+    { id: 6, name: 'Coach Brian', role: 'Coach', status: 'Active', skillLevel: 'Advanced', activity: 'Skating', bio: "10+ years of competitive skating experience.", expertise: "Figure Skating Choreography",
+      certifications: ['Certified Skating Coach (Level 3)', 'First Aid & CPR Certified'], availability: 'Mon-Fri, 9am - 5pm' },
+    { id: 7, name: 'Coach Alice', role: 'Coach', status: 'Active', skillLevel: 'Intermediate', activity: 'Swimming', bio: "Certified swimming instructor specializing in youth programs.", expertise: "Freestyle & Butterfly",
+      certifications: ['Certified Swim Instructor (WSI)', 'Lifeguard Certified'], availability: 'Weekends, 10am - 4pm' },
     
     // Admin
     { id: 8, name: 'Admin User', role: 'Admin', status: 'Active' },
@@ -137,13 +147,13 @@ const initialEvents: Event[] = [
 ];
 
 const initialPayments = [
-    { id: 'p1', userId: 4, amount: 150, date: '2025-08-01', status: 'Paid', description: 'August Fees (S. Wanjiku)' },
-    { id: 'p2', userId: 4, amount: 75, date: '2025-08-05', status: 'Paid', description: 'Swim Meet Entry (J. Kamau)' },
-    { id: 'p3', userId: 5, amount: 150, date: '2025-08-01', status: 'Overdue', description: 'August Fees (E. Akinyi)' },
+    { id: 'p1', userId: 4, amount: 15000, date: '2025-08-01', status: 'Paid', description: 'August Fees (S. Wanjiku)' },
+    { id: 'p2', userId: 4, amount: 7500, date: '2025-08-05', status: 'Paid', description: 'Swim Meet Entry (J. Kamau)' },
+    { id: 'p3', userId: 5, amount: 15000, date: '2025-08-01', status: 'Overdue', description: 'August Fees (E. Akinyi)' },
 ];
 
 const initialNotifications = [
-    { id: 1, userId: 4, type: 'payment', message: 'Your payment of $150 was successful.', timestamp: '2025-08-01T10:00:00Z', read: true },
+    { id: 1, userId: 4, type: 'payment', message: 'Your payment of KES 15000 was successful.', timestamp: '2025-08-01T10:00:00Z', read: true },
     { id: 2, userId: 4, type: 'event', message: 'Reminder: Summer Skate-a-thon is this Saturday!', timestamp: '2025-08-28T09:00:00Z', read: false },
 ];
 
@@ -253,26 +263,119 @@ const App = () => {
     const parents = useMemo(() => users.filter(u => u.role === 'Parent'), [users]);
     const unreadNotificationCount = useMemo(() => notifications.filter(n => n.userId === currentUser.id && !n.read).length, [notifications, currentUser.id]);
 
-    // Dynamic notification generation for overdue payments
+    // Enhanced dynamic notification generation for overdue payments
     useEffect(() => {
-        if (currentUser.role === 'Parent') {
-            const overduePayments = payments.filter(p => p.userId === currentUser.id && p.status === 'Overdue');
-            const hasOverdueNotification = notifications.some(n => n.userId === currentUser.id && n.type === 'payment' && n.message.toLowerCase().includes('overdue'));
+        if (currentUser.role !== 'Parent') return;
 
-            if (overduePayments.length > 0 && !hasOverdueNotification) {
-                const newNotification = {
-                    id: (notifications.length > 0 ? Math.max(...notifications.map(n => n.id)) : 0) + 1,
-                    userId: currentUser.id,
-                    type: 'payment',
-                    message: `You have an outstanding balance of $${overduePayments.reduce((sum, p) => sum + p.amount, 0)}. Please settle it soon.`,
-                    timestamp: new Date().toISOString(),
-                    read: false,
-                    page: 'payments'
-                };
-                setNotifications(prev => [...prev, newNotification]);
+        // Using a unique key for this type of notification to easily find/update/remove it
+        const overdueNotificationKey = `overdue-payment-alert-for-user-${currentUser.id}`;
+
+        const overduePayments = payments.filter(p => p.userId === currentUser.id && p.status === 'Overdue');
+        const totalOverdue = overduePayments.reduce((sum, p) => sum + p.amount, 0);
+
+        setNotifications(prevNotifications => {
+            const existingNotificationIndex = prevNotifications.findIndex(n => n.key === overdueNotificationKey);
+            
+            // Case 1: Overdue balance exists
+            if (totalOverdue > 0) {
+                const newMessage = `You have an outstanding balance of KES ${totalOverdue}. Please settle it soon.`;
+                
+                // If notification already exists
+                if (existingNotificationIndex > -1) {
+                    const existingNotification = prevNotifications[existingNotificationIndex];
+                    // Update if message is different, otherwise no change
+                    if (existingNotification.message !== newMessage) {
+                        const updatedNotifications = [...prevNotifications];
+                        updatedNotifications[existingNotificationIndex] = {
+                            ...existingNotification,
+                            message: newMessage,
+                            timestamp: new Date().toISOString(),
+                            read: false // Mark as unread again if amount changes
+                        };
+                        return updatedNotifications;
+                    }
+                    return prevNotifications; // No change needed
+                } else {
+                    // Create new notification if it doesn't exist
+                    const newNotification = {
+                        id: (prevNotifications.length > 0 ? Math.max(...prevNotifications.map(n => n.id)) : 0) + 1,
+                        key: overdueNotificationKey, // Add our unique key
+                        userId: currentUser.id,
+                        type: 'payment',
+                        message: newMessage,
+                        timestamp: new Date().toISOString(),
+                        read: false,
+                        page: 'payments'
+                    };
+                    return [...prevNotifications, newNotification];
+                }
+            } 
+            // Case 2: No overdue balance
+            else {
+                // If notification exists, remove it
+                if (existingNotificationIndex > -1) {
+                    return prevNotifications.filter((_, index) => index !== existingNotificationIndex);
+                }
+                return prevNotifications; // No change needed
             }
-        }
-    }, [currentUser, payments, notifications, setNotifications]);
+        });
+    }, [currentUser.id, currentUser.role, payments, setNotifications]);
+
+    // useEffect for upcoming training session notifications
+    useEffect(() => {
+        if (currentUser.role !== 'Athlete' && currentUser.role !== 'Coach') return;
+
+        const now = new Date();
+        const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+
+        const relevantSessions = trainingSessions.filter(session => {
+            const sessionDate = new Date(`${session.date}T${session.startTime}`);
+            return sessionDate > now && sessionDate <= tomorrow;
+        });
+
+        if (relevantSessions.length === 0) return;
+
+        setNotifications(prevNotifications => {
+            const newNotifications = [];
+            
+            relevantSessions.forEach(session => {
+                const isParticipant = session.coachId === currentUser.id || session.athleteIds.includes(currentUser.id);
+
+                if (isParticipant) {
+                    const notificationKey = `session-reminder-${session.id}-for-user-${currentUser.id}`;
+                    const alreadyNotified = prevNotifications.some(n => n.key === notificationKey);
+
+                    if (!alreadyNotified) {
+                        const sessionDate = new Date(`${session.date}T${session.startTime}`);
+                        const timeString = sessionDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                        
+                        newNotifications.push({
+                            id: 0, // placeholder id
+                            key: notificationKey,
+                            userId: currentUser.id,
+                            type: 'event',
+                            message: `Reminder: Your session "${session.title}" is today at ${timeString}.`,
+                            timestamp: new Date().toISOString(),
+                            read: false,
+                            page: 'schedule'
+                        });
+                    }
+                }
+            });
+
+            if (newNotifications.length > 0) {
+                let maxId = prevNotifications.length > 0 ? Math.max(...prevNotifications.map(n => n.id)) : 0;
+                const notificationsToAdd = newNotifications.map(notification => {
+                    maxId++;
+                    return { ...notification, id: maxId };
+                });
+                return [...prevNotifications, ...notificationsToAdd];
+            }
+
+            return prevNotifications;
+        });
+
+    }, [currentUser.id, currentUser.role, trainingSessions, setNotifications]);
 
     const showToast = (message, type = 'success') => {
         setToast({ message, type });
@@ -305,8 +408,6 @@ const App = () => {
             id: Math.max(0, ...users.map(u => u.id)) + 1, 
             role: 'Athlete',
             status: 'Active',
-            parentId: parseInt(athleteData.parentId, 10) || undefined,
-            coachId: parseInt(athleteData.coachId, 10) || undefined,
             badges: [],
             history: []
         };
@@ -372,6 +473,20 @@ const App = () => {
                     : session
             )
         );
+    };
+
+    const handleMakePayment = (userId, method) => {
+        showToast(`Processing ${method} payment...`, 'info');
+        setTimeout(() => {
+            setPayments(prevPayments =>
+                prevPayments.map(p =>
+                    p.userId === userId && p.status === 'Overdue'
+                        ? { ...p, status: 'Paid', date: new Date().toISOString().split('T')[0] }
+                        : p
+                )
+            );
+            showToast(`${method} payment successful! Your balance is cleared.`, 'success');
+        }, 2000); // Simulate network delay
     };
 
     const handleSearch = (e) => {
@@ -479,6 +594,8 @@ const App = () => {
                     onAddTaskClick={() => { setEditingTask(null); setIsTaskModalOpen(true); }}
                     onAddAthleteClick={() => setIsAthleteModalOpen(true)}
                     handleAttendanceChange={handleAttendanceChange}
+                    handleMakePayment={handleMakePayment}
+                    showToast={showToast}
                 />
             </div>
             <MobileBottomNav currentPage={page.name} navigate={navigate} currentUser={currentUser} />
@@ -486,7 +603,7 @@ const App = () => {
             {toast && <ToastNotification message={toast.message} type={toast.type} />}
             {isUserModalOpen && <UserFormModal isOpen={isUserModalOpen} onClose={() => { setIsUserModalOpen(false); setEditingUser(null); }} onSave={handleSaveUser} user={editingUser} coaches={coaches} parents={parents} />}
             {isEventModalOpen && <EventFormModal isOpen={isEventModalOpen} onClose={() => { setIsEventModalOpen(false); setEditingEvent(null); }} onSave={handleSaveEvent} event={editingEvent} athletes={athletes} />}
-            {isTaskModalOpen && <TaskFormModal isOpen={isTaskModalOpen} onClose={() => { setIsTaskModalOpen(false); setEditingTask(null); }} onSave={handleSaveTask} task={editingTask} coaches={coaches} users={users} />}
+            {isTaskModalOpen && <TaskFormModal isOpen={isTaskModalOpen} onClose={() => { setIsTaskModalOpen(false); setEditingTask(null); }} onSave={handleSaveTask} task={editingTask} users={users} />}
             {isAthleteModalOpen && <AthleteFormModal isOpen={isAthleteModalOpen} onClose={() => setIsAthleteModalOpen(false)} onSave={handleSaveAthlete} coaches={coaches} parents={parents} />}
             {deleteConfirmation && <ConfirmDeleteModal isOpen={!!deleteConfirmation} onClose={() => setDeleteConfirmation(null)} onConfirm={deleteConfirmation.onConfirm} itemType={deleteConfirmation.type} itemName={deleteConfirmation.data.name || deleteConfirmation.data.title} />}
         </div>
@@ -800,7 +917,7 @@ const DashboardPage = ({ currentUser, users, events, payments, navigate }) => {
                         <ExclamationCircleIcon />
                         <div className="banner-content">
                             <h4>Action Required: Overdue Payment</h4>
-                            <p>You have an outstanding balance of ${overduePayments.reduce((sum, p) => sum + p.amount, 0)}. Please settle it soon.</p>
+                            <p>You have an outstanding balance of KES {overduePayments.reduce((sum, p) => sum + p.amount, 0)}. Please settle it soon.</p>
                         </div>
                         <div className="banner-action">View Payments</div>
                     </div>
@@ -858,7 +975,7 @@ const AdminDashboard = ({ users, events, payments }) => (
             <div className="card stat-card-lg"><h3>{users.length}</h3><p>Total Users</p></div>
             <div className="card stat-card-lg"><h3>{users.filter(u => u.role === 'Athlete').length}</h3><p>Athletes</p></div>
             <div className="card stat-card-lg"><h3>{events.length}</h3><p>Events</p></div>
-            <div className="card stat-card-lg"><h3>${payments.filter(p => p.status === 'Paid').reduce((acc, p) => acc + p.amount, 0)}</h3><p>Revenue</p></div>
+            <div className="card stat-card-lg"><h3>KES {payments.filter(p => p.status === 'Paid').reduce((acc, p) => acc + p.amount, 0)}</h3><p>Revenue</p></div>
         </div>
         <div className="dashboard-grid">
             <div className="card grid-col-span-2">
@@ -880,7 +997,7 @@ const ManagerDashboard = ({ users, events, payments }) => (
             <div className="card stat-card-lg"><h3>{users.filter(u => u.role === 'Athlete').length}</h3><p>Total Athletes</p></div>
             <div className="card stat-card-lg"><h3>{users.filter(u => u.role === 'Coach').length}</h3><p>Coaches</p></div>
             <div className="card stat-card-lg"><h3>{events.length}</h3><p>Total Events</p></div>
-            <div className="card stat-card-lg"><h3>${payments.filter(p => p.status === 'Paid').reduce((acc, p) => acc + p.amount, 0)}</h3><p>Total Revenue</p></div>
+            <div className="card stat-card-lg"><h3>KES {payments.filter(p => p.status === 'Paid').reduce((acc, p) => acc + p.amount, 0)}</h3><p>Total Revenue</p></div>
         </div>
         <div className="card">
             <div className="card-header">
@@ -933,7 +1050,7 @@ const ParentDashboard = ({ currentUser, users, payments }) => {
         <div className="dashboard-grid">
              <div className={`card ${totalDue > 0 ? 'balance-due' : ''}`}>
                 <h3>Account Balance</h3>
-                <p>{totalDue > 0 ? `You have an outstanding balance of $${totalDue}` : 'All payments are up to date.'}</p>
+                <p>{totalDue > 0 ? `You have an outstanding balance of KES ${totalDue}` : 'All payments are up to date.'}</p>
             </div>
             <div className="card">
                 <h3>My Children</h3>
@@ -1138,8 +1255,36 @@ const AthleteProfilePage = ({ page, users, navigate, showToast }) => {
                     <p><strong>Skill Level:</strong> {athlete.skillLevel}</p>
                     <p><strong>Age Group:</strong> {athlete.ageGroup}</p>
                     {coach && <p><strong>Coach:</strong> {coach.name}</p>}
-                    {parent && <p><strong>Parent:</strong> {parent.name}</p>}
+                    {parent && (
+                        <>
+                            <p><strong>Parent/Guardian:</strong> {parent.name}</p>
+                            {parent.contactDetails && (
+                                <p><strong>Parent Contact:</strong> {parent.contactDetails.phone} | {parent.contactDetails.email}</p>
+                            )}
+                        </>
+                    )}
                 </div>
+            </div>
+
+            <div className="card card-sensitive">
+                <div className="card-header"><h3>Confidential Information</h3></div>
+                {athlete.emergencyContact && (
+                    <div className="profile-details">
+                         <h4>Emergency Contact</h4>
+                         <p><strong>Name:</strong> {athlete.emergencyContact.name}</p>
+                         <p><strong>Relation:</strong> {athlete.emergencyContact.relation}</p>
+                         <p><strong>Phone:</strong> {athlete.emergencyContact.phone}</p>
+                    </div>
+                )}
+                 {athlete.medicalNotes && (
+                    <div className="profile-details" style={{marginTop: '16px'}}>
+                        <h4>Medical Notes</h4>
+                        <p>{athlete.medicalNotes}</p>
+                    </div>
+                )}
+                 {(!athlete.emergencyContact && !athlete.medicalNotes) && (
+                    <p>No confidential information on file.</p>
+                )}
             </div>
 
             <div className="card">
@@ -1376,7 +1521,7 @@ const EventDetailsPage = ({ page, events, users, currentUser, onEditEvent, onDel
     );
 };
 
-const PaymentsPage = ({ payments, users, currentUser }) => {
+const PaymentsPage = ({ payments, users, currentUser, handleMakePayment }) => {
     let userPayments = [];
     if (currentUser.role === 'Admin' || currentUser.role === 'Manager') {
         userPayments = payments;
@@ -1388,14 +1533,27 @@ const PaymentsPage = ({ payments, users, currentUser }) => {
     }
     
     const totalPaid = userPayments.filter(p=>p.status === 'Paid').reduce((acc, p) => acc + p.amount, 0);
-    const totalDue = userPayments.filter(p=>p.status !== 'Paid').reduce((acc, p) => acc + p.amount, 0);
+    const totalDue = userPayments.filter(p=>p.status === 'Overdue').reduce((acc, p) => acc + p.amount, 0);
 
     return (
          <div className="page-container">
             <div className="stats-grid">
-                <div className="card"><h4>${totalPaid}</h4><p>Total Paid</p></div>
-                <div className="card"><h4>${totalDue}</h4><p>Total Due</p></div>
+                <div className="card"><h4>KES {totalPaid}</h4><p>Total Paid</p></div>
+                <div className="card"><h4>KES {totalDue}</h4><p>Total Due</p></div>
             </div>
+            {currentUser.role === 'Parent' && totalDue > 0 && (
+                 <div className="card">
+                     <div className="card-header">
+                        <h3>Make a Payment</h3>
+                     </div>
+                     <p>Select your preferred payment method to clear your outstanding balance of KES {totalDue}.</p>
+                     <div className="payment-options">
+                        <button className="btn btn-payment mpesa" onClick={() => handleMakePayment(currentUser.id, 'M-Pesa')}>Pay with M-Pesa</button>
+                        <button className="btn btn-payment card" onClick={() => handleMakePayment(currentUser.id, 'Card')}>Pay with Card</button>
+                        <button className="btn btn-payment paypal" onClick={() => handleMakePayment(currentUser.id, 'PayPal')}>Pay with PayPal</button>
+                     </div>
+                 </div>
+            )}
             <div className="card">
                  <div className="card-header">
                     <h3>Transaction History</h3>
@@ -1418,7 +1576,7 @@ const TransactionItem = ({ transaction, users }) => {
             </div>
             <div className="transaction-amount">
                 <h4 style={{ color: transaction.status === 'Paid' ? 'var(--success)' : 'var(--danger)' }}>
-                    ${transaction.amount}
+                    KES {transaction.amount}
                 </h4>
                 <Pill text={transaction.status} type={transaction.status.toLowerCase()} />
             </div>
@@ -1585,8 +1743,17 @@ const SearchResultsPage = ({ page, users, events, navigate }) => {
     const { query } = page;
     const lowercasedQuery = query.toLowerCase();
 
-    const userResults = users.filter(u => u.name.toLowerCase().includes(lowercasedQuery));
-    const eventResults = events.filter(e => e.title.toLowerCase().includes(lowercasedQuery) || e.description.toLowerCase().includes(lowercasedQuery));
+    const userResults = users.filter(u =>
+        u.name.toLowerCase().includes(lowercasedQuery) ||
+        u.role.toLowerCase().includes(lowercasedQuery) ||
+        (u.activity && u.activity.toLowerCase().includes(lowercasedQuery))
+    );
+
+    const eventResults = events.filter(e =>
+        e.title.toLowerCase().includes(lowercasedQuery) ||
+        e.description.toLowerCase().includes(lowercasedQuery) ||
+        e.category.toLowerCase().includes(lowercasedQuery)
+    );
 
     return (
         <div className="page-container">
@@ -1761,6 +1928,15 @@ const CoachProfilePage = ({ currentUser, users }) => {
                     <p><strong>Activity Specialization:</strong> {currentUser.activity}</p>
                     <p><strong>Bio:</strong> {currentUser.bio || 'Not provided.'}</p>
                     <p><strong>Areas of Expertise:</strong> {currentUser.expertise || 'Not specified.'}</p>
+                    {currentUser.availability && <p><strong>Availability:</strong> {currentUser.availability}</p>}
+                    {currentUser.certifications && currentUser.certifications.length > 0 && (
+                        <div>
+                             <p><strong>Certifications:</strong></p>
+                             <ul className="certifications-list">
+                                {currentUser.certifications.map((cert, index) => <li key={index}>{cert}</li>)}
+                             </ul>
+                        </div>
+                    )}
                 </div>
             </div>
              <div className="card">
@@ -1854,48 +2030,74 @@ const FormModal = ({ isOpen, onClose, title, children }) => {
 
 const UserFormModal = ({ isOpen, onClose, onSave, user, coaches, parents }) => {
     const [formData, setFormData] = useState({
-        id: null,
-        name: '',
-        role: 'Athlete',
+        id: null, name: '', role: 'Athlete',
         // Athlete specific
-        activity: 'Skating',
-        skillLevel: 'Beginner',
-        ageGroup: 'U10',
-        coachId: '',
-        parentId: '',
+        activity: 'Skating', skillLevel: 'Beginner', ageGroup: 'U10', coachId: '', parentId: '',
+        emergencyContactName: '', emergencyContactPhone: '', emergencyContactRelation: '', medicalNotes: '',
+        // Coach specific
+        certifications: '', availability: '',
     });
 
     useEffect(() => {
+        const resetState = {
+            id: null, name: '', role: 'Athlete', activity: 'Skating', skillLevel: 'Beginner', ageGroup: 'U10', 
+            coachId: '', parentId: '', emergencyContactName: '', emergencyContactPhone: '', 
+            emergencyContactRelation: '', medicalNotes: '', certifications: '', availability: '',
+        };
+
         if (user) {
             setFormData({
-                id: user.id || null,
-                name: user.name || '',
-                role: user.role || 'Athlete',
-                activity: user.activity || 'Skating',
-                skillLevel: user.skillLevel || 'Beginner',
-                ageGroup: user.ageGroup || 'U10',
-                coachId: user.coachId || '',
-                parentId: user.parentId || '',
+                ...resetState,
+                id: user.id || null, name: user.name || '', role: user.role || 'Athlete',
+                activity: user.activity || 'Skating', skillLevel: user.skillLevel || 'Beginner',
+                ageGroup: user.ageGroup || 'U10', coachId: user.coachId ? String(user.coachId) : '', parentId: user.parentId ? String(user.parentId) : '',
+                emergencyContactName: user.emergencyContact?.name || '',
+                emergencyContactPhone: user.emergencyContact?.phone || '',
+                emergencyContactRelation: user.emergencyContact?.relation || '',
+                medicalNotes: user.medicalNotes || '',
+                certifications: user.certifications?.join(', ') || '',
+                availability: user.availability || '',
             });
         } else {
-            setFormData({
-                id: null, name: '', role: 'Athlete', activity: 'Skating', skillLevel: 'Beginner', ageGroup: 'U10', coachId: '', parentId: ''
-            });
+            setFormData(resetState);
         }
     }, [user]);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        onSave({
-            ...formData,
-            coachId: parseInt(String(formData.coachId), 10) || undefined,
-            parentId: parseInt(String(formData.parentId), 10) || undefined,
-        });
+        
+        const saveData: Partial<User> & { id: number | null; name: string; role: Role } = {
+            id: formData.id, name: formData.name, role: formData.role as Role, 
+        };
+
+        if (formData.role === 'Athlete') {
+            saveData.activity = formData.activity;
+            saveData.skillLevel = formData.skillLevel as User['skillLevel'];
+            saveData.ageGroup = formData.ageGroup;
+            // FIX: The value from a select input is a string. It must be parsed to a number before saving.
+            saveData.coachId = formData.coachId ? parseInt(formData.coachId, 10) : undefined;
+            saveData.parentId = formData.parentId ? parseInt(formData.parentId, 10) : undefined;
+            if(formData.emergencyContactName) {
+                saveData.emergencyContact = {
+                    name: formData.emergencyContactName,
+                    phone: formData.emergencyContactPhone,
+                    relation: formData.emergencyContactRelation,
+                };
+            }
+            saveData.medicalNotes = formData.medicalNotes;
+        }
+
+        if (formData.role === 'Coach') {
+            saveData.certifications = formData.certifications.split(',').map(c => c.trim()).filter(Boolean);
+            saveData.availability = formData.availability;
+        }
+
+        onSave(saveData);
     };
 
     return (
@@ -1913,38 +2115,77 @@ const UserFormModal = ({ isOpen, onClose, onSave, user, coaches, parents }) => {
                 </div>
                 {formData.role === 'Athlete' && (
                     <>
+                        <div className="form-section-divider">Basic Info</div>
+                        <div className="form-grid">
+                            <div className="form-group">
+                                <label>Activity</label>
+                                <select name="activity" value={formData.activity} onChange={handleChange}>
+                                    <option value="Skating">Skating</option>
+                                    <option value="Swimming">Swimming</option>
+                                    <option value="Gymnastics">Gymnastics</option>
+                                </select>
+                            </div>
+                            <div className="form-group">
+                                <label>Skill Level</label>
+                                <select name="skillLevel" value={formData.skillLevel} onChange={handleChange}>
+                                    <option value="Beginner">Beginner</option>
+                                    <option value="Intermediate">Intermediate</option>
+                                    <option value="Advanced">Advanced</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div className="form-grid">
+                             <div className="form-group">
+                                <label>Coach</label>
+                                <select name="coachId" value={formData.coachId} onChange={handleChange}>
+                                    <option value="">Assign a coach</option>
+                                    {coaches.map((c) => <option key={c.id} value={String(c.id)}>{c.name}</option>)}
+                                </select>
+                            </div>
+                            <div className="form-group">
+                                <label>Parent</label>
+                                <select name="parentId" value={formData.parentId} onChange={handleChange}>
+                                    <option value="">Assign a parent</option>
+                                    {parents.map((p) => <option key={p.id} value={String(p.id)}>{p.name}</option>)}
+                                </select>
+                            </div>
+                        </div>
+                        <div className="form-section-divider">Confidential</div>
                          <div className="form-group">
-                            <label>Activity</label>
-                            <select name="activity" value={formData.activity} onChange={handleChange}>
-                                <option value="Skating">Skating</option>
-                                <option value="Swimming">Swimming</option>
-                                <option value="Gymnastics">Gymnastics</option>
-                            </select>
+                            <label>Emergency Contact Name</label>
+                            <input type="text" name="emergencyContactName" value={formData.emergencyContactName} onChange={handleChange} />
+                        </div>
+                         <div className="form-grid">
+                             <div className="form-group">
+                                <label>Emergency Contact Phone</label>
+                                <input type="tel" name="emergencyContactPhone" value={formData.emergencyContactPhone} onChange={handleChange} />
+                            </div>
+                            <div className="form-group">
+                                <label>Relation</label>
+                                <input type="text" name="emergencyContactRelation" value={formData.emergencyContactRelation} onChange={handleChange} />
+                            </div>
                         </div>
                         <div className="form-group">
-                            <label>Skill Level</label>
-                            <select name="skillLevel" value={formData.skillLevel} onChange={handleChange}>
-                                <option value="Beginner">Beginner</option>
-                                <option value="Intermediate">Intermediate</option>
-                                <option value="Advanced">Advanced</option>
-                            </select>
-                        </div>
-                         <div className="form-group">
-                            <label>Coach</label>
-                            <select name="coachId" value={formData.coachId} onChange={handleChange}>
-                                <option value="">Assign a coach</option>
-                                {coaches.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-                            </select>
-                        </div>
-                        <div className="form-group">
-                            <label>Parent</label>
-                            <select name="parentId" value={formData.parentId} onChange={handleChange}>
-                                <option value="">Assign a parent</option>
-                                {parents.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-                            </select>
+                            <label>Medical Notes</label>
+                            <textarea name="medicalNotes" value={formData.medicalNotes} onChange={handleChange} rows="3"></textarea>
                         </div>
                     </>
                 )}
+
+                {formData.role === 'Coach' && (
+                    <>
+                        <div className="form-section-divider">Professional Info</div>
+                        <div className="form-group">
+                            <label>Certifications (comma-separated)</label>
+                            <input type="text" name="certifications" value={formData.certifications} onChange={handleChange} />
+                        </div>
+                        <div className="form-group">
+                            <label>Availability</label>
+                            <input type="text" name="availability" value={formData.availability} onChange={handleChange} placeholder="e.g., Mon-Fri, 9am - 5pm"/>
+                        </div>
+                    </>
+                )}
+
                 <div className="form-actions">
                     <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
                     <button type="submit" className="btn btn-primary">Save Changes</button>
@@ -1956,24 +2197,35 @@ const UserFormModal = ({ isOpen, onClose, onSave, user, coaches, parents }) => {
 
 const AthleteFormModal = ({ isOpen, onClose, onSave, coaches, parents }) => {
     const [formData, setFormData] = useState({
-        name: '',
-        activity: 'Skating',
-        skillLevel: 'Beginner',
-        ageGroup: 'U10',
-        coachId: '',
-        parentId: '',
+        name: '', activity: 'Skating', skillLevel: 'Beginner', ageGroup: 'U10', coachId: '', parentId: '',
+        emergencyContactName: '', emergencyContactPhone: '', emergencyContactRelation: '', medicalNotes: '',
     });
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        onSave(formData);
+        const { emergencyContactName, emergencyContactPhone, emergencyContactRelation, medicalNotes, parentId, coachId, ...rest } = formData;
+        const athleteData = {
+            ...rest,
+            // FIX: Parse parentId from string to number. The value from a select input is always a string.
+            parentId: parentId ? parseInt(parentId, 10) : undefined,
+            // FIX: Parse coachId from string to number. The value from a select input is always a string.
+            coachId: coachId ? parseInt(coachId, 10) : undefined,
+            medicalNotes,
+            emergencyContact: (emergencyContactName)
+                ? { name: emergencyContactName, phone: emergencyContactPhone, relation: emergencyContactRelation }
+                : undefined,
+        };
+        onSave(athleteData);
         // Reset form for next entry
-        setFormData({ name: '', activity: 'Skating', skillLevel: 'Beginner', ageGroup: 'U10', coachId: '', parentId: '' });
+        setFormData({ 
+            name: '', activity: 'Skating', skillLevel: 'Beginner', ageGroup: 'U10', coachId: '', parentId: '',
+            emergencyContactName: '', emergencyContactPhone: '', emergencyContactRelation: '', medicalNotes: '',
+        });
     };
 
     return (
@@ -1990,7 +2242,6 @@ const AthleteFormModal = ({ isOpen, onClose, onSave, coaches, parents }) => {
                             <option value="U10">Under 10</option>
                             <option value="10-14">10-14</option>
                             <option value="15-18">15-18</option>
-                            <option value="Adult">Adult</option>
                         </select>
                     </div>
                      <div className="form-group">
@@ -2001,8 +2252,8 @@ const AthleteFormModal = ({ isOpen, onClose, onSave, coaches, parents }) => {
                             <option value="Gymnastics">Gymnastics</option>
                         </select>
                     </div>
-                </div>
-                 <div className="form-group">
+                 </div>
+                <div className="form-group">
                     <label>Skill Level</label>
                     <select name="skillLevel" value={formData.skillLevel} onChange={handleChange}>
                         <option value="Beginner">Beginner</option>
@@ -2010,19 +2261,40 @@ const AthleteFormModal = ({ isOpen, onClose, onSave, coaches, parents }) => {
                         <option value="Advanced">Advanced</option>
                     </select>
                 </div>
+                 <div className="form-grid">
+                     <div className="form-group">
+                        <label>Coach</label>
+                        <select name="coachId" value={formData.coachId} onChange={handleChange}>
+                            <option value="">Assign a coach</option>
+                            {coaches.map((c) => <option key={c.id} value={String(c.id)}>{c.name}</option>)}
+                        </select>
+                    </div>
+                    <div className="form-group">
+                        <label>Parent</label>
+                        <select name="parentId" value={formData.parentId} onChange={handleChange}>
+                            <option value="">Assign a parent</option>
+                            {parents.map((p) => <option key={p.id} value={String(p.id)}>{p.name}</option>)}
+                        </select>
+                    </div>
+                </div>
+                <div className="form-section-divider">Confidential (Optional)</div>
                  <div className="form-group">
-                    <label>Assign Coach</label>
-                    <select name="coachId" value={formData.coachId} onChange={handleChange}>
-                        <option value="">(Optional) Select a coach</option>
-                        {coaches.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                    </select>
+                    <label>Emergency Contact Name</label>
+                    <input type="text" name="emergencyContactName" value={formData.emergencyContactName} onChange={handleChange} />
+                </div>
+                 <div className="form-grid">
+                     <div className="form-group">
+                        <label>Emergency Contact Phone</label>
+                        <input type="tel" name="emergencyContactPhone" value={formData.emergencyContactPhone} onChange={handleChange} />
+                    </div>
+                    <div className="form-group">
+                        <label>Relation</label>
+                        <input type="text" name="emergencyContactRelation" value={formData.emergencyContactRelation} onChange={handleChange} />
+                    </div>
                 </div>
                 <div className="form-group">
-                    <label>Assign Parent/Guardian</label>
-                    <select name="parentId" value={formData.parentId} onChange={handleChange}>
-                        <option value="">(Optional) Select a parent</option>
-                        {parents.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                    </select>
+                    <label>Medical Notes</label>
+                    <textarea name="medicalNotes" value={formData.medicalNotes} onChange={handleChange} rows="3"></textarea>
                 </div>
                 <div className="form-actions">
                     <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
@@ -2035,7 +2307,12 @@ const AthleteFormModal = ({ isOpen, onClose, onSave, coaches, parents }) => {
 
 const EventFormModal = ({ isOpen, onClose, onSave, event, athletes }) => {
     const [formData, setFormData] = useState({
-        id: null, title: '', date: '', description: '', category: 'Training', participants: []
+        id: null,
+        title: '',
+        date: '',
+        description: '',
+        category: 'Competition',
+        participants: []
     });
 
     useEffect(() => {
@@ -2045,58 +2322,62 @@ const EventFormModal = ({ isOpen, onClose, onSave, event, athletes }) => {
                 title: event.title || '',
                 date: event.date || '',
                 description: event.description || '',
-                category: event.category || 'Training',
+                category: event.category || 'Competition',
                 participants: event.participants || []
             });
         } else {
-            setFormData({ id: null, title: '', date: '', description: '', category: 'Training', participants: [] });
+            setFormData({ id: null, title: '', date: '', description: '', category: 'Competition', participants: [] });
         }
     }, [event]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+        if (name === 'category') {
+            setFormData(prev => ({ ...prev, category: value as Event['category'] }));
+        } else {
+            setFormData(prev => ({ ...prev, [name]: value }));
+        }
     };
-    
+
     const handleParticipantsChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const values = Array.from(e.target.selectedOptions, option => Number(option.value));
-        setFormData(prev => ({ ...prev, participants: values }));
+        const selectedOptions = Array.from(e.target.selectedOptions, option => parseInt(option.value, 10));
+        setFormData(prev => ({ ...prev, participants: selectedOptions }));
     };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        onSave(formData);
+        onSave({ ...formData });
     };
 
     return (
         <FormModal isOpen={isOpen} onClose={onClose} title={event ? 'Edit Event' : 'Create Event'}>
             <form onSubmit={handleSubmit}>
                 <div className="form-group">
-                    <label htmlFor="eventTitle">Event Title</label>
-                    <input type="text" id="eventTitle" name="title" value={formData.title} onChange={handleChange} required />
+                    <label htmlFor="title">Event Title</label>
+                    <input type="text" id="title" name="title" value={formData.title} onChange={handleChange} required />
                 </div>
-                 <div className="form-grid">
+                <div className="form-grid">
                     <div className="form-group">
-                        <label htmlFor="eventDate">Date</label>
-                        <input type="date" id="eventDate" name="date" value={formData.date} onChange={handleChange} required />
+                        <label htmlFor="date">Date</label>
+                        <input type="date" id="date" name="date" value={formData.date} onChange={handleChange} required />
                     </div>
                     <div className="form-group">
-                        <label htmlFor="eventCategory">Category</label>
-                        <select id="eventCategory" name="category" value={formData.category} onChange={handleChange}>
-                            <option value="Training">Training</option>
+                        <label>Category</label>
+                        <select name="category" value={formData.category} onChange={handleChange}>
                             <option value="Competition">Competition</option>
+                            <option value="Training">Training</option>
                             <option value="Social">Social</option>
                         </select>
                     </div>
                 </div>
                 <div className="form-group">
-                    <label htmlFor="eventDescription">Description</label>
-                    <textarea id="eventDescription" name="description" rows="3" value={formData.description} onChange={handleChange}></textarea>
+                    <label htmlFor="description">Description</label>
+                    <textarea id="description" name="description" value={formData.description} onChange={handleChange} rows="3"></textarea>
                 </div>
                  <div className="form-group">
-                    <label htmlFor="eventParticipants">Participants</label>
-                    <select id="eventParticipants" name="participants" multiple value={formData.participants.map(String)} onChange={handleParticipantsChange}>
-                       {athletes.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+                    <label>Participants</label>
+                    <select multiple name="participants" value={formData.participants.map(String)} onChange={handleParticipantsChange}>
+                        {athletes.map(a => <option key={a.id} value={String(a.id)}>{a.name}</option>)}
                     </select>
                 </div>
                 <div className="form-actions">
@@ -2108,13 +2389,16 @@ const EventFormModal = ({ isOpen, onClose, onSave, event, athletes }) => {
     );
 };
 
-const TaskFormModal = ({ isOpen, onClose, onSave, task, coaches, users }) => {
+const TaskFormModal = ({ isOpen, onClose, onSave, task, users }) => {
     const [formData, setFormData] = useState({
-        id: null, title: '', assignedTo: '', dueDate: ''
+        id: null,
+        title: '',
+        assignedTo: '',
+        dueDate: ''
     });
-
+    
     useEffect(() => {
-        if (task) {
+        if(task) {
             setFormData({
                 id: task.id || null,
                 title: task.title || '',
@@ -2122,47 +2406,41 @@ const TaskFormModal = ({ isOpen, onClose, onSave, task, coaches, users }) => {
                 dueDate: task.dueDate || ''
             });
         } else {
-            setFormData({ id: null, title: '', assignedTo: '', dueDate: '' });
+            setFormData({ id: null, title: '', assignedTo: '', dueDate: ''});
         }
     }, [task]);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
-        // FIX: The `assignedTo` field was being passed as a string from the form.
-        // This converts it to a number to match the expected data type.
-        onSave({
-            id: formData.id,
-            title: formData.title,
-            dueDate: formData.dueDate,
-            assignedTo: parseInt(formData.assignedTo, 10),
-        });
+        // FIX: The value from a select input is a string. It must be parsed to a number before saving.
+        onSave({ ...formData, assignedTo: parseInt(formData.assignedTo, 10) });
     };
 
     const assignableUsers = users.filter(u => ['Admin', 'Coach', 'Manager'].includes(u.role));
 
     return (
         <FormModal isOpen={isOpen} onClose={onClose} title={task ? 'Edit Task' : 'Add Task'}>
-            <form onSubmit={handleSubmit}>
+             <form onSubmit={handleSubmit}>
                 <div className="form-group">
-                    <label>Task Title</label>
-                    <input type="text" name="title" value={formData.title} onChange={handleChange} required />
+                    <label htmlFor="taskTitle">Title</label>
+                    <input type="text" id="taskTitle" name="title" value={formData.title} onChange={handleChange} required />
                 </div>
                 <div className="form-grid">
                     <div className="form-group">
-                        <label>Assign To</label>
-                        <select name="assignedTo" value={formData.assignedTo} onChange={handleChange} required>
-                            <option value="" disabled>Select a user</option>
-                            {assignableUsers.map(u => <option key={u.id} value={u.id}>{u.name} ({u.role})</option>)}
+                        <label htmlFor="assignedTo">Assign To</label>
+                        <select id="assignedTo" name="assignedTo" value={formData.assignedTo} onChange={handleChange} required>
+                            <option value="">Select a user</option>
+                            {assignableUsers.map(u => <option key={u.id} value={String(u.id)}>{u.name} ({u.role})</option>)}
                         </select>
                     </div>
                     <div className="form-group">
-                        <label>Due Date</label>
-                        <input type="date" name="dueDate" value={formData.dueDate} onChange={handleChange} required />
+                        <label htmlFor="dueDate">Due Date</label>
+                        <input type="date" id="dueDate" name="dueDate" value={formData.dueDate} onChange={handleChange} required />
                     </div>
                 </div>
                 <div className="form-actions">
@@ -2171,8 +2449,10 @@ const TaskFormModal = ({ isOpen, onClose, onSave, task, coaches, users }) => {
                 </div>
             </form>
         </FormModal>
-    );
+    )
 };
 
-const root = createRoot(document.getElementById('root'));
+
+const container = document.getElementById('root');
+const root = createRoot(container);
 root.render(<App />);

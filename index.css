@@ -1,3 +1,4 @@
+
 :root {
   --primary-pink: #E91E63;
   --primary-pink-hover: #F06292;
@@ -659,6 +660,15 @@ body {
     padding-top: 16px;
     border-top: 1px solid var(--border-color);
 }
+.form-section-divider {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-color);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+}
 
 /* List Table (Mobile First) */
 .list-table table {
@@ -718,6 +728,12 @@ body {
 .pill.admin { background-color: var(--danger); color: white; }
 .pill.athlete { background-color: var(--orange-light); color: var(--orange-dark); }
 .pill.manager { background-color: var(--purple-light); color: var(--purple-dark); }
+.pill.paid { background-color: var(--green-light); color: var(--green-dark); }
+.pill.overdue { background-color: var(--danger); color: white; }
+.pill.competition { background-color: var(--danger); color: white; }
+.pill.training { background-color: var(--info); color: white; }
+.pill.social { background-color: var(--success); color: white; }
+
 
 .action-buttons {
     display: flex;
@@ -792,6 +808,9 @@ body {
     max-width: 450px;
     border: 1px solid var(--border-color);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
 }
 
 .modal-header {
@@ -799,6 +818,7 @@ body {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 12px;
+    flex-shrink: 0;
 }
 
 .modal-header h3 {
@@ -813,6 +833,11 @@ body {
     cursor: pointer;
 }
 
+.modal-body {
+    overflow-y: auto;
+    flex-grow: 1;
+}
+
 .modal-body p {
     color: var(--text-secondary);
     line-height: 1.6;
@@ -823,6 +848,7 @@ body {
     justify-content: flex-end;
     gap: 12px;
     margin-top: 20px;
+    flex-shrink: 0;
 }
 
 /* Events Page */
@@ -961,6 +987,32 @@ body {
     font-weight: 500;
     margin-right: 8px;
 }
+.card-sensitive {
+    border-color: var(--danger);
+}
+.card-sensitive h4 {
+    margin-bottom: 8px;
+    font-size: 15px;
+    color: var(--warning);
+}
+.certifications-list {
+    list-style-type: none;
+    margin-top: 8px;
+    padding-left: 16px;
+}
+.certifications-list li {
+    position: relative;
+    padding-left: 20px;
+    margin-bottom: 6px;
+    color: var(--text-secondary);
+}
+.certifications-list li::before {
+    content: '✔';
+    position: absolute;
+    left: 0;
+    color: var(--success);
+}
+
 
 /* Achievements & Badges */
 .badge-list {
@@ -1337,9 +1389,26 @@ body {
     text-align: right;
 }
 .transaction-amount h4 {
-    color: var(--success);
     font-size: 15px;
 }
+
+/* Payments Page */
+.payment-options {
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.btn-payment {
+    justify-content: center;
+    padding: 12px;
+    font-size: 15px;
+    border: 1px solid transparent;
+}
+.btn-payment.mpesa { background-color: #4CAF50; color: white; }
+.btn-payment.card { background-color: #03A9F4; color: white; }
+.btn-payment.paypal { background-color: #003087; color: white; }
 
 /* Settings Page */
 .settings-item {
@@ -1566,6 +1635,7 @@ input:checked + .slider:before {
         color: var(--text-secondary);
         text-align: center;
         height: 100%;
+        flex-grow: 1;
     }
     .no-chat-selected svg { width: 48px; height: 48px; }
 
@@ -1630,6 +1700,9 @@ input:checked + .slider:before {
         flex-grow: 1;
     }
     .calendar-day { height: 60px; }
+    .payment-options {
+        flex-direction: row;
+    }
 }
 
 /* Desktop Styles */
