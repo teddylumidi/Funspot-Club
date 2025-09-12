@@ -1,3 +1,5 @@
+
+
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { createRoot } from 'react-dom/client';
 
@@ -67,7 +69,6 @@ interface User {
     personalBest?: string;
     goals?: string;
     history?: { id: number; date: string; description: string }[];
-    // Fix: Added optional bio and expertise properties for Coach users.
     bio?: string;
     expertise?: string;
 }
@@ -144,7 +145,6 @@ const initialPayments = [
 const initialNotifications = [
     { id: 1, userId: 4, type: 'payment', message: 'Your payment of $150 was successful.', timestamp: '2025-08-01T10:00:00Z', read: true },
     { id: 2, userId: 4, type: 'event', message: 'Reminder: Summer Skate-a-thon is this Saturday!', timestamp: '2025-08-28T09:00:00Z', read: false },
-    { id: 3, userId: 5, type: 'payment', message: 'Your payment for August fees is overdue.', timestamp: '2025-08-15T11:00:00Z', read: false, page: 'payments' },
 ];
 
 const initialTasks = [
@@ -202,7 +202,7 @@ const CheckCircleIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none
 const ExclamationCircleIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" /></svg>;
 const InformationCircleIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" /></svg>;
 const UserCircleIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg>;
-const BriefcaseIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M20.25 14.15v4.098a2.25 2.25 0 0 1-2.25 2.25h-13.5a2.25 2.25 0 0 1-2.25-2.25V14.15M12 12.375a.375.375 0 0 1 .375.375v1.875c0 .207-.168.375-.375.375h-1.5a.375.375 0 0 1-.375-.375V12.75c0-.207.168-.375.375-.375h1.5Z" /><path strokeLinecap="round" strokeLinejoin="round" d="M12 12.375a.375.375 0 0 0-.375-.375h-1.5a.375.375 0 0 0-.375.375v1.875c0 .207.168.375.375.375h1.5a.375.375 0 0 0 .375-.375V12.75Zm-6-9h12c.621 0 1.125.504 1.125 1.125v3.375c0 .621-.504 1.125-1.125 1.125h-12A1.125 1.125 0 0 1 4.5 7.875V4.5A1.125 1.125 0 0 1 5.625 3.375Z" /></svg>;
+const BriefcaseIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M20.25 14.15v4.098a2.25 2.25 0 0 1-2.25 2.25h-13.5a2.25 2.25 0 0 1-2.25-2.25V14.15M12 12.375a.375.375 0 0 1 .375.375v1.875c0 .207-.168.375-.375.375h-1.5a.375.375 0 0 1-.375-.375V12.75c0-.207.168.375.375-.375h1.5Z" /><path strokeLinecap="round" strokeLinejoin="round" d="M12 12.375a.375.375 0 0 0-.375-.375h-1.5a.375.375 0 0 0-.375.375v1.875c0 .207.168.375.375.375h1.5a.375.375 0 0 0 .375-.375V12.75Zm-6-9h12c.621 0 1.125.504 1.125 1.125v3.375c0 .621-.504 1.125-1.125 1.125h-12A1.125 1.125 0 0 1 4.5 7.875V4.5A1.125 1.125 0 0 1 5.625 3.375Z" /></svg>;
 const DocumentTextIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m-1.5 12.5h-1.5a3.375 3.375 0 0 1-3.375-3.375V8.625c0-1.002.413-1.911 1.096-2.594A3.375 3.375 0 0 1 5.625 5.25h12.75c1.002 0 1.911.413 2.594 1.096A3.375 3.375 0 0 1 21 8.625v2.625m-15 4.5h15M7.5 15h7.5" /></svg>;
 const CheckBadgeIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z" /></svg>;
 const ArrowUpOnSquareIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M9 8.25H7.5a2.25 2.25 0 0 0-2.25 2.25v9a2.25 2.25 0 0 0 2.25 2.25h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25H15M12 12V3m0 0-3.75 3.75M12 3l3.75 3.75" /></svg>;
@@ -253,6 +253,27 @@ const App = () => {
     const parents = useMemo(() => users.filter(u => u.role === 'Parent'), [users]);
     const unreadNotificationCount = useMemo(() => notifications.filter(n => n.userId === currentUser.id && !n.read).length, [notifications, currentUser.id]);
 
+    // Dynamic notification generation for overdue payments
+    useEffect(() => {
+        if (currentUser.role === 'Parent') {
+            const overduePayments = payments.filter(p => p.userId === currentUser.id && p.status === 'Overdue');
+            const hasOverdueNotification = notifications.some(n => n.userId === currentUser.id && n.type === 'payment' && n.message.toLowerCase().includes('overdue'));
+
+            if (overduePayments.length > 0 && !hasOverdueNotification) {
+                const newNotification = {
+                    id: (notifications.length > 0 ? Math.max(...notifications.map(n => n.id)) : 0) + 1,
+                    userId: currentUser.id,
+                    type: 'payment',
+                    message: `You have an outstanding balance of $${overduePayments.reduce((sum, p) => sum + p.amount, 0)}. Please settle it soon.`,
+                    timestamp: new Date().toISOString(),
+                    read: false,
+                    page: 'payments'
+                };
+                setNotifications(prev => [...prev, newNotification]);
+            }
+        }
+    }, [currentUser, payments, notifications, setNotifications]);
+
     const showToast = (message, type = 'success') => {
         setToast({ message, type });
         setTimeout(() => setToast(null), 3000);
@@ -264,7 +285,7 @@ const App = () => {
             setUsers(users.map(u => u.id === userData.id ? { ...u, ...userData } : u));
             showToast('User updated successfully!');
         } else {
-            const newUser = { ...userData, id: Math.max(...users.map(u => u.id)) + 1, status: 'Active' };
+            const newUser = { ...userData, id: Math.max(0, ...users.map(u => u.id)) + 1, status: 'Active' };
             setUsers([...users, newUser]);
             showToast('User added successfully!');
         }
@@ -281,7 +302,7 @@ const App = () => {
     const handleSaveAthlete = (athleteData) => {
         const newAthlete = { 
             ...athleteData, 
-            id: Math.max(...users.map(u => u.id)) + 1, 
+            id: Math.max(0, ...users.map(u => u.id)) + 1, 
             role: 'Athlete',
             status: 'Active',
             parentId: parseInt(athleteData.parentId, 10) || undefined,
@@ -299,7 +320,7 @@ const App = () => {
             setEvents(events.map(e => e.id === eventData.id ? { ...e, ...eventData } : e));
             showToast('Event updated successfully!');
         } else {
-            const newEvent = { ...eventData, id: Math.max(...events.map(e => e.id)) + 1, participants: eventData.participants || [] };
+            const newEvent = { ...eventData, id: Math.max(0, ...events.map(e => e.id)) + 1, participants: eventData.participants || [] };
             setEvents([...events, newEvent]);
             showToast('Event created successfully!');
         }
@@ -710,7 +731,6 @@ const NotificationPanel = ({ panelRef, notifications, setNotifications, navigate
         }
     }
 
-    // Fix: Used .getTime() for date comparison to satisfy TypeScript's type requirements for arithmetic operations.
     const sortedNotifications = [...notifications].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
     return (
@@ -766,7 +786,6 @@ const DashboardPage = ({ currentUser, users, events, payments, navigate }) => {
     const upcomingEvent = useMemo(() => {
         const today = new Date();
         return events
-            // Fix: Used .getTime() for date comparison to satisfy TypeScript's type requirements for arithmetic operations.
             .filter(e => new Date(e.date) >= today)
             .sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime())[0];
     }, [events]);
@@ -1167,7 +1186,6 @@ const AthleteProfilePage = ({ page, users, navigate, showToast }) => {
                 </form>
 
                 <div className="history-list">
-                    {/* Fix: Used .getTime() for date comparison to satisfy TypeScript's type requirements for arithmetic operations. */}
                      {athlete.history?.length > 0 ? athlete.history.sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map(item => (
                          <div key={item.id} className="history-item">
                             <div>
@@ -1211,9 +1229,7 @@ const EventsPage = ({ events, onAddEventClick, navigate, currentUser }) => {
 };
 
 const EventListView = ({ events, navigate }) => {
-    // Fix: Used .getTime() for date comparison to satisfy TypeScript's type requirements for arithmetic operations.
     const upcomingEvents = events.filter(e => new Date(e.date) >= new Date()).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-    // Fix: Used .getTime() for date comparison to satisfy TypeScript's type requirements for arithmetic operations.
     const pastEvents = events.filter(e => new Date(e.date) < new Date()).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
     return (
@@ -1277,7 +1293,7 @@ const EventCalendarView = ({ events, navigate }) => {
                     const eventsOnDay = events.filter(event => new Date(event.date).toDateString() === day.toDateString());
                     return (
                         <div
-                            key={day}
+                            key={day.toISOString()}
                             className={`calendar-day ${!isCurrentMonth ? 'empty' : ''} ${isSelected ? 'selected' : ''}`}
                             onClick={() => isCurrentMonth && setSelectedDate(day)}
                         >
@@ -1427,7 +1443,6 @@ const MessagesPage = ({ conversations, currentUser, users }) => {
                     <div className="conversations-list">
                         <div className="conversations-header"><h3>Conversations</h3></div>
                         <div className="conversation-items">
-                            {/* Fix: Used .getTime() for date comparison to satisfy TypeScript's type requirements for arithmetic operations. */}
                             {myConversations.sort((a, b) => new Date(b.lastMessageTimestamp).getTime() - new Date(a.lastMessageTimestamp).getTime()).map(conv => {
                                 const otherParticipantId = conv.participantIds.find(id => id !== currentUser.id);
                                 const otherParticipant = users.find(u => u.id === otherParticipantId);
@@ -1510,7 +1525,7 @@ const SettingsPage = () => {
         setSettings(prev => ({ ...prev, [name]: checked }));
     };
 
-    const handleTimingChange = (e) => {
+    const handleTimingChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         setSettings(prev => ({...prev, notificationTiming: e.target.value}));
     };
 
@@ -1774,7 +1789,6 @@ const CoachProfilePage = ({ currentUser, users }) => {
 
 const Pill = ({ text, type }) => <span className={`pill ${type}`}>{text}</span>;
 
-// Fix: Made the 'children' prop optional and added explicit types for props to resolve TypeScript errors.
 const EmptyState = ({ title, message, children }: { title: string; message: string; children?: React.ReactNode }) => (
     <div className="empty-state">
         <div className="empty-state-icon"><EmptyIcon /></div>
@@ -1870,14 +1884,18 @@ const UserFormModal = ({ isOpen, onClose, onSave, user, coaches, parents }) => {
         }
     }, [user]);
 
-    const handleChange = (e) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        onSave(formData);
+        onSave({
+            ...formData,
+            coachId: parseInt(String(formData.coachId), 10) || undefined,
+            parentId: parseInt(String(formData.parentId), 10) || undefined,
+        });
     };
 
     return (
@@ -1946,12 +1964,12 @@ const AthleteFormModal = ({ isOpen, onClose, onSave, coaches, parents }) => {
         parentId: '',
     });
 
-    const handleChange = (e) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         onSave(formData);
         // Reset form for next entry
@@ -2035,19 +2053,17 @@ const EventFormModal = ({ isOpen, onClose, onSave, event, athletes }) => {
         }
     }, [event]);
 
-    // Fix: Added explicit types to event handlers to allow TypeScript to correctly infer types down the line.
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
     };
     
-    // Fix: Added explicit type to the event object to resolve property access on 'unknown' type.
     const handleParticipantsChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const values = Array.from(e.target.selectedOptions, option => Number(option.value));
         setFormData(prev => ({ ...prev, participants: values }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         onSave(formData);
     };
@@ -2102,7 +2118,6 @@ const TaskFormModal = ({ isOpen, onClose, onSave, task, coaches, users }) => {
             setFormData({
                 id: task.id || null,
                 title: task.title || '',
-                // Fix: Ensured 'assignedTo' is always a string in the form state to prevent type mismatch errors.
                 assignedTo: task.assignedTo ? String(task.assignedTo) : '',
                 dueDate: task.dueDate || ''
             });
@@ -2118,10 +2133,13 @@ const TaskFormModal = ({ isOpen, onClose, onSave, task, coaches, users }) => {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        // Fix: Converted 'assignedTo' back to a number on save to maintain data consistency.
+        // FIX: The `assignedTo` field was being passed as a string from the form.
+        // This converts it to a number to match the expected data type.
         onSave({
-            ...formData,
-            assignedTo: parseInt(formData.assignedTo as string, 10),
+            id: formData.id,
+            title: formData.title,
+            dueDate: formData.dueDate,
+            assignedTo: parseInt(formData.assignedTo, 10),
         });
     };
 
