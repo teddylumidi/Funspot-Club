@@ -1,3 +1,5 @@
+
+
 import React, { useState, useEffect, useRef, SetStateAction } from 'react';
 
 // --- SVG Icons ---
@@ -20,7 +22,7 @@ const ChartBarIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" v
 const LogoutIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" aria-hidden="true" focusable="false"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" /></svg>;
 const PencilIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" aria-hidden="true" focusable="false"><path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" /></svg>;
 const BellIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" aria-hidden="true" focusable="false"><path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" /></svg>;
-const EnvelopeIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" aria-hidden="true" focusable="false"><path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" /></svg>;
+const EnvelopeIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" aria-hidden="true" focusable="false"><path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25-2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" /></svg>;
 
 
 // --- Data & Hooks ---
@@ -50,9 +52,9 @@ const useLocalStorage = <T,>(key: string, initialValue: T): [T, (value: SetState
 const initialUsers = [
   { id: 1, name: 'Admin User', email: 'admin@funport.com', role: 'Admin' },
   { id: 2, name: 'Coach Sarah', email: 'sarah@funport.com', role: 'Coach' },
-  { id: 3, name: 'John Doe (Parent)', email: 'john@email.com', role: 'Parent' },
+  { id: 3, name: 'John Doe (Parent)', email: 'john@email.com', role: 'Parent', children: [4] },
   { id: 4, name: 'Leo Doe', email: 'leo@email.com', role: 'Athlete', parentId: 3, coachId: 2 },
-  { id: 5, name: 'Jane Smith (Parent)', email: 'jane@email.com', role: 'Parent' },
+  { id: 5, name: 'Jane Smith (Parent)', email: 'jane@email.com', role: 'Parent', children: [6] },
   { id: 6, name: 'Mia Smith', email: 'mia@email.com', role: 'Athlete', parentId: 5, coachId: 2 },
 ];
 
@@ -83,9 +85,9 @@ const initialSchedules = [
 ];
 
 const initialInvoices = [
-    { id: 1, userId: 3, description: 'August Training Fees - Leo Doe', amount: 8000, status: 'Due', dueDate: '2024-08-01' },
-    { id: 2, userId: 3, description: 'July Training Fees - Leo Doe', amount: 8000, status: 'Paid', dueDate: '2024-07-01' },
-    { id: 3, userId: 5, description: 'August Training Fees - Mia Smith', amount: 8000, status: 'Due', dueDate: '2024-08-01' },
+    { id: 1, userId: 4, description: 'August Training Fees - Leo Doe', amount: 8000, status: 'Due', dueDate: '2024-08-01' },
+    { id: 2, userId: 4, description: 'July Training Fees - Leo Doe', amount: 8000, status: 'Paid', dueDate: '2024-07-01' },
+    { id: 3, userId: 6, description: 'August Training Fees - Mia Smith', amount: 8000, status: 'Due', dueDate: '2024-08-01' },
 ];
 
 const initialConversations = [
@@ -186,7 +188,7 @@ const Header = ({ onBookNowClick, onLoginClick, user, onLogout, unreadCount, onN
           ) : (
             <div className="header-actions">
                 <span className="user-role">Welcome, <strong>{user.name.split(' ')[0]}</strong>!</span>
-                 <Notifications unreadCount={unreadCount} onNotificationClick={() => onNavigate('Messages')} />
+                 <Notifications unreadCount={unreadCount} onNotificationClick={() => onNavigate({name: 'Messages'})} />
                 <button onClick={onLogout} className="btn btn-secondary logout-btn" aria-label="Logout">
                   <LogoutIcon />
                 </button>
@@ -498,7 +500,7 @@ const Sidebar = ({ userRole, activeView, onNavigate }) => {
                         return (
                             <li key={link.name}>
                                 <a href="#" 
-                                   onClick={(e) => { e.preventDefault(); onNavigate(link.view); }}
+                                   onClick={(e) => { e.preventDefault(); onNavigate({name: link.view}); }}
                                    className={activeView === link.view ? 'active' : ''}
                                 >
                                     <Icon />
@@ -789,8 +791,8 @@ const Schedule = ({ schedules, users, currentUser }) => {
         }
         acc[date].push(schedule);
         return acc;
-// FIX: Add type assertion to the initial value of reduce to ensure `groupedSchedules` is correctly typed.
-    }, {} as Record<string, typeof initialSchedules>);
+// Fix: Correctly type the accumulator for the reduce function to ensure proper type inference for `sessions`.
+    }, {} as Record<string, (typeof initialSchedules)[number][]>);
 
     const getAthleteName = (id) => users.find(u => u.id === id)?.name || 'Unknown Athlete';
 
@@ -800,24 +802,22 @@ const Schedule = ({ schedules, users, currentUser }) => {
                 <h1>My Schedule</h1>
             </div>
             <div className="schedule-container">
-{/* FIX: Use `.getTime()` for date subtraction to avoid arithmetic operation errors. This also fixes the 'unknown' type error for `sessions`. */}
                 {Object.entries(groupedSchedules).sort((a,b) => new Date(a[0]).getTime() - new Date(b[0]).getTime()).map(([date, sessions]) => (
-                    <div key={date} className="schedule-group">
+                    <div key={date} className="schedule-group card">
                         <h3 className="schedule-date">{date}</h3>
-                        <div className="card-grid">
-                            {(sessions as (typeof initialSchedules)[number][]).map(session => (
-                                <div key={session.id} className="card session-card">
-                                    <h4>{session.time}</h4>
-                                    <p className="session-location"><MapPinIcon/> {session.location}</p>
-                                    <div className="session-athletes">
-                                        <strong>Athletes:</strong>
-                                        <ul>
-                                            {session.athleteIds.map(id => <li key={id}>{getAthleteName(id)}</li>)}
-                                        </ul>
-                                    </div>
+                         {/* Fix: The `sessions` variable is now correctly typed as an array, so the cast is no longer needed. */}
+                         {sessions.map(session => (
+                            <div key={session.id} className="session-card">
+                                <h4>{session.time}</h4>
+                                <p className="session-location"><MapPinIcon/> {session.location}</p>
+                                <div className="session-athletes">
+                                    <strong>Athletes:</strong>
+                                    <ul>
+                                        {session.athleteIds.map(id => <li key={id}>{getAthleteName(id)}</li>)}
+                                    </ul>
                                 </div>
-                            ))}
-                        </div>
+                            </div>
+                        ))}
                     </div>
                 ))}
             </div>
@@ -825,15 +825,74 @@ const Schedule = ({ schedules, users, currentUser }) => {
     );
 };
 
-const Messaging = ({ conversations, messages, users, currentUser, onSendMessage }) => {
+const NewConversationModal = ({ isOpen, onClose, users, currentUser, onCreateConversation }) => {
+    const [selectedUserId, setSelectedUserId] = useState('');
+    const modalContentRef = useRef(null);
+
+    const otherUsers = users.filter(u => u.id !== currentUser.id);
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        if (selectedUserId) {
+            onCreateConversation(parseInt(selectedUserId, 10));
+            onClose();
+        }
+    };
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (modalContentRef.current && !modalContentRef.current.contains(event.target)) {
+                onClose();
+            }
+        };
+        if (isOpen) document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [isOpen, onClose]);
+
+    if (!isOpen) return null;
+
+    return (
+        <div className="modal-overlay show">
+            <div className="modal-content" ref={modalContentRef}>
+                <div className="modal-header">
+                    <h2>New Message</h2>
+                    <button onClick={onClose} className="close-btn" aria-label="Close"><CloseIcon /></button>
+                </div>
+                <form onSubmit={handleSubmit}>
+                    <div className="form-group">
+                        <label htmlFor="recipient">Select a recipient</label>
+                        <select
+                            id="recipient"
+                            value={selectedUserId}
+                            onChange={(e) => setSelectedUserId(e.target.value)}
+                            required
+                        >
+                            <option value="">Choose a user...</option>
+                            {otherUsers.map(user => (
+                                <option key={user.id} value={user.id}>{user.name} ({user.role})</option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="form-actions">
+                        <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
+                        <button type="submit" className="btn btn-primary">Start Conversation</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+};
+
+
+const Messaging = ({ conversations, messages, users, currentUser, onSendMessage, onMarkAsRead, onCreateConversation }) => {
     const [selectedConversationId, setSelectedConversationId] = useState(null);
     const [newMessage, setNewMessage] = useState("");
+    const [isNewConvoModalOpen, setIsNewConvoModalOpen] = useState(false);
     const chatEndRef = useRef(null);
 
     const currentConversations = conversations.filter(c => c.participantIds.includes(currentUser.id));
     const selectedConversation = currentConversations.find(c => c.id === selectedConversationId);
     
-{/* FIX: Cast `messages` to its correct type to resolve downstream type errors, and use `.getTime()` for date sorting. */}
     const conversationMessages = (messages as typeof initialMessages)
         .filter(m => m.conversationId === selectedConversationId)
         .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
@@ -841,6 +900,14 @@ const Messaging = ({ conversations, messages, users, currentUser, onSendMessage 
     const getOtherParticipant = (convo) => {
         const otherId = convo.participantIds.find(id => id !== currentUser.id);
         return users.find(u => u.id === otherId);
+    };
+
+    // Fix: Add explicit type for convoId parameter to resolve type inference issue.
+    const getLastMessage = (convoId: number) => {
+        const lastMsg = (messages as typeof initialMessages)
+            .filter(m => m.conversationId === convoId)
+            .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())[0];
+        return lastMsg ? lastMsg.content : "No messages yet.";
     };
     
     const handleSendMessage = (e) => {
@@ -850,30 +917,36 @@ const Messaging = ({ conversations, messages, users, currentUser, onSendMessage 
         setNewMessage("");
     };
 
+    const handleSelectConversation = (convoId) => {
+        setSelectedConversationId(convoId);
+        onMarkAsRead(convoId);
+    };
+
     useEffect(() => {
         chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [conversationMessages]);
-
 
     return (
         <div>
             <div className="dashboard-header">
                 <h1>Messages</h1>
+                <button className="btn btn-secondary" onClick={() => setIsNewConvoModalOpen(true)}>New Message</button>
             </div>
             <div className="messaging-layout card">
                 <div className="conversation-list">
-                    {currentConversations.map(convo => {
+                    {currentConversations.sort((a,b) => new Date(b.lastMessageTimestamp).getTime() - new Date(a.lastMessageTimestamp).getTime()).map(convo => {
                         const otherUser = getOtherParticipant(convo);
+                        const isUnread = (messages as typeof initialMessages).some(m => m.conversationId === convo.id && !m.readBy.includes(currentUser.id));
                         return (
                             <div 
                                 key={convo.id} 
-                                className={`conversation-item ${convo.id === selectedConversationId ? 'active' : ''}`}
-                                onClick={() => setSelectedConversationId(convo.id)}
+                                className={`conversation-item ${convo.id === selectedConversationId ? 'active' : ''} ${isUnread ? 'unread' : ''}`}
+                                onClick={() => handleSelectConversation(convo.id)}
                             >
                                 <div className="avatar">{otherUser.name.charAt(0)}</div>
-                                <div>
+                                <div className="convo-details">
                                     <p className="participant-name">{otherUser.name}</p>
-                                    <p className="last-message">Last message placeholder...</p>
+                                    <p className="last-message">{getLastMessage(convo.id)}</p>
                                 </div>
                             </div>
                         );
@@ -912,6 +985,13 @@ const Messaging = ({ conversations, messages, users, currentUser, onSendMessage 
                     )}
                 </div>
             </div>
+            <NewConversationModal
+                isOpen={isNewConvoModalOpen}
+                onClose={() => setIsNewConvoModalOpen(false)}
+                users={users}
+                currentUser={currentUser}
+                onCreateConversation={onCreateConversation}
+            />
         </div>
     );
 };
@@ -999,14 +1079,17 @@ const Payments = ({ invoices, onPayInvoice }) => {
 };
 
 
-const Dashboard = ({ user, activeView, onNavigate, users, athletes, logs, schedules, invoices, messages, conversations, onAddUser, onUpdateUser, onAddLog, onSelectAthlete, onSendMessage, onPayInvoice }) => {
+const Dashboard = ({ user, activeView, onNavigate, users, athletes, logs, schedules, invoices, messages, conversations, onAddUser, onUpdateUser, onAddLog, onSelectAthlete, onSendMessage, onPayInvoice, onMarkAsRead, onCreateConversation }) => {
     const renderContent = () => {
         const athleteUser = user.role === 'Athlete' ? user : users.find(u => u.id === activeView.athleteId);
         const athleteData = athletes.find(a => a.userId === (athleteUser ? athleteUser.id : null));
-// FIX: Cast `logs` to its correct type to resolve potential arithmetic operation errors during sort, even with `.getTime()`.
         const athleteLogs = (logs as typeof initialLogs)
             .filter(l => l.athleteId === (athleteUser ? athleteUser.id : null))
             .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+            
+        const parentUser = users.find(u => u.id === user.id);
+        const childIds = parentUser && parentUser.role === 'Parent' ? parentUser.children || [] : [];
+        const childUsers = users.filter(u => childIds.includes(u.id));
 
         switch (activeView.name) {
             case 'Dashboard':
@@ -1024,9 +1107,17 @@ const Dashboard = ({ user, activeView, onNavigate, users, athletes, logs, schedu
             case 'Schedule':
                 return <Schedule schedules={schedules} users={users} currentUser={user} />;
             case 'Messages':
-                return <Messaging conversations={conversations} messages={messages} users={users} currentUser={user} onSendMessage={onSendMessage} />;
+                return <Messaging conversations={conversations} messages={messages} users={users} currentUser={user} onSendMessage={onSendMessage} onMarkAsRead={onMarkAsRead} onCreateConversation={onCreateConversation}/>;
             case 'Payments':
-                const userInvoices = user.role === 'Admin' ? invoices : invoices.filter(i => i.userId === user.id || (user.children && user.children.includes(i.userId)));
+                const userInvoices = user.role === 'Admin' 
+                    ? invoices 
+                    : invoices.filter(i => {
+                        if(user.role === 'Parent'){
+                            const childrenOfParent = users.filter(u => u.parentId === user.id).map(u => u.id);
+                            return childrenOfParent.includes(i.userId);
+                        }
+                        return i.userId === user.id;
+                    });
                 return <Payments invoices={userInvoices} onPayInvoice={onPayInvoice} />;
             default:
                 return <DashboardHome user={user} />;
@@ -1035,7 +1126,7 @@ const Dashboard = ({ user, activeView, onNavigate, users, athletes, logs, schedu
     
     return (
         <div className="dashboard-layout">
-            <Sidebar userRole={user.role} activeView={activeView.name} onNavigate={(view) => onNavigate(view)} />
+            <Sidebar userRole={user.role} activeView={activeView.name} onNavigate={onNavigate} />
             <main className="dashboard-content">
                 <div className="container">
                     {renderContent()}
@@ -1043,6 +1134,12 @@ const Dashboard = ({ user, activeView, onNavigate, users, athletes, logs, schedu
             </main>
         </div>
     )
+}
+
+interface ActiveView {
+  name: string;
+  athleteId?: number;
+  conversationId?: number;
 }
 
 const App = () => {
@@ -1055,20 +1152,23 @@ const App = () => {
     const [invoices, setInvoices] = useLocalStorage('invoices', initialInvoices);
     const [conversations, setConversations] = useLocalStorage('conversations', initialConversations);
     const [messages, setMessages] = useLocalStorage('messages', initialMessages);
-    const [currentUser, setCurrentUser] = useLocalStorage('currentUser', null);
-    const [activeView, setActiveView] = useState<{ name: string; athleteId?: number }>({ name: 'Dashboard' });
+    const [currentUser, setCurrentUser] = useLocalStorage<any>('currentUser', null);
+    const [activeView, setActiveView] = useState<ActiveView>({ name: 'Dashboard' });
 
     useEffect(() => {
         document.body.style.overflow = isBookingModalOpen || isLoginModalOpen ? 'hidden' : 'auto';
     }, [isBookingModalOpen, isLoginModalOpen]);
     
-    const handleNavigate = (viewName: string) => setActiveView({ name: viewName });
+    const handleNavigate = (view: Partial<ActiveView>) => setActiveView(prev => ({...prev, ...view}));
     const handleSelectAthlete = (athleteId: number) => setActiveView({ name: 'Athlete Profile', athleteId });
     const handleLogin = (user) => {
         setCurrentUser(user);
         setActiveView({ name: 'Dashboard' });
     }
-    const handleLogout = () => setCurrentUser(null);
+    const handleLogout = () => {
+        setCurrentUser(null);
+        setActiveView({ name: 'Dashboard' });
+    };
     const handleAddUser = (newUser) => setUsers(prev => [...prev, { ...newUser, id: Date.now() }]);
     const handleUpdateUser = (updatedUser) => setUsers(prev => prev.map(u => u.id === updatedUser.id ? updatedUser : u));
     const handleAddLog = (newLog) => setLogs(prev => [{...newLog, id: Date.now() }, ...prev]);
@@ -1083,6 +1183,30 @@ const App = () => {
             readBy: [currentUser.id]
         };
         setMessages(prev => [...prev, newMessage]);
+        setConversations(prev => prev.map(c => c.id === conversationId ? {...c, lastMessageTimestamp: newMessage.timestamp} : c));
+    };
+
+    const handleCreateConversation = (otherUserId: number) => {
+        const existingConvo = conversations.find(c => c.participantIds.includes(currentUser.id) && c.participantIds.includes(otherUserId));
+        if (existingConvo) {
+            setActiveView({ name: 'Messages', conversationId: existingConvo.id });
+        } else {
+            const newConvo = {
+                id: Date.now(),
+                participantIds: [currentUser.id, otherUserId],
+                lastMessageTimestamp: new Date().toISOString()
+            };
+            setConversations(prev => [newConvo, ...prev]);
+            setActiveView({ name: 'Messages', conversationId: newConvo.id });
+        }
+    };
+    
+    const handleMarkConversationAsRead = (conversationId) => {
+        setMessages(prev => prev.map(m => 
+            (m.conversationId === conversationId && !m.readBy.includes(currentUser.id))
+                ? { ...m, readBy: [...m.readBy, currentUser.id] }
+                : m
+        ));
     };
     
     const handlePayInvoice = (invoiceId) => {
@@ -1090,9 +1214,10 @@ const App = () => {
     };
 
     const unreadCount = messages.filter(m => {
-        const userConvos = conversations.filter(c => c.participantIds.includes(currentUser?.id));
+        if (!currentUser) return false;
+        const userConvos = conversations.filter(c => c.participantIds.includes(currentUser.id));
         const isMyConvo = userConvos.some(c => c.id === m.conversationId);
-        return isMyConvo && !m.readBy.includes(currentUser?.id);
+        return isMyConvo && !m.readBy.includes(currentUser.id);
     }).length;
 
 
@@ -1124,6 +1249,8 @@ const App = () => {
                     onSelectAthlete={handleSelectAthlete}
                     onSendMessage={handleSendMessage}
                     onPayInvoice={handlePayInvoice}
+                    onMarkAsRead={handleMarkConversationAsRead}
+                    onCreateConversation={handleCreateConversation}
                 />
             ) : (
                 <LandingPage onBookNowClick={() => setIsBookingModalOpen(true)} />
