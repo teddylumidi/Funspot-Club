@@ -1,5 +1,4 @@
 
-
 import React, { useState, useEffect, useRef, SetStateAction } from 'react';
 
 // --- SVG Icons ---
@@ -707,7 +706,6 @@ const AthleteProfile = ({ athleteId, users, athletes, logs, onAddLog }) => {
     const [logContent, setLogContent] = useState('');
     const athleteUser = users.find(u => u.id === athleteId);
     const athleteData = athletes.find(a => a.userId === athleteId);
-    // FIX: Removed unnecessary and problematic type cast that was causing a type inference issue.
     const athleteLogs = logs
         .filter(l => l.athleteId === athleteId)
         .sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -733,7 +731,7 @@ const AthleteProfile = ({ athleteId, users, athletes, logs, onAddLog }) => {
                         <div key={skill} className="progress-item">
                             <label>{skill}</label>
                             <div className="progress-bar">
-                                <div className="progress-bar-fill" style={{ width: `${value}%` }}>{value}%</div>
+                                <div className="progress-bar-fill" style={{ width: `${value}%` }}>{String(value)}%</div>
                             </div>
                         </div>
                     ))}
@@ -921,12 +919,12 @@ const Payments = ({ currentUser, users, invoices, onPayInvoice }) => {
         }
     };
     
-    let userInvoices = [];
+    let userInvoices: Invoice[] = [];
     if (currentUser.role === 'Admin') {
         userInvoices = invoices;
     } else if (currentUser.role === 'Parent' && currentUser.children) {
         const childIds = currentUser.children;
-        userInvoices = (invoices as typeof initialInvoices).filter(inv => childIds.includes(inv.userId));
+        userInvoices = (invoices as Invoice[]).filter(inv => childIds.includes(inv.userId));
     }
 
     return (
