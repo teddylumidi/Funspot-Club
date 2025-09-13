@@ -1,5 +1,5 @@
 {
-  "name": "Funpot Skating Club Management",
-  "description": "A comprehensive management system for sports clubs and activities, featuring role-based access, scheduling, payments, and communication tools.",
+  "name": "Funport Skating Club",
+  "description": "A web application for the Funport Skating Club, providing information on programs, session booking, and contact details, based on their promotional flyer.",
   "requestFramePermissions": []
 }
