@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect, useRef, SetStateAction } from 'react';
 import { createRoot } from 'react-dom/client';
 
@@ -792,8 +790,7 @@ const Schedule = ({ schedules, users, currentUser }) => {
         }
         acc[date].push(schedule);
         return acc;
-// FIX: Add type assertion to the initial value of reduce to ensure `groupedSchedules` is correctly typed.
-    }, {} as Record<string, typeof initialSchedules>);
+    }, {});
 
     const getAthleteName = (id) => users.find(u => u.id === id)?.name || 'Unknown Athlete';
 
@@ -803,12 +800,11 @@ const Schedule = ({ schedules, users, currentUser }) => {
                 <h1>My Schedule</h1>
             </div>
             <div className="schedule-container">
-{/* FIX: Use `.getTime()` for date subtraction to avoid arithmetic operation errors. This also fixes the 'unknown' type error for `sessions`. */}
-                {Object.entries(groupedSchedules).sort((a,b) => new Date(a[0]).getTime() - new Date(b[0]).getTime()).map(([date, sessions]) => (
+                {Object.entries(groupedSchedules).sort((a,b) => new Date(a[0]) - new Date(b[0])).map(([date, sessions]) => (
                     <div key={date} className="schedule-group">
                         <h3 className="schedule-date">{date}</h3>
                         <div className="card-grid">
-                            {(sessions as (typeof initialSchedules)[number][]).map(session => (
+                            {sessions.map(session => (
                                 <div key={session.id} className="card session-card">
                                     <h4>{session.time}</h4>
                                     <p className="session-location"><MapPinIcon/> {session.location}</p>
@@ -836,10 +832,9 @@ const Messaging = ({ conversations, messages, users, currentUser, onSendMessage 
     const currentConversations = conversations.filter(c => c.participantIds.includes(currentUser.id));
     const selectedConversation = currentConversations.find(c => c.id === selectedConversationId);
     
-{/* FIX: Cast `messages` to its correct type to resolve downstream type errors, and use `.getTime()` for date sorting. */}
-    const conversationMessages = (messages as typeof initialMessages)
+    const conversationMessages = messages
         .filter(m => m.conversationId === selectedConversationId)
-        .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+        .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
 
     const getOtherParticipant = (convo) => {
         const otherId = convo.participantIds.find(id => id !== currentUser.id);
@@ -1006,8 +1001,7 @@ const Dashboard = ({ user, activeView, onNavigate, users, athletes, logs, schedu
     const renderContent = () => {
         const athleteUser = user.role === 'Athlete' ? user : users.find(u => u.id === activeView.athleteId);
         const athleteData = athletes.find(a => a.userId === (athleteUser ? athleteUser.id : null));
-{/* FIX: Cast `logs` to its correct type to resolve potential arithmetic operation errors during sort, even with `.getTime()`. */}
-        const athleteLogs = (logs as typeof initialLogs)
+        const athleteLogs = logs
             .filter(l => l.athleteId === (athleteUser ? athleteUser.id : null))
             .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 

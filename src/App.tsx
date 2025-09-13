@@ -1,7 +1,4 @@
-
-
 import React, { useState, useEffect, useRef, SetStateAction } from 'react';
-import { createRoot } from 'react-dom/client';
 
 // --- SVG Icons ---
 const CalendarIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" aria-hidden="true" focusable="false"><path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0h18" /></svg>;
@@ -1006,7 +1003,7 @@ const Dashboard = ({ user, activeView, onNavigate, users, athletes, logs, schedu
     const renderContent = () => {
         const athleteUser = user.role === 'Athlete' ? user : users.find(u => u.id === activeView.athleteId);
         const athleteData = athletes.find(a => a.userId === (athleteUser ? athleteUser.id : null));
-{/* FIX: Cast `logs` to its correct type to resolve potential arithmetic operation errors during sort, even with `.getTime()`. */}
+// FIX: Cast `logs` to its correct type to resolve potential arithmetic operation errors during sort, even with `.getTime()`.
         const athleteLogs = (logs as typeof initialLogs)
             .filter(l => l.athleteId === (athleteUser ? athleteUser.id : null))
             .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -1029,7 +1026,7 @@ const Dashboard = ({ user, activeView, onNavigate, users, athletes, logs, schedu
             case 'Messages':
                 return <Messaging conversations={conversations} messages={messages} users={users} currentUser={user} onSendMessage={onSendMessage} />;
             case 'Payments':
-                const userInvoices = user.role === 'Admin' ? invoices : invoices.filter(i => i.userId === user.id || user.children?.includes(i.userId));
+                const userInvoices = user.role === 'Admin' ? invoices : invoices.filter(i => i.userId === user.id || (user.children && user.children.includes(i.userId)));
                 return <Payments invoices={userInvoices} onPayInvoice={onPayInvoice} />;
             default:
                 return <DashboardHome user={user} />;
@@ -1065,8 +1062,8 @@ const App = () => {
         document.body.style.overflow = isBookingModalOpen || isLoginModalOpen ? 'hidden' : 'auto';
     }, [isBookingModalOpen, isLoginModalOpen]);
     
-    const handleNavigate = (viewName) => setActiveView({ name: viewName });
-    const handleSelectAthlete = (athleteId) => setActiveView({ name: 'Athlete Profile', athleteId });
+    const handleNavigate = (viewName: string) => setActiveView({ name: viewName });
+    const handleSelectAthlete = (athleteId: number) => setActiveView({ name: 'Athlete Profile', athleteId });
     const handleLogin = (user) => {
         setCurrentUser(user);
         setActiveView({ name: 'Dashboard' });
@@ -1143,6 +1140,4 @@ const App = () => {
     );
 };
 
-const container = document.getElementById('root');
-const root = createRoot(container);
-root.render(<App />);
+export default App;
