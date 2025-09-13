@@ -1,5 +1,4 @@
 
-
 import React, { useState, useEffect, useRef, SetStateAction } from 'react';
 
 // --- SVG Icons ---
@@ -115,6 +114,22 @@ const skills = [
   { title: 'Stopping Practice', description: 'Master various stopping methods to ensure your safety and build confidence on wheels.', icon: ShieldCheckIcon },
 ];
 
+// --- Type Definitions ---
+type User = (typeof initialUsers)[0];
+type Athlete = (typeof initialAthletes)[0];
+type Log = (typeof initialLogs)[0];
+type Schedule = (typeof initialSchedules)[0];
+type Invoice = (typeof initialInvoices)[0];
+type Conversation = (typeof initialConversations)[0];
+type Message = (typeof initialMessages)[0];
+
+interface ActiveView {
+  name: string;
+  athleteId?: number;
+  conversationId?: number;
+}
+
+
 // --- Components ---
 
 const Notifications = ({ unreadCount, onNotificationClick }) => {
@@ -143,7 +158,7 @@ const Notifications = ({ unreadCount, onNotificationClick }) => {
                     <div className="notification-content">
                         {unreadCount > 0 ? (
                             <a href="#" onClick={(e) => { e.preventDefault(); onNotificationClick(); setIsOpen(false); }}>
-                                You have {unreadCount} new message{unreadCount > 1 ? 's' : ''}.
+                                You have {unreadCount} unread conversation{unreadCount > 1 ? 's' : ''}.
                             </a>
                         ) : (
                             <p>No new notifications.</p>
@@ -522,15 +537,18 @@ const DashboardHome = ({ user }) => (
     </div>
 );
 
-const UserFormModal = ({ isOpen, onClose, onSave, userToEdit }) => {
-    const [formData, setFormData] = useState({ name: '', email: '', role: 'Athlete' });
+const UserFormModal = ({ isOpen, onClose, onSave, userToEdit, users }) => {
+    const [formData, setFormData] = useState({ name: '', email: '', role: 'Athlete', coachId: '' });
     const modalContentRef = useRef(null);
 
     useEffect(() => {
         if (userToEdit) {
-            setFormData(userToEdit);
+            setFormData({
+                ...userToEdit,
+                coachId: userToEdit.coachId || ''
+            });
         } else {
-            setFormData({ name: '', email: '', role: 'Athlete' });
+            setFormData({ name: '', email: '', role: 'Athlete', coachId: '' });
         }
     }, [userToEdit, isOpen]);
 
@@ -556,6 +574,8 @@ const UserFormModal = ({ isOpen, onClose, onSave, userToEdit }) => {
     }, [isOpen, onClose]);
 
     if (!isOpen) return null;
+    
+    const coaches = users.filter(u => u.role === 'Coach');
 
     return (
         <div className="modal-overlay show">
@@ -582,8 +602,18 @@ const UserFormModal = ({ isOpen, onClose, onSave, userToEdit }) => {
                             <option value="Admin">Admin</option>
                         </select>
                     </div>
+                    {formData.role === 'Athlete' && (
+                         <div className="form-group">
+                            <label htmlFor="coachId">Assign Coach</label>
+                            <select id="coachId" name="coachId" value={formData.coachId} onChange={handleChange}>
+                                <option value="">No Coach</option>
+                                {coaches.map(coach => (
+                                    <option key={coach.id} value={coach.id}>{coach.name}</option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
                     <div className="form-actions">
-                        <button type="button" onClick={onClose} className="btn btn-secondary">Cancel</button>
                         <button type="submit" className="btn btn-primary">Save User</button>
                     </div>
                 </form>
@@ -592,7 +622,7 @@ const UserFormModal = ({ isOpen, onClose, onSave, userToEdit }) => {
     );
 };
 
-const UserManagement = ({ users, onAddUser, onUpdateUser }) => {
+const UserManagement = ({ users, onAddUser, onEditUser }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [userToEdit, setUserToEdit] = useState(null);
 
@@ -606,9 +636,9 @@ const UserManagement = ({ users, onAddUser, onUpdateUser }) => {
         setIsModalOpen(false);
     };
 
-    const handleSaveUser = (userData) => {
+    const handleSave = (userData) => {
         if (userData.id) {
-            onUpdateUser(userData);
+            onEditUser(userData);
         } else {
             onAddUser(userData);
         }
@@ -618,7 +648,7 @@ const UserManagement = ({ users, onAddUser, onUpdateUser }) => {
         <div>
             <div className="dashboard-header">
                 <h1>User Management</h1>
-                <button onClick={() => handleOpenModal()} className="btn btn-primary">Add User</button>
+                <button className="btn btn-primary" onClick={() => handleOpenModal()}>Add User</button>
             </div>
             <div className="table-container">
                 <table>
@@ -644,122 +674,120 @@ const UserManagement = ({ users, onAddUser, onUpdateUser }) => {
                     </tbody>
                 </table>
             </div>
-            <UserFormModal
-                isOpen={isModalOpen}
-                onClose={handleCloseModal}
-                onSave={handleSaveUser}
+            <UserFormModal 
+                isOpen={isModalOpen} 
+                onClose={handleCloseModal} 
+                onSave={handleSave}
                 userToEdit={userToEdit}
+                users={users}
             />
         </div>
     );
 };
 
-const MyAthletes = ({ users, onSelectAthlete }) => {
-    const athletes = users.filter(u => u.role === 'Athlete');
+const MyAthletes = ({ currentUser, users, onSelectAthlete }) => {
+    const myAthletes = users.filter(user => user.role === 'Athlete' && user.coachId === currentUser.id);
+
     return (
         <div>
             <div className="dashboard-header">
                 <h1>My Athletes</h1>
             </div>
-            <div className="card-grid">
-                {athletes.map(athlete => (
-                    <div key={athlete.id} className="card">
-                        <h3>{athlete.name}</h3>
-                        <p>{athlete.email}</p>
-                        <button onClick={() => onSelectAthlete(athlete.id)} className="btn btn-secondary">View Profile</button>
-                    </div>
-                ))}
-            </div>
+            {myAthletes.length > 0 ? (
+                <div className="card-grid">
+                    {myAthletes.map(athlete => (
+                        <div key={athlete.id} className="card">
+                            <h3>{athlete.name}</h3>
+                            <p>{athlete.email}</p>
+                            <button className="btn btn-secondary" onClick={() => onSelectAthlete(athlete.id)}>View Profile</button>
+                        </div>
+                    ))}
+                </div>
+            ) : (
+                <p>You have not been assigned any athletes yet.</p>
+            )}
         </div>
     );
 };
 
-const ActivityLog = ({ logs, onAddLog, currentUser, athlete }) => {
-    const [newLog, setNewLog] = useState('');
-    
-    const handleSubmit = (e) => {
+const AthleteProfile = ({ athleteId, users, athletes, logs, onAddLog, onNavigateBack }) => {
+    const athleteUser = users.find(u => u.id === athleteId);
+    const athleteData = athletes.find(a => a.userId === athleteId);
+    const athleteLogs = (logs as typeof initialLogs).filter(log => log.athleteId === athleteId).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    const [logContent, setLogContent] = useState('');
+
+    const handleLogSubmit = (e) => {
         e.preventDefault();
-        if (!newLog.trim()) return;
-        onAddLog({
-            athleteId: athlete.id,
-            author: currentUser.name,
-            date: new Date().toISOString().split('T')[0],
-            content: newLog
-        });
-        setNewLog('');
+        if (logContent.trim()) {
+            onAddLog(athleteId, logContent);
+            setLogContent('');
+        }
     };
 
-    return (
-        <div className="activity-log">
-            <h3>Activity Log</h3>
-            <form onSubmit={handleSubmit} className="log-form">
-                <div className="form-group">
-                    <textarea 
-                        value={newLog}
-                        onChange={(e) => setNewLog(e.target.value)}
-                        placeholder="Add a new log entry..."
-                        required
-                    />
-                </div>
-                <div className="form-actions">
-                    <button type="submit" className="btn btn-primary">Add Entry</button>
-                </div>
-            </form>
-            <div className="log-list">
-                {logs.map(log => (
-                    <div key={log.id} className="log-entry">
-                        <p className="log-content">{log.content}</p>
-                        <p className="log-meta">By <strong>{log.author}</strong> on {log.date}</p>
-                    </div>
-                ))}
-            </div>
-        </div>
-    );
-};
-
-const AthleteProfile = ({ athlete, athleteData, logs, onAddLog, currentUser }) => {
-    if (!athlete || !athleteData) return <p>Select an athlete to view their profile.</p>;
+    if (!athleteUser || !athleteData) return <p>Athlete not found.</p>;
 
     return (
         <div>
             <div className="dashboard-header">
-                <h1>{athlete.name}'s Profile</h1>
+                <h1>{athleteUser.name}'s Profile</h1>
+                <button className="btn btn-secondary" onClick={onNavigateBack}>Back to Athletes</button>
             </div>
             <div className="profile-layout">
-                <div className="progress-section card">
-                    <h3>Current Progress</h3>
+                <div className="card">
+                    <h3>Progress Summary</h3>
                     {Object.entries(athleteData.progress).map(([skill, value]) => (
                         <div key={skill} className="progress-item">
                             <label>{skill}</label>
                             <div className="progress-bar">
-                                <div className="progress-bar-fill" style={{ width: `${value}%` }}>{value}%</div>
+                                <div className="progress-bar-fill" style={{ width: `${String(value)}%` }}>{String(value)}%</div>
                             </div>
                         </div>
                     ))}
                 </div>
-                <div className="log-section card">
-                    <ActivityLog logs={logs} onAddLog={onAddLog} currentUser={currentUser} athlete={athlete}/>
+                <div className="card">
+                    <h3>Activity Log</h3>
+                    <form onSubmit={handleLogSubmit} className="log-form">
+                        <div className="form-group">
+                             <textarea 
+                                value={logContent} 
+                                onChange={(e) => setLogContent(e.target.value)}
+                                placeholder="Add a new log entry..."
+                                required
+                             />
+                        </div>
+                        <div className="form-actions" style={{justifyContent: 'flex-start'}}>
+                            <button type="submit" className="btn btn-primary">Add Log</button>
+                        </div>
+                    </form>
+                    <div className="log-list">
+                        {athleteLogs.map(log => (
+                            <div key={log.id} className="log-entry">
+                                <p className="log-content">{log.content}</p>
+                                <p className="log-meta">By {log.author} on {new Date(log.date).toLocaleDateString()}</p>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </div>
         </div>
     );
-}
+};
 
-const MyProgress = ({ athleteData }) => {
-    if (!athleteData) return <p>Loading progress...</p>;
+const MyProgress = ({ currentUser, athletes }) => {
+    const athleteData = athletes.find(a => a.userId === currentUser.id);
+
+    if (!athleteData) return <p>Your progress has not been recorded yet.</p>;
 
     return (
         <div>
-            <div className="dashboard-header">
-                <h1>My Progress</h1>
-            </div>
-            <div className="card">
-                <h3>Current Skill Levels</h3>
+             <div className="dashboard-header"><h1>My Progress</h1></div>
+             <div className="card">
+                <h3>Your Skill Levels</h3>
                 {Object.entries(athleteData.progress).map(([skill, value]) => (
                     <div key={skill} className="progress-item">
                         <label>{skill}</label>
                         <div className="progress-bar">
-                            <div className="progress-bar-fill" style={{ width: `${value}%` }}>{value}%</div>
+                             <div className="progress-bar-fill" style={{ width: `${String(value)}%` }}>{String(value)}%</div>
                         </div>
                     </div>
                 ))}
@@ -768,77 +796,102 @@ const MyProgress = ({ athleteData }) => {
     );
 };
 
-const PersonalLog = ({ athlete, logs, onAddLog, currentUser }) => {
-    return (
-        <div>
-            <div className="dashboard-header">
-                <h1>My Personal Log</h1>
-            </div>
-             <div className="log-section card">
-                <ActivityLog logs={logs} onAddLog={onAddLog} currentUser={currentUser} athlete={athlete}/>
-            </div>
-        </div>
-    );
-};
+const PersonalLog = ({ currentUser, logs, onAddLog }) => {
+    const personalLogs = logs.filter(log => log.athleteId === currentUser.id).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    const [logContent, setLogContent] = useState('');
 
-const Schedule = ({ schedules, users, currentUser }) => {
-    const mySchedules = schedules.filter(s => s.coachId === currentUser.id);
-
-    const groupedSchedules = mySchedules.reduce((acc, schedule) => {
-        const date = new Date(schedule.date).toDateString();
-        if (!acc[date]) {
-            acc[date] = [];
-        }
-        acc[date].push(schedule);
-        return acc;
-// Fix: Correctly type the accumulator for the reduce function to ensure proper type inference for `sessions`.
-    }, {} as Record<string, (typeof initialSchedules)[number][]>);
-
-    const getAthleteName = (id) => users.find(u => u.id === id)?.name || 'Unknown Athlete';
-
-    return (
-        <div>
-            <div className="dashboard-header">
-                <h1>My Schedule</h1>
-            </div>
-            <div className="schedule-container">
-                {Object.entries(groupedSchedules).sort((a,b) => new Date(a[0]).getTime() - new Date(b[0]).getTime()).map(([date, sessions]) => (
-                    <div key={date} className="schedule-group card">
-                        <h3 className="schedule-date">{date}</h3>
-                         {/* Fix: The `sessions` variable is now correctly typed as an array, so the cast is no longer needed. */}
-                         {sessions.map(session => (
-                            <div key={session.id} className="session-card">
-                                <h4>{session.time}</h4>
-                                <p className="session-location"><MapPinIcon/> {session.location}</p>
-                                <div className="session-athletes">
-                                    <strong>Athletes:</strong>
-                                    <ul>
-                                        {session.athleteIds.map(id => <li key={id}>{getAthleteName(id)}</li>)}
-                                    </ul>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                ))}
-            </div>
-        </div>
-    );
-};
-
-const NewConversationModal = ({ isOpen, onClose, users, currentUser, onCreateConversation }) => {
-    const [selectedUserId, setSelectedUserId] = useState('');
-    const modalContentRef = useRef(null);
-
-    const otherUsers = users.filter(u => u.id !== currentUser.id);
-
-    const handleSubmit = (e) => {
+     const handleLogSubmit = (e) => {
         e.preventDefault();
-        if (selectedUserId) {
-            onCreateConversation(parseInt(selectedUserId, 10));
-            onClose();
+        if (logContent.trim()) {
+            onAddLog(currentUser.id, logContent);
+            setLogContent('');
         }
     };
 
+    return (
+        <div>
+            <div className="dashboard-header"><h1>Personal Log</h1></div>
+             <div className="card">
+                <h3>Log Your Practice</h3>
+                <form onSubmit={handleLogSubmit} className="log-form">
+                    <div className="form-group">
+                         <textarea 
+                            value={logContent} 
+                            onChange={(e) => setLogContent(e.target.value)}
+                            placeholder="e.g., Practiced crossovers for 30 minutes."
+                            required
+                         />
+                    </div>
+                     <div className="form-actions" style={{justifyContent: 'flex-start'}}>
+                        <button type="submit" className="btn btn-primary">Add Entry</button>
+                    </div>
+                </form>
+                <h3>Past Entries</h3>
+                <div className="log-list">
+                     {personalLogs.length > 0 ? personalLogs.map(log => (
+                        <div key={log.id} className="log-entry">
+                            <p className="log-content">{log.content}</p>
+                            <p className="log-meta">By {log.author} on {new Date(log.date).toLocaleDateString()}</p>
+                        </div>
+                    )) : <p>No log entries yet.</p>}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const Schedule = ({ currentUser, schedules, users }) => {
+    const coachSchedules = (schedules as typeof initialSchedules)
+        .filter(s => s.coachId === currentUser.id)
+        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+    const groupedSchedules = coachSchedules.reduce((acc, session) => {
+        const date = new Date(session.date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        if (!acc[date]) {
+            acc[date] = [];
+        }
+        acc[date].push(session);
+        return acc;
+    }, {} as Record<string, (typeof initialSchedules)[number][]>);
+
+    return (
+        <div>
+            <div className="dashboard-header"><h1>My Schedule</h1></div>
+            <div className="schedule-container">
+                {Object.keys(groupedSchedules).length > 0 ? (
+                    Object.entries(groupedSchedules).sort((a,b) => new Date(a[0]).getTime() - new Date(b[0]).getTime()).map(([date, sessions]) => (
+                        <div key={date} className="card schedule-group">
+                            <h3 className="schedule-date">{date}</h3>
+                            {sessions.map(session => (
+                                <div key={session.id} className="session-card">
+                                    <h4>{session.time}</h4>
+                                    <p className="session-location"><MapPinIcon/> {session.location}</p>
+                                    <div className="session-athletes">
+                                        <strong>Athletes:</strong>
+                                        <ul>
+                                            {session.athleteIds.map(id => {
+                                                const athlete = users.find(u => u.id === id);
+                                                return <li key={id}>{athlete ? athlete.name : 'Unknown'}</li>;
+                                            })}
+                                        </ul>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ))
+                ) : (
+                    <p>No upcoming sessions in your schedule.</p>
+                )}
+            </div>
+        </div>
+    );
+};
+
+const PaymentModal = ({ isOpen, onClose, onConfirm, invoice }) => {
+    const modalContentRef = useRef(null);
+    const [paymentMethod, setPaymentMethod] = useState('Card');
+    const [submitted, setSubmitted] = useState(false);
+    
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (modalContentRef.current && !modalContentRef.current.contains(event.target)) {
@@ -848,6 +901,138 @@ const NewConversationModal = ({ isOpen, onClose, users, currentUser, onCreateCon
         if (isOpen) document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [isOpen, onClose]);
+    
+    useEffect(() => {
+       if(!isOpen) setSubmitted(false);
+    }, [isOpen]);
+
+    if (!isOpen) return null;
+
+    const handleConfirm = () => {
+        onConfirm(invoice.id);
+        setSubmitted(true);
+    };
+
+    return (
+        <div className="modal-overlay show">
+            <div className="modal-content" ref={modalContentRef}>
+                 {!submitted ? (
+                     <>
+                        <div className="modal-header">
+                            <h2>Complete Payment</h2>
+                            <button onClick={onClose} className="close-btn" aria-label="Close"><CloseIcon /></button>
+                        </div>
+                        <div className="payment-details">
+                            <p><strong>Invoice:</strong> {invoice.description}</p>
+                            <p><strong>Amount:</strong> KES {invoice.amount.toLocaleString()}</p>
+                             <div className="form-group">
+                                <label htmlFor="paymentMethod">Payment Method</label>
+                                <select id="paymentMethod" value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
+                                    <option value="Card">Card</option>
+                                    <option value="M-Pesa">M-Pesa</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div className="form-actions payment-actions">
+                            <button onClick={handleConfirm} className="btn btn-primary">Pay KES {invoice.amount.toLocaleString()}</button>
+                        </div>
+                        <p className="payment-note">This is a simulated payment process.</p>
+                     </>
+                 ) : (
+                     <div className="confirmation-message">
+                        <div className="icon"><CheckCircleIcon/></div>
+                        <h3>Payment Successful!</h3>
+                        <p>Thank you for your payment. The invoice has been marked as paid.</p>
+                        <button onClick={onClose} className="btn btn-primary">Done</button>
+                    </div>
+                 )}
+            </div>
+        </div>
+    );
+};
+
+const Payments = ({ currentUser, users, invoices, onPayInvoice }) => {
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedInvoice, setSelectedInvoice] = useState(null);
+
+    const handlePayClick = (invoice) => {
+        setSelectedInvoice(invoice);
+        setIsModalOpen(true);
+    };
+    
+    let userInvoices: Invoice[] = [];
+    if (currentUser.role === 'Admin') {
+        userInvoices = invoices;
+    } else if (currentUser.role === 'Parent') {
+        const childIds = currentUser.children || [];
+        userInvoices = (invoices as typeof initialInvoices).filter(inv => childIds.includes(inv.userId));
+    } else {
+        userInvoices = (invoices as typeof initialInvoices).filter(inv => inv.userId === currentUser.id);
+    }
+    
+    return (
+        <div>
+            <div className="dashboard-header"><h1>Payments</h1></div>
+            <div className="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Description</th>
+                            <th>Amount (KES)</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {userInvoices.map(invoice => (
+                            <tr key={invoice.id}>
+                                <td>{invoice.description}</td>
+                                <td>{invoice.amount.toLocaleString()}</td>
+                                <td>
+                                    <span className={`status-badge status-${invoice.status.toLowerCase()}`}>
+                                        {invoice.status}
+                                    </span>
+                                </td>
+                                <td>
+                                    {invoice.status === 'Due' && (
+                                        <button className="btn btn-primary" onClick={() => handlePayClick(invoice)}>Pay Now</button>
+                                    )}
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+            {selectedInvoice && (
+                <PaymentModal 
+                    isOpen={isModalOpen}
+                    onClose={() => setIsModalOpen(false)}
+                    onConfirm={onPayInvoice}
+                    invoice={selectedInvoice}
+                />
+            )}
+        </div>
+    );
+};
+
+const NewConversationModal = ({ isOpen, onClose, users, currentUser, onCreateConversation }) => {
+    const modalContentRef = useRef(null);
+    const [recipientId, setRecipientId] = useState('');
+
+    useEffect(() => {
+        if (isOpen) {
+            setRecipientId('');
+        }
+    }, [isOpen]);
+
+    const handleCreate = () => {
+        if(recipientId) {
+            onCreateConversation(parseInt(recipientId, 10));
+            onClose();
+        }
+    };
+    
+    const availableUsers = users.filter(u => u.id !== currentUser.id);
 
     if (!isOpen) return null;
 
@@ -855,122 +1040,122 @@ const NewConversationModal = ({ isOpen, onClose, users, currentUser, onCreateCon
         <div className="modal-overlay show">
             <div className="modal-content" ref={modalContentRef}>
                 <div className="modal-header">
-                    <h2>New Message</h2>
+                    <h2>Start a New Conversation</h2>
                     <button onClick={onClose} className="close-btn" aria-label="Close"><CloseIcon /></button>
                 </div>
-                <form onSubmit={handleSubmit}>
-                    <div className="form-group">
-                        <label htmlFor="recipient">Select a recipient</label>
-                        <select
-                            id="recipient"
-                            value={selectedUserId}
-                            onChange={(e) => setSelectedUserId(e.target.value)}
-                            required
-                        >
-                            <option value="">Choose a user...</option>
-                            {otherUsers.map(user => (
-                                <option key={user.id} value={user.id}>{user.name} ({user.role})</option>
-                            ))}
-                        </select>
-                    </div>
-                    <div className="form-actions">
-                        <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
-                        <button type="submit" className="btn btn-primary">Start Conversation</button>
-                    </div>
-                </form>
+                <div className="form-group">
+                    <label htmlFor="recipient">Select a user to message:</label>
+                    <select id="recipient" value={recipientId} onChange={(e) => setRecipientId(e.target.value)}>
+                        <option value="">Select a user...</option>
+                        {availableUsers.map(user => (
+                            <option key={user.id} value={user.id}>{user.name} ({user.role})</option>
+                        ))}
+                    </select>
+                </div>
+                <div className="form-actions">
+                    <button onClick={handleCreate} className="btn btn-primary" disabled={!recipientId}>Start Chat</button>
+                </div>
             </div>
         </div>
     );
 };
 
 
-const Messaging = ({ conversations, messages, users, currentUser, onSendMessage, onMarkAsRead, onCreateConversation }) => {
-    const [selectedConversationId, setSelectedConversationId] = useState(null);
-    const [newMessage, setNewMessage] = useState("");
+const Messaging = ({ currentUser, users, conversations, messages, onSendMessage, onCreateConversation, onMarkAsRead, activeConversationId: propActiveConvoId, onSelectConversation }) => {
+    const [activeConversationId, setActiveConversationId] = useState(propActiveConvoId || null);
+    const [newMessage, setNewMessage] = useState('');
     const [isNewConvoModalOpen, setIsNewConvoModalOpen] = useState(false);
-    const chatEndRef = useRef(null);
+    const messagesEndRef = useRef(null);
 
-    const currentConversations = conversations.filter(c => c.participantIds.includes(currentUser.id));
-    const selectedConversation = currentConversations.find(c => c.id === selectedConversationId);
+    useEffect(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [messages, activeConversationId]);
+
+    useEffect(() => {
+        if (propActiveConvoId) {
+            setActiveConversationId(propActiveConvoId);
+            onMarkAsRead(propActiveConvoId);
+        }
+    }, [propActiveConvoId]);
     
-    const conversationMessages = (messages as typeof initialMessages)
-        .filter(m => m.conversationId === selectedConversationId)
-        .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
-
-    const getOtherParticipant = (convo) => {
-        const otherId = convo.participantIds.find(id => id !== currentUser.id);
-        return users.find(u => u.id === otherId);
-    };
-
-    // Fix: Add explicit type for convoId parameter to resolve type inference issue.
-    const getLastMessage = (convoId: number) => {
-        const lastMsg = (messages as typeof initialMessages)
-            .filter(m => m.conversationId === convoId)
-            .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())[0];
-        return lastMsg ? lastMsg.content : "No messages yet.";
-    };
-    
-    const handleSendMessage = (e) => {
-        e.preventDefault();
-        if (!newMessage.trim() || !selectedConversationId) return;
-        onSendMessage(selectedConversationId, newMessage);
-        setNewMessage("");
-    };
-
     const handleSelectConversation = (convoId) => {
-        setSelectedConversationId(convoId);
+        setActiveConversationId(convoId);
+        onSelectConversation(convoId); // Notify parent
         onMarkAsRead(convoId);
     };
 
-    useEffect(() => {
-        chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [conversationMessages]);
+    const handleSendMessage = (e) => {
+        e.preventDefault();
+        if (newMessage.trim() && activeConversationId) {
+            onSendMessage(activeConversationId, newMessage);
+            setNewMessage('');
+        }
+    };
+
+    const getLastMessage = (convoId: number) => {
+        const convoMessages = (messages as typeof initialMessages)
+            .filter(m => m.conversationId === convoId)
+            .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+        return convoMessages[0];
+    };
+    
+    const userConversations = (conversations as typeof initialConversations)
+        .filter(c => c.participantIds.includes(currentUser.id))
+        .sort((a, b) => new Date(getLastMessage(b.id)?.timestamp || 0).getTime() - new Date(getLastMessage(a.id)?.timestamp || 0).getTime());
+        
+    const activeConversation = conversations.find(c => c.id === activeConversationId);
+    const conversationMessages = (messages as typeof initialMessages)
+        .filter(m => m.conversationId === activeConversationId)
+        .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
 
     return (
         <div>
             <div className="dashboard-header">
                 <h1>Messages</h1>
-                <button className="btn btn-secondary" onClick={() => setIsNewConvoModalOpen(true)}>New Message</button>
+                 <button className="btn btn-primary" onClick={() => setIsNewConvoModalOpen(true)}>New Message</button>
             </div>
-            <div className="messaging-layout card">
+            <div className="card messaging-layout">
                 <div className="conversation-list">
-                    {currentConversations.sort((a,b) => new Date(b.lastMessageTimestamp).getTime() - new Date(a.lastMessageTimestamp).getTime()).map(convo => {
-                        const otherUser = getOtherParticipant(convo);
-                        const isUnread = (messages as typeof initialMessages).some(m => m.conversationId === convo.id && !m.readBy.includes(currentUser.id));
+                    {userConversations.map(convo => {
+                        const otherParticipantId = convo.participantIds.find(id => id !== currentUser.id);
+                        const otherParticipant = users.find(u => u.id === otherParticipantId);
+                        const lastMessage = getLastMessage(convo.id);
+                        const isUnread = lastMessage && !lastMessage.readBy.includes(currentUser.id) && lastMessage.senderId !== currentUser.id;
+
                         return (
-                            <div 
-                                key={convo.id} 
-                                className={`conversation-item ${convo.id === selectedConversationId ? 'active' : ''} ${isUnread ? 'unread' : ''}`}
-                                onClick={() => handleSelectConversation(convo.id)}
+                            <div key={convo.id} 
+                                 className={`conversation-item ${activeConversationId === convo.id ? 'active' : ''} ${isUnread ? 'unread' : ''}`}
+                                 onClick={() => handleSelectConversation(convo.id)}
                             >
-                                <div className="avatar">{otherUser.name.charAt(0)}</div>
+                                {isUnread && <div className="unread-indicator"></div>}
+                                <div className="avatar">{otherParticipant?.name.charAt(0)}</div>
                                 <div className="convo-details">
-                                    <p className="participant-name">{otherUser.name}</p>
-                                    <p className="last-message">{getLastMessage(convo.id)}</p>
+                                    <p className="participant-name">{otherParticipant?.name}</p>
+                                    <p className="last-message">{lastMessage ? lastMessage.content : 'No messages yet'}</p>
                                 </div>
                             </div>
-                        );
+                        )
                     })}
                 </div>
                 <div className="chat-window">
-                    {selectedConversation ? (
+                    {activeConversation ? (
                         <>
                             <div className="chat-header">
-                                <h3>{getOtherParticipant(selectedConversation).name}</h3>
+                                <h3>{users.find(u => u.id === activeConversation.participantIds.find(id => id !== currentUser.id))?.name}</h3>
                             </div>
                             <div className="chat-messages">
                                 {conversationMessages.map(msg => (
                                     <div key={msg.id} className={`message-bubble ${msg.senderId === currentUser.id ? 'sent' : 'received'}`}>
-                                        <p>{msg.content}</p>
-                                        <span className="message-timestamp">{new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                                        {msg.content}
+                                        <span className="message-timestamp">{new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                                     </div>
                                 ))}
-                                <div ref={chatEndRef} />
+                                <div ref={messagesEndRef} />
                             </div>
-                            <form className="chat-input-form" onSubmit={handleSendMessage}>
+                             <form className="chat-input-form" onSubmit={handleSendMessage}>
                                 <input 
                                     type="text" 
-                                    placeholder="Type a message..." 
+                                    placeholder="Type a message..."
                                     value={newMessage}
                                     onChange={(e) => setNewMessage(e.target.value)}
                                 />
@@ -979,8 +1164,9 @@ const Messaging = ({ conversations, messages, users, currentUser, onSendMessage,
                         </>
                     ) : (
                         <div className="no-chat-selected">
-                            <EnvelopeIcon/>
-                            <p>Select a conversation to start messaging</p>
+                            <EnvelopeIcon />
+                            <h3>Select a conversation</h3>
+                            <p>Choose a conversation from the list to start chatting.</p>
                         </div>
                     )}
                 </div>
@@ -996,134 +1182,48 @@ const Messaging = ({ conversations, messages, users, currentUser, onSendMessage,
     );
 };
 
-const PaymentModal = ({ isOpen, onClose, onConfirm, invoice }) => {
-    const modalContentRef = useRef(null);
-    if (!isOpen || !invoice) return null;
-
-    return (
-        <div className="modal-overlay show">
-            <div className="modal-content" ref={modalContentRef}>
-                <div className="modal-header">
-                    <h2>Confirm Payment</h2>
-                    <button onClick={onClose} className="close-btn" aria-label="Close"><CloseIcon /></button>
-                </div>
-                <div className="payment-details">
-                    <p><strong>Invoice:</strong> {invoice.description}</p>
-                    <p><strong>Amount:</strong> KES {invoice.amount.toLocaleString()}</p>
-                </div>
-                <div className="form-actions payment-actions">
-                    <button onClick={() => onConfirm(invoice.id)} className="btn btn-primary">Pay with M-Pesa</button>
-                    <button onClick={() => onConfirm(invoice.id)} className="btn btn-primary">Pay with Card</button>
-                </div>
-                <p className="payment-note">This is a simulated payment process.</p>
-            </div>
-        </div>
-    );
-};
-
-
-const Payments = ({ invoices, onPayInvoice }) => {
-    const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
-    const [selectedInvoice, setSelectedInvoice] = useState(null);
-
-    const handlePayClick = (invoice) => {
-        setSelectedInvoice(invoice);
-        setIsPaymentModalOpen(true);
-    };
+const Dashboard = ({ user, users, athletes, logs, schedules, invoices, conversations, messages, onAddLog, onSelectAthlete, activeView, onNavigate, onPayInvoice, onSendMessage, onCreateConversation, onMarkAsRead }) => {
     
-    const handleConfirmPayment = (invoiceId) => {
-        onPayInvoice(invoiceId);
-        setIsPaymentModalOpen(false);
-        setSelectedInvoice(null);
-    }
-
-    return (
-        <div>
-            <div className="dashboard-header">
-                <h1>Payments & Invoices</h1>
-            </div>
-            <div className="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Description</th>
-                            <th>Amount (KES)</th>
-                            <th>Status</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {invoices.map(invoice => (
-                            <tr key={invoice.id}>
-                                <td>{invoice.description}</td>
-                                <td>{invoice.amount.toLocaleString()}</td>
-                                <td><span className={`status-badge status-${invoice.status.toLowerCase()}`}>{invoice.status}</span></td>
-                                <td>
-                                    {invoice.status === 'Due' && (
-                                        <button onClick={() => handlePayClick(invoice)} className="btn btn-secondary">Pay Now</button>
-                                    )}
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
-            <PaymentModal 
-                isOpen={isPaymentModalOpen}
-                onClose={() => setIsPaymentModalOpen(false)}
-                onConfirm={handleConfirmPayment}
-                invoice={selectedInvoice}
-            />
-        </div>
-    );
-};
-
-
-const Dashboard = ({ user, activeView, onNavigate, users, athletes, logs, schedules, invoices, messages, conversations, onAddUser, onUpdateUser, onAddLog, onSelectAthlete, onSendMessage, onPayInvoice, onMarkAsRead, onCreateConversation }) => {
     const renderContent = () => {
-        const athleteUser = user.role === 'Athlete' ? user : users.find(u => u.id === activeView.athleteId);
-        const athleteData = athletes.find(a => a.userId === (athleteUser ? athleteUser.id : null));
-        const athleteLogs = (logs as typeof initialLogs)
-            .filter(l => l.athleteId === (athleteUser ? athleteUser.id : null))
-            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-            
-        const parentUser = users.find(u => u.id === user.id);
-        const childIds = parentUser && parentUser.role === 'Parent' ? parentUser.children || [] : [];
-        const childUsers = users.filter(u => childIds.includes(u.id));
-
         switch (activeView.name) {
-            case 'Dashboard':
-                return <DashboardHome user={user} />;
             case 'User Management':
-                return <UserManagement users={users} onAddUser={onAddUser} onUpdateUser={onUpdateUser} />;
+                return <div>Admin Only</div>; // This component is rendered outside in App to pass handlers
             case 'My Athletes':
-                return <MyAthletes users={users.filter(u => u.coachId === user.id)} onSelectAthlete={onSelectAthlete} />;
+                return <MyAthletes currentUser={user} users={users} onSelectAthlete={onSelectAthlete} />;
             case 'Athlete Profile':
-                return <AthleteProfile athlete={athleteUser} athleteData={athleteData} logs={athleteLogs} onAddLog={onAddLog} currentUser={user} />;
+                return <AthleteProfile 
+                            athleteId={activeView.athleteId} 
+                            users={users} 
+                            athletes={athletes} 
+                            logs={logs} 
+                            onAddLog={onAddLog}
+                            onNavigateBack={() => onNavigate({ name: 'My Athletes' })}
+                        />;
             case 'My Progress':
-                return <MyProgress athleteData={athleteData} />;
+                return <MyProgress currentUser={user} athletes={athletes} />;
             case 'Personal Log':
-                 return <PersonalLog athlete={user} logs={athleteLogs} onAddLog={onAddLog} currentUser={user}/>;
+                return <PersonalLog currentUser={user} logs={logs} onAddLog={onAddLog} />;
             case 'Schedule':
-                return <Schedule schedules={schedules} users={users} currentUser={user} />;
-            case 'Messages':
-                return <Messaging conversations={conversations} messages={messages} users={users} currentUser={user} onSendMessage={onSendMessage} onMarkAsRead={onMarkAsRead} onCreateConversation={onCreateConversation}/>;
+                return <Schedule currentUser={user} schedules={schedules} users={users} />;
             case 'Payments':
-                const userInvoices = user.role === 'Admin' 
-                    ? invoices 
-                    : invoices.filter(i => {
-                        if(user.role === 'Parent'){
-                            const childrenOfParent = users.filter(u => u.parentId === user.id).map(u => u.id);
-                            return childrenOfParent.includes(i.userId);
-                        }
-                        return i.userId === user.id;
-                    });
-                return <Payments invoices={userInvoices} onPayInvoice={onPayInvoice} />;
+                 return <Payments currentUser={user} users={users} invoices={invoices} onPayInvoice={onPayInvoice} />;
+            case 'Messages':
+                 return <Messaging 
+                            currentUser={user} 
+                            users={users} 
+                            conversations={conversations} 
+                            messages={messages}
+                            onSendMessage={onSendMessage}
+                            onCreateConversation={onCreateConversation}
+                            onMarkAsRead={onMarkAsRead}
+                            activeConversationId={activeView.conversationId}
+                            onSelectConversation={(convoId) => onNavigate({ name: 'Messages', conversationId: convoId })}
+                        />;
+            case 'Dashboard':
             default:
                 return <DashboardHome user={user} />;
         }
-    };
-    
+    }
     return (
         <div className="dashboard-layout">
             <Sidebar userRole={user.role} activeView={activeView.name} onNavigate={onNavigate} />
@@ -1136,135 +1236,164 @@ const Dashboard = ({ user, activeView, onNavigate, users, athletes, logs, schedu
     )
 }
 
-interface ActiveView {
-  name: string;
-  athleteId?: number;
-  conversationId?: number;
-}
 
-const App = () => {
-    const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
-    const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-    const [users, setUsers] = useLocalStorage('users', initialUsers);
-    const [athletes, setAthletes] = useLocalStorage('athletes', initialAthletes);
-    const [logs, setLogs] = useLocalStorage('logs', initialLogs);
-    const [schedules, setSchedules] = useLocalStorage('schedules', initialSchedules);
-    const [invoices, setInvoices] = useLocalStorage('invoices', initialInvoices);
-    const [conversations, setConversations] = useLocalStorage('conversations', initialConversations);
-    const [messages, setMessages] = useLocalStorage('messages', initialMessages);
-    const [currentUser, setCurrentUser] = useLocalStorage<any>('currentUser', null);
-    const [activeView, setActiveView] = useState<ActiveView>({ name: 'Dashboard' });
+function App() {
+  const [isBookingModalOpen, setBookingModalOpen] = useState(false);
+  const [isLoginModalOpen, setLoginModalOpen] = useState(false);
+  
+  const [users, setUsers] = useLocalStorage<User[]>('users', initialUsers);
+  const [athletes, setAthletes] = useLocalStorage<Athlete[]>('athletes', initialAthletes);
+  const [logs, setLogs] = useLocalStorage<Log[]>('logs', initialLogs);
+  const [schedules, setSchedules] = useLocalStorage<Schedule[]>('schedules', initialSchedules);
+  const [invoices, setInvoices] = useLocalStorage<Invoice[]>('invoices', initialInvoices);
+  const [conversations, setConversations] = useLocalStorage<Conversation[]>('conversations', initialConversations);
+  const [messages, setMessages] = useLocalStorage<Message[]>('messages', initialMessages);
+  
+  const [currentUser, setCurrentUser] = useLocalStorage<User | null>('currentUser', null);
+  const [activeView, setActiveView] = useState<ActiveView>({ name: 'Dashboard' });
 
-    useEffect(() => {
-        document.body.style.overflow = isBookingModalOpen || isLoginModalOpen ? 'hidden' : 'auto';
-    }, [isBookingModalOpen, isLoginModalOpen]);
-    
-    const handleNavigate = (view: Partial<ActiveView>) => setActiveView(prev => ({...prev, ...view}));
-    const handleSelectAthlete = (athleteId: number) => setActiveView({ name: 'Athlete Profile', athleteId });
-    const handleLogin = (user) => {
-        setCurrentUser(user);
-        setActiveView({ name: 'Dashboard' });
-    }
-    const handleLogout = () => {
-        setCurrentUser(null);
-        setActiveView({ name: 'Dashboard' });
-    };
-    const handleAddUser = (newUser) => setUsers(prev => [...prev, { ...newUser, id: Date.now() }]);
-    const handleUpdateUser = (updatedUser) => setUsers(prev => prev.map(u => u.id === updatedUser.id ? updatedUser : u));
-    const handleAddLog = (newLog) => setLogs(prev => [{...newLog, id: Date.now() }, ...prev]);
-    
-    const handleSendMessage = (conversationId, content) => {
-        const newMessage = {
-            id: Date.now(),
-            conversationId,
-            senderId: currentUser.id,
-            content,
-            timestamp: new Date().toISOString(),
-            readBy: [currentUser.id]
-        };
-        setMessages(prev => [...prev, newMessage]);
-        setConversations(prev => prev.map(c => c.id === conversationId ? {...c, lastMessageTimestamp: newMessage.timestamp} : c));
-    };
+  const handleLogin = (user) => {
+    setCurrentUser(user);
+    const defaultView = sidebarLinks[user.role]?.[0]?.view || 'Dashboard';
+    setActiveView({ name: defaultView });
+  };
+  const handleLogout = () => {
+    setCurrentUser(null);
+    setActiveView({ name: 'Dashboard' });
+  };
 
-    const handleCreateConversation = (otherUserId: number) => {
-        const existingConvo = conversations.find(c => c.participantIds.includes(currentUser.id) && c.participantIds.includes(otherUserId));
-        if (existingConvo) {
-            setActiveView({ name: 'Messages', conversationId: existingConvo.id });
-        } else {
-            const newConvo = {
-                id: Date.now(),
-                participantIds: [currentUser.id, otherUserId],
-                lastMessageTimestamp: new Date().toISOString()
-            };
-            setConversations(prev => [newConvo, ...prev]);
-            setActiveView({ name: 'Messages', conversationId: newConvo.id });
+  const handleNavigate = (view: ActiveView) => setActiveView(view);
+  const handleSelectAthlete = (athleteId: number) => setActiveView({ name: 'Athlete Profile', athleteId });
+
+  const handleAddUser = (userData) => {
+    setUsers(prev => [...prev, { ...userData, id: Date.now() }]);
+  };
+
+  const handleEditUser = (updatedUserData) => {
+    setUsers(prev => prev.map(u => u.id === updatedUserData.id ? updatedUserData : u));
+  };
+  
+  const handleAddLog = (athleteId, content) => {
+      const newLog = {
+          id: Date.now(),
+          athleteId,
+          author: currentUser?.name,
+          date: new Date().toISOString().split('T')[0],
+          content
+      };
+      setLogs(prev => [...prev, newLog]);
+  };
+  
+  const handlePayInvoice = (invoiceId) => {
+      setInvoices(prev => prev.map(inv => inv.id === invoiceId ? {...inv, status: 'Paid'} : inv));
+  };
+  
+  const handleSendMessage = (conversationId, content) => {
+      const newMessage = {
+          id: Date.now(),
+          conversationId,
+          senderId: currentUser.id,
+          content,
+          timestamp: new Date().toISOString(),
+          readBy: [currentUser.id]
+      };
+      setMessages(prev => [...prev, newMessage]);
+      setConversations(prev => prev.map(c => 
+          c.id === conversationId ? { ...c, lastMessageTimestamp: newMessage.timestamp } : c
+      ));
+  };
+  
+  const handleCreateConversation = (recipientId) => {
+      const existingConvo = conversations.find(c => 
+          c.participantIds.includes(currentUser.id) && c.participantIds.includes(recipientId)
+      );
+
+      if (existingConvo) {
+          handleNavigate({ name: 'Messages', conversationId: existingConvo.id });
+          return;
+      }
+
+      const newConversation = {
+          id: Date.now(),
+          participantIds: [currentUser.id, recipientId],
+          lastMessageTimestamp: new Date().toISOString(),
+      };
+      setConversations(prev => [...prev, newConversation]);
+      handleNavigate({ name: 'Messages', conversationId: newConversation.id });
+  };
+  
+  const handleMarkConversationAsRead = (conversationId) => {
+      setMessages(prev => prev.map(msg => {
+          if (msg.conversationId === conversationId && !msg.readBy.includes(currentUser.id)) {
+              return { ...msg, readBy: [...msg.readBy, currentUser.id] };
+          }
+          return msg;
+      }));
+  };
+  
+  const unreadMessagesCount = conversations
+    .filter(c => c.participantIds.includes(currentUser?.id))
+    .reduce((count, convo) => {
+        const lastMessage = messages
+            .filter(m => m.conversationId === convo.id)
+            .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())[0];
+
+        if (lastMessage && lastMessage.senderId !== currentUser?.id && !lastMessage.readBy.includes(currentUser?.id)) {
+            return count + 1;
         }
-    };
-    
-    const handleMarkConversationAsRead = (conversationId) => {
-        setMessages(prev => prev.map(m => 
-            (m.conversationId === conversationId && !m.readBy.includes(currentUser.id))
-                ? { ...m, readBy: [...m.readBy, currentUser.id] }
-                : m
-        ));
-    };
-    
-    const handlePayInvoice = (invoiceId) => {
-        setInvoices(prev => prev.map(inv => inv.id === invoiceId ? { ...inv, status: 'Paid' } : inv));
-    };
+        return count;
+    }, 0);
 
-    const unreadCount = messages.filter(m => {
-        if (!currentUser) return false;
-        const userConvos = conversations.filter(c => c.participantIds.includes(currentUser.id));
-        const isMyConvo = userConvos.some(c => c.id === m.conversationId);
-        return isMyConvo && !m.readBy.includes(currentUser.id);
-    }).length;
-
-
-    return (
-        <>
-            <Header 
-                onBookNowClick={() => setIsBookingModalOpen(true)}
-                onLoginClick={() => setIsLoginModalOpen(true)}
-                user={currentUser}
-                onLogout={handleLogout}
-                unreadCount={unreadCount}
-                onNavigate={handleNavigate}
-            />
-            {currentUser ? (
-                <Dashboard 
-                    user={currentUser} 
-                    activeView={activeView}
-                    onNavigate={handleNavigate}
-                    users={users}
-                    athletes={athletes}
-                    logs={logs}
-                    schedules={schedules}
-                    invoices={invoices}
-                    messages={messages}
-                    conversations={conversations}
-                    onAddUser={handleAddUser}
-                    onUpdateUser={handleUpdateUser}
-                    onAddLog={handleAddLog}
-                    onSelectAthlete={handleSelectAthlete}
-                    onSendMessage={handleSendMessage}
-                    onPayInvoice={handlePayInvoice}
-                    onMarkAsRead={handleMarkConversationAsRead}
-                    onCreateConversation={handleCreateConversation}
-                />
-            ) : (
-                <LandingPage onBookNowClick={() => setIsBookingModalOpen(true)} />
-            )}
-            <Footer />
-            <BookingModal isOpen={isBookingModalOpen} onClose={() => setIsBookingModalOpen(false)} />
-            <LoginModal 
-                isOpen={isLoginModalOpen} 
-                onClose={() => setIsLoginModalOpen(false)} 
-                onLogin={handleLogin}
+  return (
+    <>
+      <Header 
+        onBookNowClick={() => setBookingModalOpen(true)} 
+        onLoginClick={() => setLoginModalOpen(true)}
+        user={currentUser}
+        onLogout={handleLogout}
+        unreadCount={unreadMessagesCount}
+        onNavigate={handleNavigate}
+      />
+      
+      {!currentUser ? (
+        <LandingPage onBookNowClick={() => setBookingModalOpen(true)} />
+      ) : (
+        activeView.name === 'User Management' && currentUser.role === 'Admin' ? (
+             <div className="dashboard-layout">
+                <Sidebar userRole={currentUser.role} activeView={activeView.name} onNavigate={handleNavigate} />
+                <main className="dashboard-content">
+                    <div className="container">
+                        <UserManagement users={users} onAddUser={handleAddUser} onEditUser={handleEditUser} />
+                    </div>
+                </main>
+            </div>
+        ) : (
+            <Dashboard 
+                user={currentUser} 
                 users={users}
+                athletes={athletes}
+                logs={logs}
+                schedules={schedules}
+                invoices={invoices}
+                conversations={conversations}
+                messages={messages}
+                onAddLog={handleAddLog}
+                onSelectAthlete={handleSelectAthlete}
+                activeView={activeView}
+                onNavigate={handleNavigate}
+                onPayInvoice={handlePayInvoice}
+                onSendMessage={handleSendMessage}
+                onCreateConversation={handleCreateConversation}
+                onMarkAsRead={handleMarkConversationAsRead}
             />
-        </>
-    );
-};
+        )
+      )}
+      
+      <Footer />
+      <BookingModal isOpen={isBookingModalOpen} onClose={() => setBookingModalOpen(false)} />
+      <LoginModal isOpen={isLoginModalOpen} onClose={() => setLoginModalOpen(false)} onLogin={handleLogin} users={users} />
+    </>
+  );
+}
 
 export default App;
