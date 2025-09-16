@@ -67,6 +67,29 @@ body { font-family: 'Poppins', sans-serif; background-color: var(--bg-dark); col
 .dashboard-content-area { padding: 24px; overflow-y: auto; flex-grow: 1; }
 .view-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
 
+/* --- Search Bars --- */
+.search-bar-container {
+    margin-bottom: 24px;
+}
+.search-input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-dark);
+    color: var(--text-primary);
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: inherit;
+}
+.search-input::placeholder {
+    color: var(--text-secondary);
+}
+.search-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.3);
+}
+
 /* --- Admin Dashboard & Tables --- */
 .stat-card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 24px; }
 .stat-card { background-color: var(--bg-light); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); display: flex; align-items: center; gap: 16px; }
@@ -142,8 +165,24 @@ td input[type="range"] { width: 120px; }
 .schedule-item-date span:last-child { font-size: 1.5rem; font-weight: 700; }
 .schedule-item-info { flex-grow: 1; }
 .schedule-item-info h4 { font-size: 1.1rem; }
-.schedule-item-info p { color: var(--text-secondary); }
 .schedule-item-actions { display: flex; gap: 12px; }
+
+.session-details {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 0.9rem;
+}
+.session-details p {
+    color: var(--text-secondary);
+    margin: 0;
+}
+.session-details strong {
+    color: var(--text-primary);
+    font-weight: 500;
+    margin-right: 8px;
+}
 
 /* --- Calendar View --- */
 .calendar-container { background-color: var(--bg-light); border-radius: 12px; padding: 20px; border: 1px solid var(--border-color); }

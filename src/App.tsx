@@ -340,13 +340,39 @@ const AdminDashboard = ({ users, programs, payments }) => {
 }
 const UserManagement = ({ users, onImpersonate, onAdd, onEdit, onDelete }) => {
     const [isModalOpen, setIsModalOpen] = useState(false); const [userToEdit, setUserToEdit] = useState<User | null>(null);
+    const [searchTerm, setSearchTerm] = useState('');
     const handleOpenModal = (user: User | null = null) => { setUserToEdit(user); setIsModalOpen(true); };
     const handleSave = (formData) => { if (userToEdit) onEdit({ ...userToEdit, ...formData }); else onAdd(formData); setIsModalOpen(false); };
-    return (<div><div className="view-header"><h1>User Management</h1><button className="btn btn-primary" onClick={() => handleOpenModal()}><UserPlusIcon/> Add User</button></div><div className="table-container"><table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Actions</th></tr></thead><tbody>{users.map(user => (<tr key={user.user_id}><td>{user.name}</td><td>{user.email}</td><td><span className={`role-badge role-${user.role.toLowerCase()}`}>{user.role}</span></td><td className="action-cell"><button onClick={() => onImpersonate(user)} className="btn-icon" title="Impersonate"><EyeIcon/></button><button onClick={() => handleOpenModal(user)} className="btn-icon" title="Edit"><PencilIcon/></button><button onClick={() => onDelete(user.user_id)} className="btn-icon btn-danger" title="Delete"><TrashIcon/></button></td></tr>))}</tbody></table></div><UserFormModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSave={handleSave} userToEdit={userToEdit} users={users}/></div>);
+    const filteredUsers = users.filter(user =>
+        user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.email.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    return (
+        <div>
+            <div className="view-header"><h1>User Management</h1><button className="btn btn-primary" onClick={() => handleOpenModal()}><UserPlusIcon/> Add User</button></div>
+            <div className="search-bar-container">
+                <input
+                    type="text"
+                    placeholder="Search users by name or email..."
+                    className="search-input"
+                    value={searchTerm}
+                    onChange={e => setSearchTerm(e.target.value)}
+                />
+            </div>
+            <div className="table-container">
+                <table>
+                    <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Actions</th></tr></thead>
+                    <tbody>{filteredUsers.map(user => (<tr key={user.user_id}><td>{user.name}</td><td>{user.email}</td><td><span className={`role-badge role-${user.role.toLowerCase()}`}>{user.role}</span></td><td className="action-cell"><button onClick={() => onImpersonate(user)} className="btn-icon" title="Impersonate"><EyeIcon/></button><button onClick={() => handleOpenModal(user)} className="btn-icon" title="Edit"><PencilIcon/></button><button onClick={() => onDelete(user.user_id)} className="btn-icon btn-danger" title="Delete"><TrashIcon/></button></td></tr>))}</tbody>
+                </table>
+            </div>
+            <UserFormModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSave={handleSave} userToEdit={userToEdit} users={users}/>
+        </div>
+    );
 };
 const ProgramManagement = ({ programs, users, onAdd, onEdit, onDelete }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [programToEdit, setProgramToEdit] = useState<Program | null>(null);
+    const [searchTerm, setSearchTerm] = useState('');
     const coaches = users.filter(u => u.role === 'Coach');
 
     const handleOpenModal = (program: Program | null = null) => {
@@ -363,6 +389,10 @@ const ProgramManagement = ({ programs, users, onAdd, onEdit, onDelete }) => {
         setIsModalOpen(false);
     };
 
+    const filteredPrograms = programs.filter(program =>
+        program.title.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
     return (
         <div>
             <div className="view-header">
@@ -370,6 +400,15 @@ const ProgramManagement = ({ programs, users, onAdd, onEdit, onDelete }) => {
                 <button className="btn btn-primary" onClick={() => handleOpenModal()}>
                     <PlusCircleIcon /> Add Program
                 </button>
+            </div>
+            <div className="search-bar-container">
+                <input
+                    type="text"
+                    placeholder="Search programs by title..."
+                    className="search-input"
+                    value={searchTerm}
+                    onChange={e => setSearchTerm(e.target.value)}
+                />
             </div>
             <div className="table-container">
                 <table>
@@ -385,7 +424,7 @@ const ProgramManagement = ({ programs, users, onAdd, onEdit, onDelete }) => {
                         </tr>
                     </thead>
                     <tbody>
-                        {programs.map(program => {
+                        {filteredPrograms.map(program => {
                             const coach = users.find(u => u.user_id === program.coach_id);
                             const skillLevelClass = program.skillLevel.toLowerCase().replace(' ', '-');
                             return (
@@ -422,7 +461,7 @@ const ParentDashboard = ({ parent, users, progress }) => {
 }
 const PaymentManagement = ({ payments, users }) => (<div><div className="view-header"><h1>Payment Management</h1></div><div className="table-container"><table><thead><tr><th>User</th><th>Amount (KES)</th><th>Status</th><th>Date</th></tr></thead><tbody>{payments.map(p => { const user = users.find(u => u.user_id === p.user_id); return (<tr key={p.payment_id}><td>{user ? user.name : 'Unknown User'}</td><td>{p.amount.toLocaleString()}</td><td><span className={`status-badge status-${p.status}`}>{p.status}</span></td><td>{p.paid_at ? new Date(p.paid_at).toLocaleDateString() : 'N/A'}</td></tr>); })}</tbody></table></div></div>);
 const AdminLogView = ({ logs, users }) => (<div><div className="view-header"><h1>Admin Audit Log</h1></div><div className="table-container"><table><thead><tr><th>Admin</th><th>Action</th><th>Target ID</th><th>Timestamp</th></tr></thead><tbody>{logs.map(log => { const admin = users.find(u => u.user_id === log.admin_id); return (<tr key={log.log_id}><td>{admin ? admin.name : 'Unknown Admin'}</td><td>{log.action}</td><td>{log.target_id || 'N/A'}</td><td>{new Date(log.timestamp).toLocaleString()}</td></tr>); })}</tbody></table></div></div>);
-const ScheduleView = ({ user, sessions, users, onConfirmBooking, onSetReminder }) => {
+const ScheduleView = ({ user, sessions, users, programs, onConfirmBooking, onSetReminder }) => {
     const getAthleteId = () => user.role === 'Athlete' ? user.user_id : null;
     const getChildrenIds = () => user.role === 'Parent' ? users.filter(u => u.parent_id === user.user_id).map(c => c.user_id) : [];
 
@@ -440,13 +479,16 @@ const ScheduleView = ({ user, sessions, users, onConfirmBooking, onSetReminder }
 
     return (
         <div>
-            <div className="view-header"><h1>My Schedule</h1></div>
+            <div className="view-header"><h1>Session Booking</h1></div>
             <div className="schedule-list">
                 {upcomingSessions.length === 0 ? (<p>No upcoming sessions.</p>) : upcomingSessions.map(session => {
                     const athleteForSession = user.role === 'Athlete' ? user : users.find(u => session.athlete_ids.includes(u.user_id) && childrenIds.includes(u.user_id));
                     if (!athleteForSession) return null;
 
+                    const program = programs.find(p => p.program_id === session.program_id);
+                    const coach = users.find(u => u.user_id === session.coach_id);
                     const isConfirmed = session.confirmed_athlete_ids.includes(athleteForSession.user_id);
+
                     return (
                         <div className="schedule-item" key={session.session_id}>
                             <div className="schedule-item-date">
@@ -455,7 +497,11 @@ const ScheduleView = ({ user, sessions, users, onConfirmBooking, onSetReminder }
                             </div>
                             <div className="schedule-item-info">
                                 <h4>{session.title} {user.role === 'Parent' && `(${athleteForSession.name})`}</h4>
-                                <p>{new Date(session.date).toLocaleDateString([], { weekday: 'long' })} at {session.time}</p>
+                                <div className="session-details">
+                                    <p><strong>Program:</strong> {program ? program.title : 'N/A'}</p>
+                                    <p><strong>Coach:</strong> {coach ? coach.name : 'N/A'}</p>
+                                    <p>{new Date(session.date).toLocaleDateString([], { weekday: 'long' })} at {session.time}</p>
+                                </div>
                             </div>
                             <div className="schedule-item-actions">
                                 {isConfirmed ? (
@@ -695,7 +741,7 @@ const DashboardLayout = ({ user, impersonatedUser, onLogout, onStopImpersonating
             case 'AthleteDashboard': return <AthleteDashboard athlete={effectiveUser} progress={data.progress} />;
             case 'PaymentManagement': return <PaymentManagement payments={data.payments} users={data.users} />;
             case 'AdminLog': return <AdminLogView logs={data.adminLogs} users={data.users} />;
-            case 'ScheduleView': return <ScheduleView user={effectiveUser} sessions={data.sessions} users={data.users} onConfirmBooking={handlers.confirmBooking} onSetReminder={handlers.openReminderModal}/>;
+            case 'ScheduleView': return <ScheduleView user={effectiveUser} sessions={data.sessions} users={data.users} programs={data.programs} onConfirmBooking={handlers.confirmBooking} onSetReminder={handlers.openReminderModal}/>;
             case 'CalendarView': return <CalendarView coach={effectiveUser} sessions={data.sessions} users={data.users} onSetReminder={handlers.openReminderModal}/>;
             case 'MessagesView': return <MessagesView messages={data.messages} users={data.users} />;
             case 'ContactUs': return <ContactUs onSendMessage={handlers.sendMessage} addToast={handlers.addToast} />;
