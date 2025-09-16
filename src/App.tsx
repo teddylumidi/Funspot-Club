@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, useMemo, FC, SetStateAction, useRef } from 'react';
 
 // --- SVG Icons ---
@@ -21,18 +22,21 @@ const UserCircleIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="
 const SunIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M12 12a5 5 0 100-10 5 5 0 000 10z" /></svg>;
 const MoonIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.72 9.72 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25c0 5.385 4.365 9.75 9.75 9.75 2.138 0 4.123-.693 5.752-1.848z" /></svg>;
 const BellIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" /></svg>;
+const ArrowDownTrayIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>;
 
 // --- Type Definitions ---
 type Role = 'Admin' | 'Coach' | 'Athlete' | 'Parent';
 type SkillLevel = 'Beginner' | 'Intermediate' | 'Advanced' | 'All Levels';
 type PaymentStatus = 'paid' | 'pending' | 'failed';
 type Theme = 'light' | 'dark';
+type ToastType = 'success' | 'info' | 'error';
 
 interface User { user_id: number; name: string; email: string; password_hash: string; role: Role; date_of_birth: string; parent_id: number | null; coach_id?: number | null; photo_url?: string; bio?: string; }
 interface Program { program_id: number; title: string; description: string; schedule: string; coach_id: number; price: number; duration: string; skillLevel: SkillLevel; }
 interface Session { session_id: number; program_id: number; date: string; time: string; title: string; coach_id: number; athlete_ids: number[]; confirmed_athlete_ids: number[]; }
 interface Payment { payment_id: number; user_id: number; program_id: number; amount: number; status: PaymentStatus; paid_at: string | null; }
 interface Progress { progress_id: number; athlete_id: number; skill: string; percentage: number; updated_at: string; }
+interface ToastMessage { id: number; message: string; type: ToastType; }
 
 // --- Data Simulation & Hooks ---
 const useLocalStorage = <T,>(key: string, initialValue: T): [T, (value: SetStateAction<T>) => void] => {
@@ -101,6 +105,17 @@ const BarChart: FC<{ data: { label: string; value: number }[]; showTooltip: Show
 };
 const Tooltip: FC<{ tooltip: TooltipState }> = ({ tooltip }) => { if (!tooltip.visible) return null; return <div className="chart-tooltip" style={{ left: tooltip.x, top: tooltip.y, transform: 'translate(-50%, -120%)' }} dangerouslySetInnerHTML={{ __html: tooltip.content }} />; };
 const Modal: FC<{ title: string; onClose: () => void; children: React.ReactNode; size?: 'sm' | 'md' | 'lg'}> = ({ title, onClose, children, size = 'md' }) => ( <div className="modal-backdrop"><div className={`modal-content modal-${size}`}><div className="modal-header"><h3>{title}</h3><button onClick={onClose} className="btn-icon"><CloseIcon /></button></div><div className="modal-body">{children}</div></div></div> );
+const ToastContainer: FC<{ toasts: ToastMessage[]; onClose: (id: number) => void }> = ({ toasts, onClose }) => (
+    <div className="toast-container">
+        {toasts.map(toast => (
+            <div key={toast.id} className={`toast toast-${toast.type}`}>
+                <p>{toast.message}</p>
+                <button onClick={() => onClose(toast.id)} className="toast-close-btn"><CloseIcon /></button>
+            </div>
+        ))}
+    </div>
+);
+
 
 // --- Dashboards ---
 const AdminDashboard: FC<{ users: User[], programs: Program[], payments: Payment[], showTooltip: ShowTooltipFn, hideTooltip: HideTooltipFn }> = ({ users, programs, payments, showTooltip, hideTooltip }) => {
@@ -215,7 +230,135 @@ const UserProfilePage: FC<{ profileUser: User; currentUser: User; users: User[];
             {profileUser.role === 'Coach' && assignedAthletes.length > 0 && ( <div className="card"><h3>Assigned Athletes</h3><div className="table-container"><table><thead><tr><th>Name</th><th>Date of Birth</th><th>Parent</th></tr></thead><tbody>{assignedAthletes.map(athlete => ( <tr key={athlete.user_id}><td data-label="Name"><div className="user-name-cell"><img src={athlete.photo_url} alt={athlete.name} className="table-avatar"/>{athlete.name}</div></td><td data-label="DOB">{athlete.date_of_birth}</td><td data-label="Parent">{getParentName(athlete.parent_id)}</td></tr> ))}</tbody></table></div></div> )}
         </div>
     )
-}
+};
+const ReportsView: FC<{ users: User[], payments: Payment[], programs: Program[] }> = ({ users, payments, programs }) => {
+    const [dateRange, setDateRange] = useState({ start: '', end: '' });
+
+    const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setDateRange(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    };
+
+    const downloadCSV = (filename: string, data: Record<string, any>[]) => {
+        if (data.length === 0) {
+            alert("No data available for the selected criteria.");
+            return;
+        }
+        const headers = Object.keys(data[0]);
+        const csvContent = [
+            headers.join(','),
+            ...data.map(row => 
+                headers.map(header => {
+                    let cell = row[header] === null || row[header] === undefined ? '' : String(row[header]);
+                    cell = cell.replace(/"/g, '""'); // Escape double quotes
+                    if (cell.includes(',')) cell = `"${cell}"`;
+                    return cell;
+                }).join(',')
+            )
+        ].join('\n');
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", filename);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+    const handleExportUsers = () => {
+        const parentMap = new Map(users.filter(u => u.role === 'Parent').map(p => [p.user_id, p.name]));
+        const data = users.map(u => ({
+            'User ID': u.user_id,
+            'Name': u.name,
+            'Email': u.email,
+            'Role': u.role,
+            'Date of Birth': u.date_of_birth,
+            'Parent Name': parentMap.get(u.parent_id!) || 'N/A',
+        }));
+        downloadCSV('user_list.csv', data);
+    };
+
+    const getFilteredPayments = () => {
+        const { start, end } = dateRange;
+        return payments.filter(p => {
+            if (!p.paid_at) return false;
+            const paymentDate = new Date(p.paid_at);
+            const startDate = start ? new Date(start) : null;
+            const endDate = end ? new Date(end) : null;
+            if (startDate && paymentDate < startDate) return false;
+            if (endDate && paymentDate > endDate) return false;
+            return true;
+        });
+    }
+
+    const handleExportEnrollments = () => {
+        const filtered = getFilteredPayments();
+        const userMap = new Map(users.map(u => [u.user_id, u]));
+        const programMap = new Map(programs.map(p => [p.program_id, p]));
+        const data = filtered.map(p => ({
+            'Payment ID': p.payment_id,
+            'Athlete Name': userMap.get(p.user_id)?.name || 'Unknown',
+            'Program Title': programMap.get(p.program_id)?.title || 'Unknown',
+            'Amount': p.amount,
+            'Status': p.status,
+            'Payment Date': p.paid_at ? new Date(p.paid_at).toLocaleDateString() : 'N/A',
+        }));
+        downloadCSV('program_enrollments.csv', data);
+    };
+
+    const handleExportPayments = () => {
+        const filtered = getFilteredPayments();
+        const userMap = new Map(users.map(u => [u.user_id, u.name]));
+        const data = filtered.map(p => ({
+            'Payment ID': p.payment_id,
+            'User Name': userMap.get(p.user_id) || 'Unknown',
+            'Program ID': p.program_id,
+            'Amount': p.amount,
+            'Status': p.status,
+            'Payment Date': p.paid_at ? new Date(p.paid_at).toLocaleDateString() : 'N/A',
+        }));
+        downloadCSV('payment_history.csv', data);
+    };
+
+    return (
+        <div className="reports-container">
+            <div className="card report-card">
+                <h3>Export User List</h3>
+                <p>Download a CSV file of all users in the system.</p>
+                <div className="report-actions">
+                    <button className="btn btn-primary" onClick={handleExportUsers}><ArrowDownTrayIcon /> Export All Users</button>
+                </div>
+            </div>
+
+            <div className="card report-card">
+                <h3>Export Program Enrollments</h3>
+                <p>Download a CSV of enrollments based on payment date.</p>
+                <div className="report-filters">
+                    <div className="form-group"><label>Start Date</label><input type="date" name="start" value={dateRange.start} onChange={handleDateChange} /></div>
+                    <div className="form-group"><label>End Date</label><input type="date" name="end" value={dateRange.end} onChange={handleDateChange} /></div>
+                </div>
+                <div className="report-actions">
+                    <button className="btn btn-primary" onClick={handleExportEnrollments}><ArrowDownTrayIcon /> Export Enrollments</button>
+                </div>
+            </div>
+
+            <div className="card report-card">
+                <h3>Export Payment History</h3>
+                <p>Download a CSV of all successful payments within a date range.</p>
+                 <div className="report-filters">
+                    <div className="form-group"><label>Start Date</label><input type="date" name="start" value={dateRange.start} onChange={handleDateChange} /></div>
+                    <div className="form-group"><label>End Date</label><input type="date" name="end" value={dateRange.end} onChange={handleDateChange} /></div>
+                </div>
+                <div className="report-actions">
+                    <button className="btn btn-primary" onClick={handleExportPayments}><ArrowDownTrayIcon /> Export Payments</button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 
 // --- Main App Component ---
 const App = () => {
@@ -234,6 +377,7 @@ const App = () => {
     const [modal, setModal] = useState<ModalState>({ type: null });
     const [viewingProfile, setViewingProfile] = useState<User | null>(null);
     const [showNotifications, setShowNotifications] = useState(false);
+    const [toasts, setToasts] = useState<ToastMessage[]>([]);
     const notifRef = useRef<HTMLDivElement>(null);
     
     const [userSearch, setUserSearch] = useState('');
@@ -266,28 +410,95 @@ const App = () => {
 
     const handleLogin = (user: User) => { setCurrentUser(user); };
     const handleLogout = () => { setCurrentUser(null); setImpersonatedUser(null); setViewingProfile(null); setView('Dashboard'); };
-    const handleImpersonate = (user: User) => { if (currentUser?.role === 'Admin') { setImpersonatedUser(user); setView('Dashboard'); } };
-    const stopImpersonating = () => { setImpersonatedUser(null); setView('Dashboard'); };
+    const handleImpersonate = (user: User) => { if (currentUser?.role === 'Admin') { setImpersonatedUser(user); setView('Dashboard'); addToast(`Now viewing as ${user.name}`, 'info'); } };
+    const stopImpersonating = () => { setImpersonatedUser(null); setView('Dashboard'); addToast(`Returned to your account`, 'info'); };
+    
+    const removeToast = (id: number) => { setToasts(prev => prev.filter(t => t.id !== id)); };
+    const addToast = (message: string, type: ToastType = 'success') => {
+        const id = Date.now();
+        setToasts(prev => [...prev, { id, message, type }]);
+        setTimeout(() => removeToast(id), 5000);
+    };
+
 
     // --- CRUD Handlers ---
-    const handleSaveUser = (user: User) => { setUsers(prev => user.user_id ? prev.map(u => u.user_id === user.user_id ? user : u) : [...prev, { ...user, user_id: Date.now(), photo_url: `https://i.pravatar.cc/150?u=${Date.now()}` }]); if(viewingProfile?.user_id === user.user_id) setViewingProfile(user); setModal({type: null}); };
-    const handleDeleteUserClick = (userToDelete: User) => { let warning = ''; if (userToDelete.role === 'Coach') { const assignedProgramsCount = programs.filter(p => p.coach_id === userToDelete.user_id).length; if (assignedProgramsCount > 0) { warning = `This coach is assigned to ${assignedProgramsCount} program(s). Deleting this user will unassign them.`; } } if (userToDelete.role === 'Parent') { const childCount = users.filter(u => u.parent_id === userToDelete.user_id).length; if (childCount > 0) { warning = `This parent is linked to ${childCount} child athlete(s). Deleting this user will remove the parent link.`; } } setModal({ type: 'delete-user', data: userToDelete, warning }); };
-    const handleDeleteUser = (user: User) => {
-        if (user.role === 'Coach') { setPrograms(prev => prev.map(p => p.coach_id === user.user_id ? { ...p, coach_id: 0 } : p)); }
-        setUsers(prev => { let updatedUsers = prev; if (user.role === 'Parent') { updatedUsers = updatedUsers.map(u => u.parent_id === user.user_id ? { ...u, parent_id: null } : u); } if (user.role === 'Coach') { updatedUsers = updatedUsers.map(u => u.coach_id === user.user_id ? { ...u, coach_id: null } : u); } return updatedUsers.filter(u => u.user_id !== user.user_id); });
-        setModal({ type: null });
+    const handleSaveUser = (user: User) => { 
+        const isNew = !user.user_id;
+        setUsers(prev => isNew ? [...prev, { ...user, user_id: Date.now(), photo_url: `https://i.pravatar.cc/150?u=${Date.now()}` }] : prev.map(u => u.user_id === user.user_id ? user : u) ); 
+        if(viewingProfile?.user_id === user.user_id) setViewingProfile(user); 
+        setModal({type: null}); 
+        addToast(isNew ? 'User added successfully!' : 'User updated successfully!');
     };
-    const handleSaveProgram = (program: Program) => { setPrograms(prev => program.program_id ? prev.map(p => p.program_id === program.program_id ? program : p) : [...prev, { ...program, program_id: Date.now() }]); setModal({type: null}); };
-    const handleDeleteProgram = (program: Program) => { setPrograms(prev => prev.filter(p => p.program_id !== program.program_id)); setModal({type: null}); };
-    const handleConfirmBooking = (program: Program, athleteId: number) => { if (!athleteId) return; const isEnrolled = payments.some(p => p.program_id === program.program_id && p.user_id === athleteId); if (isEnrolled) { alert('This athlete is already enrolled in this program.'); setModal({type: null}); return; } const newPayment: Payment = { payment_id: Date.now(), user_id: athleteId, program_id: program.program_id, amount: program.price, status: 'pending', paid_at: null }; setPayments(prev => [...prev, newPayment]); alert(`${program.title} booked! Please complete the payment from the My Bookings section.`); setModal({type: null}); };
+    const handleDeleteUserClick = (userToDelete: User) => {
+        let warning = '';
+        if (userToDelete.role === 'Coach') {
+            const assignedProgramsCount = programs.filter(p => p.coach_id === userToDelete.user_id).length;
+            if (assignedProgramsCount > 0) { warning = `This coach is assigned to ${assignedProgramsCount} program(s). Deleting this user will unassign them.`; }
+        } else if (userToDelete.role === 'Parent') {
+            const childCount = users.filter(u => u.parent_id === userToDelete.user_id).length;
+            if (childCount > 0) { warning = `This parent is linked to ${childCount} child athlete(s). Deleting this user will remove the parent link.`; }
+        } else if (userToDelete.role === 'Athlete') {
+            const bookingCount = payments.filter(p => p.user_id === userToDelete.user_id).length;
+            if (bookingCount > 0) {
+                warning = `This athlete has ${bookingCount} program booking(s). Deleting this user will also remove all their associated bookings, session registrations, and progress data.`;
+            }
+        }
+        setModal({ type: 'delete-user', data: userToDelete, warning });
+    };
+    const handleDeleteUser = (user: User) => {
+        if (user.role === 'Coach') {
+            setPrograms(prev => prev.map(p => p.coach_id === user.user_id ? { ...p, coach_id: 0 } : p));
+        }
+        if (user.role === 'Athlete') {
+            const athleteId = user.user_id;
+            setPayments(prev => prev.filter(p => p.user_id !== athleteId));
+            setProgress(prev => prev.filter(p => p.athlete_id !== athleteId));
+            setSessions(prev => prev.map(s => ({
+                ...s,
+                athlete_ids: s.athlete_ids.filter(id => id !== athleteId),
+                confirmed_athlete_ids: s.confirmed_athlete_ids.filter(id => id !== athleteId),
+            })));
+        }
+        setUsers(prev => {
+            let updatedUsers = prev;
+            if (user.role === 'Parent') { updatedUsers = updatedUsers.map(u => u.parent_id === user.user_id ? { ...u, parent_id: null } : u); }
+            if (user.role === 'Coach') { updatedUsers = updatedUsers.map(u => u.coach_id === user.user_id ? { ...u, coach_id: null } : u); }
+            return updatedUsers.filter(u => u.user_id !== user.user_id);
+        });
+        setModal({ type: null });
+        addToast('User deleted.', 'info');
+    };
+    const handleSaveProgram = (program: Program) => {
+        const isNew = !program.program_id;
+        setPrograms(prev => isNew ? [...prev, { ...program, program_id: Date.now() }] : prev.map(p => p.program_id === program.program_id ? program : p)); 
+        setModal({type: null});
+        addToast(isNew ? 'Program added successfully!' : 'Program updated successfully!');
+    };
+    const handleDeleteProgramClick = (programToDelete: Program) => {
+        const bookingsCount = payments.filter(p => p.program_id === programToDelete.program_id).length;
+        const sessionsCount = sessions.filter(s => s.program_id === programToDelete.program_id).length;
+        let warning = '';
+        if (bookingsCount > 0 || sessionsCount > 0) {
+            warning = `This program has ${bookingsCount} booking(s) and ${sessionsCount} scheduled session(s). Deleting it will remove all associated records.`;
+        }
+        setModal({ type: 'delete-program', data: programToDelete, warning });
+    };
+    const handleDeleteProgram = (program: Program) => {
+        setSessions(prev => prev.filter(s => s.program_id !== program.program_id));
+        setPayments(prev => prev.filter(p => p.program_id !== program.program_id));
+        setPrograms(prev => prev.filter(p => p.program_id !== program.program_id));
+        setModal({type: null});
+        addToast('Program and its associated data deleted.', 'info');
+    };
+    const handleConfirmBooking = (program: Program, athleteId: number) => { if (!athleteId) return; const isEnrolled = payments.some(p => p.program_id === program.program_id && p.user_id === athleteId); if (isEnrolled) { addToast('This athlete is already enrolled in this program.', 'error'); setModal({type: null}); return; } const newPayment: Payment = { payment_id: Date.now(), user_id: athleteId, program_id: program.program_id, amount: program.price, status: 'pending', paid_at: null }; setPayments(prev => [...prev, newPayment]); addToast(`${program.title} booked! Please complete the payment.`, 'success'); setModal({type: null}); };
     const handleSessionRegister = (sessionId: number, athleteId: number, register: boolean) => { setSessions(prev => prev.map(s => { if(s.session_id !== sessionId) return s; const updatedAthletes = register ? [...s.athlete_ids, athleteId] : s.athlete_ids.filter(id => id !== athleteId); return {...s, athlete_ids: Array.from(new Set(updatedAthletes))}; })); };
-    const handleUpdateAttendance = (sessionId: number, confirmedIds: number[]) => { setSessions(prev => prev.map(s => s.session_id === sessionId ? {...s, confirmed_athlete_ids: confirmedIds} : s)); setModal({type: null}); alert('Attendance saved!'); };
+    const handleUpdateAttendance = (sessionId: number, confirmedIds: number[]) => { setSessions(prev => prev.map(s => s.session_id === sessionId ? {...s, confirmed_athlete_ids: confirmedIds} : s)); setModal({type: null}); addToast('Attendance saved!'); };
     const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
 
     if (!currentUser) return <LoginPage onLogin={handleLogin} users={users} />;
     
     const navigationLinks = {
-        Admin: [ { name: 'Dashboard', icon: ChartPieIcon }, { name: 'Users', icon: UserGroupIcon }, { name: 'Programs', icon: DocumentTextIcon }, { name: 'My Profile', icon: UserCircleIcon } ],
+        Admin: [ { name: 'Dashboard', icon: ChartPieIcon }, { name: 'Users', icon: UserGroupIcon }, { name: 'Programs', icon: DocumentTextIcon }, { name: 'Reports', icon: DocumentTextIcon }, { name: 'My Profile', icon: UserCircleIcon } ],
         Coach: [ { name: 'Dashboard', icon: ChartPieIcon }, { name: 'Schedule', icon: CalendarIcon }, { name: 'My Profile', icon: UserCircleIcon } ],
         Parent: [ { name: 'Dashboard', icon: ChartPieIcon }, { name: 'Browse Programs', icon: BookOpenIcon}, { name: 'My Bookings', icon: CreditCardIcon }, { name: 'Schedule', icon: CalendarIcon }, { name: 'My Profile', icon: UserCircleIcon } ],
         Athlete: [ { name: 'Dashboard', icon: ChartPieIcon }, { name: 'Browse Programs', icon: BookOpenIcon}, { name: 'My Bookings', icon: CreditCardIcon }, { name: 'Schedule', icon: CalendarIcon }, { name: 'My Profile', icon: UserCircleIcon } ],
@@ -307,10 +518,11 @@ const App = () => {
                 if (displayUser?.role === 'Athlete') return <AthleteDashboard currentUser={displayUser} progress={progress} showTooltip={showTooltip} hideTooltip={hideTooltip} />;
                 return null;
             case 'Users': return <UserManagement users={filteredUsers} onImpersonate={handleImpersonate} onEdit={(u) => setModal({type: 'edit-user', data: u})} onDelete={handleDeleteUserClick} onAdd={() => setModal({type: 'add-user'})} onViewProfile={(u) => { setViewingProfile(u); setView('User Profile'); }} searchValue={userSearch} onSearchChange={e => setUserSearch(e.target.value)} />;
-            case 'Programs': return <ProgramManagement programs={filteredPrograms} users={users} onEdit={(p) => setModal({type: 'edit-program', data: p})} onDelete={(p) => setModal({type: 'delete-program', data: p})} onAdd={() => setModal({type: 'add-program'})} onView={(p) => setModal({type: 'program-details', data: p})} searchValue={programSearch} onSearchChange={e => setProgramSearch(e.target.value)} />;
+            case 'Programs': return <ProgramManagement programs={filteredPrograms} users={users} onEdit={(p) => setModal({type: 'edit-program', data: p})} onDelete={handleDeleteProgramClick} onAdd={() => setModal({type: 'add-program'})} onView={(p) => setModal({type: 'program-details', data: p})} searchValue={programSearch} onSearchChange={e => setProgramSearch(e.target.value)} />;
             case 'My Bookings': return <MyBookingsView currentUser={displayUser!} users={users} payments={payments} programs={programs} sessions={sessions} />;
             case 'Browse Programs': return <BrowseProgramsView programs={programs} currentUser={displayUser!} payments={payments} users={users} onBook={(p) => setModal({ type: 'book-program', data: p })} onView={(p) => setModal({type: 'program-details', data: p})} />;
             case 'Schedule': return <ScheduleView sessions={sessions} programs={programs} users={users} onSessionClick={(s) => setModal({type: 'session-details', data: s})} />;
+            case 'Reports': return <ReportsView users={users} payments={payments} programs={programs} />;
             case 'User Profile': return viewingProfile && <UserProfilePage profileUser={viewingProfile} currentUser={displayUser!} users={users} progress={progress} onEditUser={(u) => setModal({type: 'edit-user', data: u})} showTooltip={showTooltip} hideTooltip={hideTooltip}/>;
             default: return <div>Not Found</div>;
         }
@@ -319,6 +531,7 @@ const App = () => {
     return (
         <>
             <Tooltip tooltip={tooltip} />
+            <ToastContainer toasts={toasts} onClose={removeToast} />
             <div className="dashboard-layout">
                 {isMobile ? <BottomNav links={displayUser ? navigationLinks[displayUser.role] : []} activeView={view} onNavClick={handleNavClick} /> : <Sidebar links={displayUser ? navigationLinks[displayUser.role] : []} activeView={view} onNavClick={handleNavClick} />}
                 <main className="main-content">
@@ -409,7 +622,7 @@ const UserFormModal: FC<{ user?: User, users: User[], onSave: (user: User) => vo
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => { const { name, value } = e.target; setFormData(prev => ({ ...prev, [name]: name === 'parent_id' || name === 'coach_id' ? (value ? Number(value) : null) : value })); }
     const handleSubmit = (e: React.FormEvent) => { e.preventDefault(); onSave({ ...formData, password_hash: user?.password_hash || 'password123', user_id: formData.user_id || 0}); }
     const coaches = users.filter(u => u.role === 'Coach'); const parents = users.filter(u => u.role === 'Parent');
-    return ( <Modal title={user ? "Edit User" : "Add User"} onClose={onClose}><form onSubmit={handleSubmit}><div className="form-grid"><div className="form-group"><label>Name</label><input name="name" value={formData.name} onChange={handleChange} required/></div><div className="form-group"><label>Email</label><input name="email" type="email" value={formData.email} onChange={handleChange} required/></div><div className="form-group"><label>Date of Birth</label><input name="date_of_birth" type="date" value={formData.date_of_birth} onChange={handleChange} required/></div><div className="form-group"><label>Role</label><select name="role" value={formData.role} onChange={handleChange}><option>Admin</option><option>Coach</option><option>Parent</option><option>Athlete</option></select></div></div>{formData.role === 'Athlete' && <div className="form-grid"><div className="form-group"><label>Parent</label><select name="parent_id" value={formData.parent_id || ''} onChange={handleChange}><option value="">None</option>{parents.map(p => <option key={p.user_id} value={p.user_id}>{p.name}</option>)}</select></div><div className="form-group"><label>Coach</label><select name="coach_id" value={formData.coach_id || ''} onChange={handleChange}><option value="">None</option>{coaches.map(c => <option key={c.user_id} value={c.user_id}>{c.name}</option>)}</select></div></div>}<div className="form-group"><label>Bio</label><textarea name="bio" value={formData.bio} onChange={handleChange} rows={3}/></div><div className="modal-actions"><button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button><button type="submit" className="btn btn-primary">Save User</button></div></form></Modal> )
+    return ( <Modal title={user ? "Edit User" : "Add User"} onClose={onClose}><form onSubmit={handleSubmit}><div className="form-grid"><div className="form-group"><label>Name</label><input name="name" value={formData.name} onChange={handleChange} required/></div><div className="form-group"><label>Email</label><input name="email" type="email" value={formData.email} onChange={handleChange} required/></div><div className="form-group"><label>Date of Birth</label><input name="date_of_birth" type="date" value={formData.date_of_birth} onChange={handleChange} required/></div><div className="form-group"><label>Role</label><select name="role" value={formData.role} onChange={handleChange}><option>Admin</option><option>Coach</option><option>Parent</option><option>Athlete</option></select></div></div>{formData.role === 'Athlete' && <div className="form-grid"><div className="form-group"><label>Parent</label><select name="parent_id" value={formData.parent_id || ''} onChange={handleChange}><option value="">None</option>{parents.map(p => <option key={p.user_id} value={p.user_id}>{p.name}</option>)}</select></div><div className="form-group"><label>Coach</label><select name="coach_id" value={formData.coach_id || ''} onChange={handleChange}><option value="">None</option>{coaches.map(c => <option key={c.user_id} value={c.user_id}>{c.name}</option>)}</select></div></div>}<div className="form-group"><label>Bio</label><textarea name="bio" value={formData.bio || ''} onChange={handleChange} rows={3}/></div><div className="modal-actions"><button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button><button type="submit" className="btn btn-primary">Save User</button></div></form></Modal> )
 }
 const ProgramFormModal: FC<{ program?: Program, users: User[], onSave: (p: Program) => void, onClose: () => void }> = ({ program, users, onSave, onClose }) => {
     const [formData, setFormData] = useState<Omit<Program, 'program_id'> & { program_id?: number }>( program || { title: '', description: '', schedule: '', coach_id: 0, price: 0, duration: '', skillLevel: 'All Levels' } );
