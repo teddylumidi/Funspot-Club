@@ -113,12 +113,52 @@ tbody tr:hover { background-color: var(--bg-dark); }
 .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; text-transform: capitalize; display: inline-flex; align-items: center; gap: 6px; }
 .status-paid, .status-confirmed { background-color: var(--success-light); color: var(--success); }
 .status-pending { background-color: var(--warning-light); color: var(--warning); }
+.status-failed { background-color: var(--danger-light); color: var(--danger); }
 .status-badge svg { width: 16px; height: 16px; }
 .skill-badge { padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; text-transform: capitalize; }
 .skill-beginner { background-color: var(--info-light); color: var(--info); }
 .skill-intermediate { background-color: var(--warning-light); color: var(--warning); }
 .skill-advanced { background-color: var(--danger-light); color: var(--danger); }
 .skill-all-levels { background-color: var(--success-light); color: var(--success); }
+
+/* --- Payment Filters --- */
+.filter-container {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 24px;
+    background-color: var(--bg-light);
+    padding: 16px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    flex-wrap: wrap;
+    align-items: center;
+}
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex-grow: 1;
+    min-width: 150px;
+}
+.filter-group label {
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+.filter-group select,
+.filter-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-dark);
+    color: var(--text-primary);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-family: inherit;
+}
+.filter-group input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+}
 
 /* --- Modals --- */
 .modal-overlay { position: fixed; inset: 0; background-color: rgba(17, 24, 39, 0.8); display: flex; justify-content: center; align-items: center; z-index: 1100; padding: 20px; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s; }

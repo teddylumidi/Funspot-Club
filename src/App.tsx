@@ -99,7 +99,7 @@ const initialProgress: Progress[] = [
     { progress_id: 1, athlete_id: 5, skill: 'Balance', level: 'intermediate', percentage: 80, updated_at: '2024-07-18T09:00:00Z' }, { progress_id: 2, athlete_id: 5, skill: 'Gliding', level: 'beginner', percentage: 60, updated_at: '2024-07-18T09:00:00Z' }, { progress_id: 3, athlete_id: 7, skill: 'Stopping', level: 'intermediate', percentage: 85, updated_at: '2024-07-18T09:00:00Z' }, { progress_id: 4, athlete_id: 8, skill: 'Speed', level: 'advanced', percentage: 90, updated_at: '2024-07-19T09:00:00Z' },
 ];
 const initialPayments: Payment[] = [
-    { payment_id: 1, user_id: 4, booking_id: 1, amount: 8000, status: 'paid', paid_at: '2024-07-01T10:05:00Z' }, { payment_id: 2, user_id: 6, booking_id: 2, amount: 8000, status: 'pending', paid_at: null }, { payment_id: 3, user_id: 8, booking_id: 3, amount: 6000, status: 'pending', paid_at: null },
+    { payment_id: 1, user_id: 4, booking_id: 1, amount: 8000, status: 'paid', paid_at: '2024-07-01T10:05:00Z' }, { payment_id: 2, user_id: 6, booking_id: 2, amount: 8000, status: 'pending', paid_at: null }, { payment_id: 3, user_id: 8, booking_id: 3, amount: 6000, status: 'failed', paid_at: null },
 ];
 const initialAdminLogs: AdminLog[] = [{ log_id: 1, admin_id: 1, action: 'User account created', target_id: 8, timestamp: '2024-07-15T12:00:00Z' }];
 const initialSessions: Session[] = [
@@ -459,7 +459,85 @@ const ParentDashboard = ({ parent, users, progress }) => {
     const children = users.filter(u => u.parent_id === parent.user_id);
     return (<div><div className="view-header"><h1>My Children's Progress</h1></div><div className="customer-dashboard-layout">{children.length === 0 ? (<p>No children linked to this account.</p>) : children.map(child => { const childProgress = progress.filter(p => p.athlete_id === child.user_id); return <ProgressDisplay key={child.user_id} title={`${child.name}'s Skills`} progressItems={childProgress} /> })}</div></div>)
 }
-const PaymentManagement = ({ payments, users }) => (<div><div className="view-header"><h1>Payment Management</h1></div><div className="table-container"><table><thead><tr><th>User</th><th>Amount (KES)</th><th>Status</th><th>Date</th></tr></thead><tbody>{payments.map(p => { const user = users.find(u => u.user_id === p.user_id); return (<tr key={p.payment_id}><td>{user ? user.name : 'Unknown User'}</td><td>{p.amount.toLocaleString()}</td><td><span className={`status-badge status-${p.status}`}>{p.status}</span></td><td>{p.paid_at ? new Date(p.paid_at).toLocaleDateString() : 'N/A'}</td></tr>); })}</tbody></table></div></div>);
+const PaymentManagement = ({ payments, users }) => {
+    const [filterUser, setFilterUser] = useState('');
+    const [filterStatus, setFilterStatus] = useState('');
+    const [filterDate, setFilterDate] = useState('');
+
+    const paymentUserIds = [...new Set(payments.map(p => p.user_id))];
+    const paymentUsers = users.filter(u => paymentUserIds.includes(u.user_id));
+
+    const handleResetFilters = () => {
+        setFilterUser('');
+        setFilterStatus('');
+        setFilterDate('');
+    };
+
+    const filteredPayments = payments.filter(p => {
+        const userMatch = !filterUser || p.user_id === parseInt(filterUser);
+        const statusMatch = !filterStatus || p.status === filterStatus;
+        const dateMatch = !filterDate || (p.paid_at && new Date(p.paid_at).toISOString().startsWith(filterDate));
+        return userMatch && statusMatch && dateMatch;
+    });
+
+    return (
+        <div>
+            <div className="view-header"><h1>Payment Management</h1></div>
+            <div className="filter-container">
+                <div className="filter-group">
+                    <label htmlFor="userFilter">Filter by User</label>
+                    <select id="userFilter" value={filterUser} onChange={(e) => setFilterUser(e.target.value)}>
+                        <option value="">All Users</option>
+                        {paymentUsers.map(u => <option key={u.user_id} value={u.user_id}>{u.name}</option>)}
+                    </select>
+                </div>
+                <div className="filter-group">
+                    <label htmlFor="statusFilter">Filter by Status</label>
+                    <select id="statusFilter" value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
+                        <option value="">All Statuses</option>
+                        <option value="paid">Paid</option>
+                        <option value="pending">Pending</option>
+                        <option value="failed">Failed</option>
+                    </select>
+                </div>
+                <div className="filter-group">
+                    <label htmlFor="dateFilter">Filter by Date</label>
+                    <input type="date" id="dateFilter" value={filterDate} onChange={(e) => setFilterDate(e.target.value)} />
+                </div>
+                <button onClick={handleResetFilters} className="btn btn-secondary" style={{alignSelf: 'flex-end'}}>Reset Filters</button>
+            </div>
+            <div className="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Amount (KES)</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {filteredPayments.length === 0 ? (
+                             <tr><td colSpan={4} style={{textAlign: 'center'}}>No payments match the current filters.</td></tr>
+                        ) : (
+                            filteredPayments.map(p => {
+                                const user = users.find(u => u.user_id === p.user_id);
+                                return (
+                                    <tr key={p.payment_id}>
+                                        <td>{user ? user.name : 'Unknown User'}</td>
+                                        <td>{p.amount.toLocaleString()}</td>
+                                        <td><span className={`status-badge status-${p.status}`}>{p.status}</span></td>
+                                        <td>{p.paid_at ? new Date(p.paid_at).toLocaleDateString() : 'N/A'}</td>
+                                    </tr>
+                                );
+                            })
+                        )}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    );
+};
 const AdminLogView = ({ logs, users }) => (<div><div className="view-header"><h1>Admin Audit Log</h1></div><div className="table-container"><table><thead><tr><th>Admin</th><th>Action</th><th>Target ID</th><th>Timestamp</th></tr></thead><tbody>{logs.map(log => { const admin = users.find(u => u.user_id === log.admin_id); return (<tr key={log.log_id}><td>{admin ? admin.name : 'Unknown Admin'}</td><td>{log.action}</td><td>{log.target_id || 'N/A'}</td><td>{new Date(log.timestamp).toLocaleString()}</td></tr>); })}</tbody></table></div></div>);
 const ScheduleView = ({ user, sessions, users, programs, onConfirmBooking, onSetReminder }) => {
     const getAthleteId = () => user.role === 'Athlete' ? user.user_id : null;
