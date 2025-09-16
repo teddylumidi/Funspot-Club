@@ -1580,8 +1580,10 @@ const SessionModal = ({ isOpen, onClose, sessionToEdit, selectedDate, onSave, on
                     </div>
                      <div className="form-group">
                         <label htmlFor="athleteIds">Athletes</label>
-                        {/* FIX: Ensure formData.athleteIds is treated as an array before calling .map() to prevent type errors when the state type is not correctly inferred. */}
-                        <select id="athleteIds" name="athleteIds" multiple value={Array.isArray(formData.athleteIds) ? (formData.athleteIds as any[]).map(String) : []} onChange={handleAthleteChange} className="multi-select">
+                        {/* Fix: Correctly handle mapping athleteIds to strings for the select value.
+                            The previous expression caused a type error because `formData.athleteIds` was being inferred as `unknown`.
+                            Using `(formData.athleteIds || [])` ensures we always have an array to map over. */}
+                        <select id="athleteIds" name="athleteIds" multiple value={(formData.athleteIds || []).map(String)} onChange={handleAthleteChange} className="multi-select">
                             {coachAthletes.map(athlete => (
                                 <option key={athlete.id} value={athlete.id}>{athlete.name}</option>
                             ))}
