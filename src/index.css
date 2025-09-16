@@ -91,6 +91,11 @@ tbody tr:hover { background-color: var(--bg-dark); }
 .status-paid, .status-confirmed { background-color: var(--success-light); color: var(--success); }
 .status-pending { background-color: var(--warning-light); color: var(--warning); }
 .status-badge svg { width: 16px; height: 16px; }
+.skill-badge { padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; text-transform: capitalize; }
+.skill-beginner { background-color: var(--info-light); color: var(--info); }
+.skill-intermediate { background-color: var(--warning-light); color: var(--warning); }
+.skill-advanced { background-color: var(--danger-light); color: var(--danger); }
+.skill-all-levels { background-color: var(--success-light); color: var(--success); }
 
 /* --- Modals --- */
 .modal-overlay { position: fixed; inset: 0; background-color: rgba(17, 24, 39, 0.8); display: flex; justify-content: center; align-items: center; z-index: 1100; padding: 20px; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s; }
@@ -101,6 +106,7 @@ tbody tr:hover { background-color: var(--bg-dark); }
 .modal-header h2 { font-size: 1.5rem; }
 .close-btn svg { width: 24px; height: 24px; }
 .form-actions { margin-top: 24px; text-align: right; }
+.confirmation-modal-body { padding: 16px 0; color: var(--text-secondary); line-height: 1.7; }
 
 /* --- Coach Dashboard --- */
 .progress-bar-table { width: 100px; height: 12px; background-color: var(--bg-dark); border-radius: 6px; overflow: hidden; }

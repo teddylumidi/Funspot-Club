@@ -17,6 +17,7 @@ const BellIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewB
 const ClockIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>;
 const CheckCircleIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>;
 const EnvelopeIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" /></svg>;
+const PlusCircleIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>;
 
 
 // --- Type Definitions ---
@@ -26,7 +27,7 @@ interface User {
   user_id: number; name: string; email: string; password_hash: string; role: Role; date_of_birth: string; parent_id: number | null; coach_id?: number;
 }
 interface Program {
-  program_id: number; title: string; description: string; schedule: string; coach_id: number; price: number;
+  program_id: number; title: string; description: string; schedule: string; coach_id: number; price: number; duration: string; skillLevel: 'Beginner' | 'Intermediate' | 'Advanced' | 'All Levels';
 }
 interface Session {
     session_id: number; program_id: number; date: string; time: string; title: string; coach_id: number; athlete_ids: number[]; confirmed_athlete_ids: number[];
@@ -59,8 +60,6 @@ interface Message {
   body: string;
   sent_at: string;
 }
-// FIX: Removed `| null` from Toast type to prevent potential runtime errors and improve type safety.
-// A toast object should never be null in the toasts array.
 type Toast = { id: number; message: string; type: 'success' | 'error'; };
 
 // --- Data Simulation & Hooks ---
@@ -90,8 +89,8 @@ const initialUsers: User[] = [
     { user_id: 8, name: 'Anna Belle', email: 'anna@funport.com', password_hash: 'password123', role: 'Athlete', date_of_birth: '2002-12-01', parent_id: null, coach_id: 3 },
 ];
 const initialPrograms: Program[] = [
-    { program_id: 1, title: 'Summer Weekly Program', description: 'Intensive training on weekdays.', schedule: 'Mon, Wed & Fri 3:30PM–6:00PM', coach_id: 2, price: 8000 },
-    { program_id: 2, title: 'Weekend Sessions', description: 'Flexible weekend training.', schedule: 'Sat & Sun 3:30PM–6:00PM', coach_id: 3, price: 6000 },
+    { program_id: 1, title: 'Summer Weekly Program', description: 'Intensive training on weekdays.', schedule: 'Mon, Wed & Fri 3:30PM–6:00PM', coach_id: 2, price: 8000, duration: '8 Weeks', skillLevel: 'Intermediate' },
+    { program_id: 2, title: 'Weekend Sessions', description: 'Flexible weekend training.', schedule: 'Sat & Sun 3:30PM–6:00PM', coach_id: 3, price: 6000, duration: 'Ongoing', skillLevel: 'All Levels' },
 ];
 const initialBookings: Booking[] = [
     { booking_id: 1, user_id: 4, program_id: 1, status: 'confirmed', booked_at: '2024-07-01T10:00:00Z' }, { booking_id: 2, user_id: 6, program_id: 1, status: 'confirmed', booked_at: '2024-07-02T11:00:00Z' }, { booking_id: 3, user_id: 8, program_id: 2, status: 'pending', booked_at: '2024-07-20T14:00:00Z' },
@@ -103,7 +102,6 @@ const initialPayments: Payment[] = [
     { payment_id: 1, user_id: 4, booking_id: 1, amount: 8000, status: 'paid', paid_at: '2024-07-01T10:05:00Z' }, { payment_id: 2, user_id: 6, booking_id: 2, amount: 8000, status: 'pending', paid_at: null }, { payment_id: 3, user_id: 8, booking_id: 3, amount: 6000, status: 'pending', paid_at: null },
 ];
 const initialAdminLogs: AdminLog[] = [{ log_id: 1, admin_id: 1, action: 'User account created', target_id: 8, timestamp: '2024-07-15T12:00:00Z' }];
-// New Session Data for Calendar/Schedule
 const initialSessions: Session[] = [
     { session_id: 1, program_id: 1, date: '2024-08-12', time: '16:00', title: 'Leo D. - Gliding', coach_id: 2, athlete_ids: [5], confirmed_athlete_ids: [] },
     { session_id: 2, program_id: 1, date: '2024-08-12', time: '17:00', title: 'Mia S. - Stopping', coach_id: 2, athlete_ids: [7], confirmed_athlete_ids: [7] },
@@ -111,6 +109,7 @@ const initialSessions: Session[] = [
     { session_id: 4, program_id: 2, date: '2024-08-17', time: '15:30', title: 'Anna B. - Speed', coach_id: 3, athlete_ids: [8], confirmed_athlete_ids: [] },
     { session_id: 5, program_id: 2, date: '2024-08-18', time: '16:00', title: 'Group Session', coach_id: 3, athlete_ids: [8], confirmed_athlete_ids: [] },
 ];
+
 // --- Components ---
 const LoginPage = ({ onLogin, error }) => {
     const [email, setEmail] = useState('admin@funport.com'); const [password, setPassword] = useState('password123');
@@ -220,6 +219,55 @@ const UserFormModal = ({ isOpen, onClose, onSave, userToEdit, users }) => {
         </div>
     );
 };
+const ProgramFormModal = ({ isOpen, onClose, onSave, programToEdit, coaches }) => {
+    const initialFormState = { title: '', description: '', schedule: '', coach_id: '', price: '', duration: '', skillLevel: 'All Levels' };
+    const [formData, setFormData] = useState(initialFormState);
+    const modalContentRef = useRef(null);
+
+    useEffect(() => {
+        if (programToEdit) {
+            setFormData({ ...initialFormState, ...programToEdit, price: programToEdit.price.toString(), coach_id: programToEdit.coach_id.toString() });
+        } else {
+            setFormData(initialFormState);
+        }
+    }, [programToEdit, isOpen]);
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        onSave({ ...formData, price: parseFloat(formData.price) || 0, coach_id: parseInt(formData.coach_id, 10) });
+    };
+
+    useEffect(() => {
+        const handleClickOutside = (event) => { if (modalContentRef.current && !modalContentRef.current.contains(event.target)) onClose(); };
+        if (isOpen) document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [isOpen, onClose]);
+
+    if (!isOpen) return null;
+
+    return (
+        <div className="modal-overlay show">
+            <div className="modal-content" ref={modalContentRef}>
+                <div className="modal-header"><h2>{programToEdit ? 'Edit Program' : 'Add New Program'}</h2><button onClick={onClose} className="close-btn"><CloseIcon /></button></div>
+                <form onSubmit={handleSubmit}>
+                    <div className="form-group"><label>Title</label><input type="text" name="title" value={formData.title} onChange={handleChange} required /></div>
+                    <div className="form-group"><label>Description</label><textarea name="description" value={formData.description} onChange={handleChange} required rows={3}></textarea></div>
+                    <div className="form-group"><label>Schedule</label><input type="text" name="schedule" value={formData.schedule} onChange={handleChange} required /></div>
+                    <div className="form-group"><label>Duration</label><input type="text" name="duration" value={formData.duration} onChange={handleChange} required placeholder="e.g., 8 Weeks"/></div>
+                    <div className="form-group"><label>Price (KES)</label><input type="number" name="price" value={formData.price} onChange={handleChange} required /></div>
+                    <div className="form-group"><label>Skill Level</label><select name="skillLevel" value={formData.skillLevel} onChange={handleChange}><option value="Beginner">Beginner</option><option value="Intermediate">Intermediate</option><option value="Advanced">Advanced</option><option value="All Levels">All Levels</option></select></div>
+                    <div className="form-group"><label>Assign Coach</label><select name="coach_id" value={formData.coach_id} onChange={handleChange} required><option value="" disabled>Select a coach</option>{coaches.map(c => <option key={c.user_id} value={c.user_id}>{c.name}</option>)}</select></div>
+                    <div className="form-actions"><button type="submit" className="btn btn-primary">{programToEdit ? 'Save Changes' : 'Create Program'}</button></div>
+                </form>
+            </div>
+        </div>
+    );
+};
 const ReminderModal = ({ isOpen, onClose, onSave, session }) => {
     const [reminderTime, setReminderTime] = useState('60'); // default to 1 hour
     const modalContentRef = useRef(null);
@@ -249,6 +297,41 @@ const ReminderModal = ({ isOpen, onClose, onSave, session }) => {
         </div>
     );
 };
+const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, children }) => {
+    const modalContentRef = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (modalContentRef.current && !modalContentRef.current.contains(event.target)) {
+                onClose();
+            }
+        };
+        if (isOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [isOpen, onClose]);
+
+    if (!isOpen) return null;
+
+    return (
+        <div className="modal-overlay show">
+            <div className="modal-content" ref={modalContentRef} style={{ maxWidth: '450px' }}>
+                <div className="modal-header">
+                    <h2>{title}</h2>
+                    <button onClick={onClose} className="close-btn"><CloseIcon /></button>
+                </div>
+                <div className="confirmation-modal-body">{children}</div>
+                <div className="form-actions" style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+                    <button onClick={onClose} className="btn btn-secondary">Cancel</button>
+                    <button onClick={onConfirm} className="btn btn-primary">Confirm</button>
+                </div>
+            </div>
+        </div>
+    );
+};
 // --- Dashboard Views ---
 const AdminDashboard = ({ users, programs, payments }) => {
     const totalUsers = users.length; const activeAthletes = users.filter(u => u.role === 'Athlete').length; const pendingPayments = payments.filter(p => p.status === 'pending').reduce((sum, p) => sum + p.amount, 0); const totalRevenue = payments.filter(p => p.status === 'paid').reduce((sum, p) => sum + p.amount, 0);
@@ -260,6 +343,72 @@ const UserManagement = ({ users, onImpersonate, onAdd, onEdit, onDelete }) => {
     const handleOpenModal = (user: User | null = null) => { setUserToEdit(user); setIsModalOpen(true); };
     const handleSave = (formData) => { if (userToEdit) onEdit({ ...userToEdit, ...formData }); else onAdd(formData); setIsModalOpen(false); };
     return (<div><div className="view-header"><h1>User Management</h1><button className="btn btn-primary" onClick={() => handleOpenModal()}><UserPlusIcon/> Add User</button></div><div className="table-container"><table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Actions</th></tr></thead><tbody>{users.map(user => (<tr key={user.user_id}><td>{user.name}</td><td>{user.email}</td><td><span className={`role-badge role-${user.role.toLowerCase()}`}>{user.role}</span></td><td className="action-cell"><button onClick={() => onImpersonate(user)} className="btn-icon" title="Impersonate"><EyeIcon/></button><button onClick={() => handleOpenModal(user)} className="btn-icon" title="Edit"><PencilIcon/></button><button onClick={() => onDelete(user.user_id)} className="btn-icon btn-danger" title="Delete"><TrashIcon/></button></td></tr>))}</tbody></table></div><UserFormModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSave={handleSave} userToEdit={userToEdit} users={users}/></div>);
+};
+const ProgramManagement = ({ programs, users, onAdd, onEdit, onDelete }) => {
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [programToEdit, setProgramToEdit] = useState<Program | null>(null);
+    const coaches = users.filter(u => u.role === 'Coach');
+
+    const handleOpenModal = (program: Program | null = null) => {
+        setProgramToEdit(program);
+        setIsModalOpen(true);
+    };
+
+    const handleSave = (formData) => {
+        if (programToEdit) {
+            onEdit({ ...programToEdit, ...formData });
+        } else {
+            onAdd(formData);
+        }
+        setIsModalOpen(false);
+    };
+
+    return (
+        <div>
+            <div className="view-header">
+                <h1>Program Management</h1>
+                <button className="btn btn-primary" onClick={() => handleOpenModal()}>
+                    <PlusCircleIcon /> Add Program
+                </button>
+            </div>
+            <div className="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Coach</th>
+                            <th>Schedule</th>
+                            <th>Duration</th>
+                            <th>Skill Level</th>
+                            <th>Price (KES)</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {programs.map(program => {
+                            const coach = users.find(u => u.user_id === program.coach_id);
+                            const skillLevelClass = program.skillLevel.toLowerCase().replace(' ', '-');
+                            return (
+                                <tr key={program.program_id}>
+                                    <td>{program.title}</td>
+                                    <td>{coach ? coach.name : 'N/A'}</td>
+                                    <td>{program.schedule}</td>
+                                    <td>{program.duration}</td>
+                                    <td><span className={`skill-badge skill-${skillLevelClass}`}>{program.skillLevel}</span></td>
+                                    <td>{program.price.toLocaleString()}</td>
+                                    <td className="action-cell">
+                                        <button onClick={() => handleOpenModal(program)} className="btn-icon" title="Edit"><PencilIcon /></button>
+                                        <button onClick={() => onDelete(program.program_id)} className="btn-icon btn-danger" title="Delete"><TrashIcon /></button>
+                                    </td>
+                                </tr>
+                            );
+                        })}
+                    </tbody>
+                </table>
+            </div>
+            <ProgramFormModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSave={handleSave} programToEdit={programToEdit} coaches={coaches} />
+        </div>
+    );
 };
 const CoachDashboard = ({ coach, users, progress, onUpdateProgress }) => {
     const myAthletes = users.filter(u => u.role === 'Athlete' && u.coach_id === coach.user_id);
@@ -408,7 +557,6 @@ const CalendarView = ({ coach, sessions, users, onSetReminder }) => {
         );
     };
 
-    // Week and Day views are simplified for brevity but would be built out similarly
     const renderWeekView = () => {
          const weekStart = new Date(currentDate);
          weekStart.setDate(weekStart.getDate() - weekStart.getDay());
@@ -541,6 +689,7 @@ const DashboardLayout = ({ user, impersonatedUser, onLogout, onStopImpersonating
         switch (activeView) {
             case 'AdminDashboard': return <AdminDashboard users={data.users} programs={data.programs} payments={data.payments}/>
             case 'UserManagement': return <UserManagement users={data.users} onImpersonate={handlers.impersonateUser} onAdd={handlers.addUser} onEdit={handlers.updateUser} onDelete={handlers.deleteUser} />;
+            case 'ProgramManagement': return <ProgramManagement programs={data.programs} users={data.users} onAdd={handlers.addProgram} onEdit={handlers.updateProgram} onDelete={handlers.deleteProgram} />;
             case 'CoachDashboard': return <CoachDashboard coach={effectiveUser} users={data.users} progress={data.progress} onUpdateProgress={handlers.updateProgress}/>;
             case 'ParentDashboard': return <ParentDashboard parent={effectiveUser} users={data.users} progress={data.progress} />;
             case 'AthleteDashboard': return <AthleteDashboard athlete={effectiveUser} progress={data.progress} />;
@@ -570,6 +719,7 @@ const App = () => {
     const [impersonatedUser, setImpersonatedUser] = useLocalStorage<User | null>('impersonatedUser', null);
     const [loginError, setLoginError] = useState('');
     const [users, setUsers] = useLocalStorage<User[]>('fsc_users', initialUsers);
+    const [programs, setPrograms] = useLocalStorage<Program[]>('fsc_programs', initialPrograms);
     const [progress, setProgress] = useLocalStorage<Progress[]>('fsc_progress', initialProgress);
     const [payments, setPayments] = useLocalStorage<Payment[]>('fsc_payments', initialPayments);
     const [adminLogs, setAdminLogs] = useLocalStorage<AdminLog[]>('fsc_adminLogs', initialAdminLogs);
@@ -581,8 +731,24 @@ const App = () => {
     const [sessionForReminder, setSessionForReminder] = useState<Session | null>(null);
     const [toasts, setToasts] = useState<Toast[]>([]);
 
-    // FIX: Added explicit types for `message` and `type` parameters to resolve TypeScript error.
-    // This ensures that only valid toast types ('success' or 'error') are used.
+    const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+    const [confirmAction, setConfirmAction] = useState<{ onConfirm: () => void } | null>(null);
+    const [confirmModalContent, setConfirmModalContent] = useState({ title: '', body: '' });
+
+    const openConfirmationModal = (title, body, onConfirm) => {
+        setConfirmModalContent({ title, body });
+        setConfirmAction({ onConfirm });
+        setIsConfirmModalOpen(true);
+    };
+
+    const handleConfirm = () => {
+        if (confirmAction && typeof confirmAction.onConfirm === 'function') {
+            confirmAction.onConfirm();
+        }
+        setIsConfirmModalOpen(false);
+        setConfirmAction(null);
+    };
+
     const addToast = (message: string, type: 'success' | 'error' = 'success') => {
         const id = Date.now();
         setToasts(prev => [...prev, { id, message, type }]);
@@ -604,7 +770,7 @@ const App = () => {
                 setNotifications(prev => [...prev, ...newNotifications]);
                 setReminders(prev => prev.filter(r => !dueReminders.some(dr => dr.reminder_id === r.reminder_id)));
             }
-        }, 60000); // Check every minute
+        }, 60000);
         return () => clearInterval(interval);
     }, [reminders, sessions, setNotifications, setReminders]);
     
@@ -613,19 +779,31 @@ const App = () => {
     const handleLogout = () => { addAdminLog('User logout'); setCurrentUser(null); setImpersonatedUser(null); };
     const handleImpersonate = (userToImpersonate: User) => { if (currentUser && currentUser.role === 'Admin') { addAdminLog('Impersonated user', userToImpersonate.user_id); setImpersonatedUser(userToImpersonate); }};
     const handleStopImpersonating = () => { if(impersonatedUser) { addAdminLog('Stopped impersonating user', impersonatedUser.user_id); setImpersonatedUser(null); }};
-    const handleAddUser = (formData) => { const newUser: User = { user_id: Date.now(), name: formData.name, email: formData.email, password_hash: 'password123', role: formData.role, date_of_birth: formData.date_of_birth, parent_id: formData.parent_id ? Number(formData.parent_id) : null, coach_id: formData.coach_id ? Number(formData.coach_id) : undefined, }; setUsers(prev => [...prev, newUser]); addAdminLog('Created user', newUser.user_id); };
-    const handleUpdateUser = (updatedUser: User) => { setUsers(prev => prev.map(u => u.user_id === updatedUser.user_id ? updatedUser : u)); addAdminLog('Updated user', updatedUser.user_id); };
-    const handleDeleteUser = (userId: number) => { if (window.confirm("Are you sure?")) { setUsers(prev => prev.filter(u => u.user_id !== userId)); addAdminLog('Deleted user', userId); }};
+    const handleAddUser = (formData) => { const newUser: User = { user_id: Date.now(), name: formData.name, email: formData.email, password_hash: 'password123', role: formData.role, date_of_birth: formData.date_of_birth, parent_id: formData.parent_id ? Number(formData.parent_id) : null, coach_id: formData.coach_id ? Number(formData.coach_id) : undefined, }; setUsers(prev => [...prev, newUser]); addAdminLog('Created user', newUser.user_id); addToast('User created successfully.'); };
+    const handleUpdateUser = (updatedUser: User) => { setUsers(prev => prev.map(u => u.user_id === updatedUser.user_id ? updatedUser : u)); addAdminLog('Updated user', updatedUser.user_id); addToast('User updated successfully.'); };
+    const handleDeleteUser = (userId: number) => { openConfirmationModal('Delete User', 'Are you sure you want to delete this user? This action cannot be undone.', () => { setUsers(prev => prev.filter(u => u.user_id !== userId)); addAdminLog('Deleted user', userId); addToast('User deleted successfully.'); }); };
+    const handleAddProgram = (formData) => { const newProgram: Program = { ...formData, program_id: Date.now() }; setPrograms(prev => [newProgram, ...prev]); addAdminLog('Created program', newProgram.program_id); addToast('Program created successfully.'); };
+    const handleUpdateProgram = (updatedProgram: Program) => { setPrograms(prev => prev.map(p => p.program_id === updatedProgram.program_id ? updatedProgram : p)); addAdminLog('Updated program', updatedProgram.program_id); addToast('Program updated successfully.'); };
+    const handleDeleteProgram = (programId: number) => { openConfirmationModal('Delete Program', 'Are you sure you want to delete this program?', () => { setPrograms(prev => prev.filter(p => p.program_id !== programId)); addAdminLog('Deleted program', programId); addToast('Program deleted successfully.'); }); };
     const handleUpdateProgress = (progressId: number, newPercentage: number) => { setProgress(prev => prev.map(p => p.progress_id === progressId ? {...p, percentage: newPercentage, updated_at: new Date().toISOString()} : p)); }
     const handleConfirmBooking = (sessionId: number, athleteId: number) => {
-        setSessions(prev => prev.map(s => s.session_id === sessionId ? { ...s, confirmed_athlete_ids: [...s.confirmed_athlete_ids, athleteId] } : s));
         const session = sessions.find(s => s.session_id === sessionId);
         const athlete = users.find(u => u.user_id === athleteId);
-        if(session && athlete) {
+        if (!session || !athlete) return;
+    
+        const executeBooking = () => {
+            setSessions(prev => prev.map(s => s.session_id === sessionId ? { ...s, confirmed_athlete_ids: [...s.confirmed_athlete_ids, athleteId] } : s));
+            
             const newNotification: Notification = { notification_id: Date.now(), user_id: session.coach_id, text: `${athlete.name} has confirmed for ${session.title}.`, type: 'confirmation', created_at: Date.now() };
             setNotifications(prev => [...prev, newNotification]);
-        }
-        addToast('Booking confirmed successfully!');
+            addToast('Booking confirmed successfully!');
+        };
+    
+        openConfirmationModal(
+            'Confirm Booking',
+            `Are you sure you want to book the session "${session.title}" for ${athlete.name} on ${new Date(session.date).toLocaleDateString()}?`,
+            executeBooking
+        );
     };
     const handleOpenReminderModal = (session: Session) => { setSessionForReminder(session); setIsReminderModalOpen(true); };
     const handleSetReminder = (sessionId, minutesBefore) => {
@@ -647,21 +825,15 @@ const App = () => {
             addToast('You must be logged in to send a message.', 'error');
             return;
         }
-        const newMessage: Message = {
-            message_id: Date.now(),
-            user_id: user.user_id,
-            subject,
-            body,
-            sent_at: new Date().toISOString(),
-        };
+        const newMessage: Message = { message_id: Date.now(), user_id: user.user_id, subject, body, sent_at: new Date().toISOString(), };
         setMessages(prev => [newMessage, ...prev]);
         addToast('Message sent successfully!');
     };
 
 
-    const data = { users, progress, payments, adminLogs, sessions, notifications, messages };
+    const data = { users, programs, progress, payments, adminLogs, sessions, notifications, messages };
     const handlers = {
-        impersonateUser: handleImpersonate, addUser: handleAddUser, updateUser: handleUpdateUser, deleteUser: handleDeleteUser, updateProgress: handleUpdateProgress, confirmBooking: handleConfirmBooking, openReminderModal: handleOpenReminderModal, dismissNotification: handleDismissNotification, sendMessage: handleSendMessage, addToast: addToast,
+        impersonateUser: handleImpersonate, addUser: handleAddUser, updateUser: handleUpdateUser, deleteUser: handleDeleteUser, updateProgress: handleUpdateProgress, confirmBooking: handleConfirmBooking, openReminderModal: handleOpenReminderModal, dismissNotification: handleDismissNotification, sendMessage: handleSendMessage, addToast: addToast, addProgram: handleAddProgram, updateProgram: handleUpdateProgram, deleteProgram: handleDeleteProgram
     };
 
     if (!currentUser) return <LoginPage onLogin={handleLogin} error={loginError} />;
@@ -671,6 +843,9 @@ const App = () => {
             <ToastContainer toasts={toasts} removeToast={removeToast} />
             <DashboardLayout user={currentUser} impersonatedUser={impersonatedUser} onLogout={handleLogout} onStopImpersonating={handleStopImpersonating} data={data} handlers={handlers} />
             <ReminderModal isOpen={isReminderModalOpen} onClose={() => setIsReminderModalOpen(false)} onSave={handleSetReminder} session={sessionForReminder} />
+            <ConfirmationModal isOpen={isConfirmModalOpen} onClose={() => setIsConfirmModalOpen(false)} onConfirm={handleConfirm} title={confirmModalContent.title}>
+                <p>{confirmModalContent.body}</p>
+            </ConfirmationModal>
         </>
     );
 };
