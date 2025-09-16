@@ -859,7 +859,7 @@ const App = () => {
     const [confirmAction, setConfirmAction] = useState<{ onConfirm: () => void } | null>(null);
     const [confirmModalContent, setConfirmModalContent] = useState({ title: '', body: '' });
 
-    const openConfirmationModal = (title, body, onConfirm) => {
+    const openConfirmationModal = (title: string, body: string, onConfirm: () => void) => {
         setConfirmModalContent({ title, body });
         setConfirmAction({ onConfirm });
         setIsConfirmModalOpen(true);
@@ -905,73 +905,72 @@ const App = () => {
     const handleStopImpersonating = () => { if(impersonatedUser) { addAdminLog('Stopped impersonating user', impersonatedUser.user_id); setImpersonatedUser(null); }};
     const handleAddUser = (formData) => { const newUser: User = { user_id: Date.now(), name: formData.name, email: formData.email, password_hash: 'password123', role: formData.role, date_of_birth: formData.date_of_birth, parent_id: formData.parent_id ? Number(formData.parent_id) : null, coach_id: formData.coach_id ? Number(formData.coach_id) : undefined, }; setUsers(prev => [...prev, newUser]); addAdminLog('Created user', newUser.user_id); addToast('User created successfully.'); };
     const handleUpdateUser = (updatedUser: User) => { setUsers(prev => prev.map(u => u.user_id === updatedUser.user_id ? updatedUser : u)); addAdminLog('Updated user', updatedUser.user_id); addToast('User updated successfully.'); };
-    const handleDeleteUser = (userId: number) => { openConfirmationModal('Delete User', 'Are you sure you want to delete this user? This action cannot be undone.', () => { setUsers(prev => prev.filter(u => u.user_id !== userId)); addAdminLog('Deleted user', userId); addToast('User deleted successfully.'); }); };
-    const handleAddProgram = (formData) => { const newProgram: Program = { ...formData, program_id: Date.now() }; setPrograms(prev => [newProgram, ...prev]); addAdminLog('Created program', newProgram.program_id); addToast('Program created successfully.'); };
+    const handleDeleteUser = (userId: number) => {
+        const userToDelete = users.find(u => u.user_id === userId);
+        if (!userToDelete) return;
+        openConfirmationModal('Delete User', `Are you sure you want to delete "${userToDelete.name}"? This action cannot be undone.`, () => {
+            setUsers(prev => prev.filter(u => u.user_id !== userId));
+            addAdminLog('Deleted user', userId);
+            addToast('User deleted successfully.', 'success');
+        });
+    };
+    const handleAddProgram = (formData) => { const newProgram: Program = { program_id: Date.now(), title: formData.title, description: formData.description, schedule: formData.schedule, coach_id: parseInt(formData.coach_id, 10), price: parseFloat(formData.price) || 0, duration: formData.duration, skillLevel: formData.skillLevel, }; setPrograms(prev => [...prev, newProgram]); addAdminLog('Created program', newProgram.program_id); addToast('Program created successfully.'); };
     const handleUpdateProgram = (updatedProgram: Program) => { setPrograms(prev => prev.map(p => p.program_id === updatedProgram.program_id ? updatedProgram : p)); addAdminLog('Updated program', updatedProgram.program_id); addToast('Program updated successfully.'); };
-    const handleDeleteProgram = (programId: number) => { openConfirmationModal('Delete Program', 'Are you sure you want to delete this program?', () => { setPrograms(prev => prev.filter(p => p.program_id !== programId)); addAdminLog('Deleted program', programId); addToast('Program deleted successfully.'); }); };
-    const handleUpdateProgress = (progressId: number, newPercentage: number) => { setProgress(prev => prev.map(p => p.progress_id === progressId ? {...p, percentage: newPercentage, updated_at: new Date().toISOString()} : p)); }
+    const handleDeleteProgram = (programId: number) => {
+        const programToDelete = programs.find(p => p.program_id === programId);
+        if (!programToDelete) return;
+        openConfirmationModal('Delete Program', `Are you sure you want to delete "${programToDelete.title}"? This action is permanent.`, () => {
+            setPrograms(prev => prev.filter(p => p.program_id !== programId));
+            addAdminLog('Deleted program', programId);
+            addToast('Program deleted successfully.', 'success');
+        });
+    };
+    const handleUpdateProgress = (progressId: number, percentage: number) => { setProgress(prev => prev.map(p => p.progress_id === progressId ? { ...p, percentage, updated_at: new Date().toISOString() } : p)); };
     const handleConfirmBooking = (sessionId: number, athleteId: number) => {
-        const session = sessions.find(s => s.session_id === sessionId);
-        const athlete = users.find(u => u.user_id === athleteId);
-        if (!session || !athlete) return;
-    
-        const executeBooking = () => {
-            setSessions(prev => prev.map(s => s.session_id === sessionId ? { ...s, confirmed_athlete_ids: [...s.confirmed_athlete_ids, athleteId] } : s));
-            
-            const newNotification: Notification = { notification_id: Date.now(), user_id: session.coach_id, text: `${athlete.name} has confirmed for ${session.title}.`, type: 'confirmation', created_at: Date.now() };
-            setNotifications(prev => [...prev, newNotification]);
-            addToast('Booking confirmed successfully!');
-        };
-    
-        openConfirmationModal(
-            'Confirm Booking',
-            `Are you sure you want to book the session "${session.title}" for ${athlete.name} on ${new Date(session.date).toLocaleDateString()}?`,
-            executeBooking
-        );
+        const sessionToBook = sessions.find(s => s.session_id === sessionId);
+        if (!sessionToBook) return;
+        openConfirmationModal('Confirm Booking', `Are you sure you want to book the session "${sessionToBook.title}"?`, () => {
+            setSessions(prev => prev.map(s => s.session_id === sessionId ? { ...s, confirmed_athlete_ids: [...new Set([...s.confirmed_athlete_ids, athleteId])] } : s));
+            addToast('Session booked successfully!');
+        });
     };
     const handleOpenReminderModal = (session: Session) => { setSessionForReminder(session); setIsReminderModalOpen(true); };
-    const handleSetReminder = (sessionId, minutesBefore) => {
+    const handleSetReminder = (sessionId: number, minutesBefore: number) => {
         const session = sessions.find(s => s.session_id === sessionId);
         const user = impersonatedUser || currentUser;
-        if(session && user) {
+        if (session && user) {
             const sessionTime = new Date(`${session.date}T${session.time}`).getTime();
             const remindAt = sessionTime - (minutesBefore * 60 * 1000);
-            const newReminder: Reminder = { reminder_id: Date.now(), session_id: sessionId, user_id: user.user_id, remind_at: remindAt };
+            const newReminder: Reminder = { reminder_id: Date.now(), session_id: sessionId, user_id: user.user_id, remind_at: remindAt, };
             setReminders(prev => [...prev, newReminder]);
-            addToast('Reminder set successfully!');
+            addToast(`Reminder set for ${session.title}.`);
         }
         setIsReminderModalOpen(false);
+        setSessionForReminder(null);
     };
-    const handleDismissNotification = (notificationId) => setNotifications(prev => prev.filter(n => n.notification_id !== notificationId));
+    const handleDismissNotification = (notificationId: number) => { setNotifications(prev => prev.filter(n => n.notification_id !== notificationId)); };
     const handleSendMessage = (subject: string, body: string) => {
         const user = impersonatedUser || currentUser;
-        if (!user) {
-            addToast('You must be logged in to send a message.', 'error');
-            return;
-        }
-        const newMessage: Message = { message_id: Date.now(), user_id: user.user_id, subject, body, sent_at: new Date().toISOString(), };
+        if (!user) return;
+        const newMessage: Message = { message_id: Date.now(), user_id: user.user_id, subject, body, sent_at: new Date().toISOString() };
         setMessages(prev => [newMessage, ...prev]);
-        addToast('Message sent successfully!');
+        addToast('Your message has been sent successfully.');
     };
-
 
     const data = { users, programs, progress, payments, adminLogs, sessions, notifications, messages };
-    const handlers = {
-        impersonateUser: handleImpersonate, addUser: handleAddUser, updateUser: handleUpdateUser, deleteUser: handleDeleteUser, updateProgress: handleUpdateProgress, confirmBooking: handleConfirmBooking, openReminderModal: handleOpenReminderModal, dismissNotification: handleDismissNotification, sendMessage: handleSendMessage, addToast: addToast, addProgram: handleAddProgram, updateProgram: handleUpdateProgram, deleteProgram: handleDeleteProgram
-    };
+    const handlers = { impersonateUser: handleImpersonate, addUser: handleAddUser, updateUser: handleUpdateUser, deleteUser: handleDeleteUser, addProgram: handleAddProgram, updateProgram: handleUpdateProgram, deleteProgram: handleDeleteProgram, updateProgress: handleUpdateProgress, confirmBooking: handleConfirmBooking, openReminderModal: handleOpenReminderModal, dismissNotification: handleDismissNotification, sendMessage: handleSendMessage, addToast };
 
-    if (!currentUser) return <LoginPage onLogin={handleLogin} error={loginError} />;
+    if (!currentUser) { return <LoginPage onLogin={handleLogin} error={loginError} />; }
 
     return (
         <>
-            <ToastContainer toasts={toasts} removeToast={removeToast} />
             <DashboardLayout user={currentUser} impersonatedUser={impersonatedUser} onLogout={handleLogout} onStopImpersonating={handleStopImpersonating} data={data} handlers={handlers} />
             <ReminderModal isOpen={isReminderModalOpen} onClose={() => setIsReminderModalOpen(false)} onSave={handleSetReminder} session={sessionForReminder} />
             <ConfirmationModal isOpen={isConfirmModalOpen} onClose={() => setIsConfirmModalOpen(false)} onConfirm={handleConfirm} title={confirmModalContent.title}>
                 <p>{confirmModalContent.body}</p>
             </ConfirmationModal>
+            <ToastContainer toasts={toasts} removeToast={removeToast} />
         </>
     );
 };
-
 export default App;
