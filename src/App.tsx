@@ -16,6 +16,7 @@ const CreditCardIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none"
 const BellIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" /></svg>;
 const ClockIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>;
 const CheckCircleIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>;
+const EnvelopeIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" /></svg>;
 
 
 // --- Type Definitions ---
@@ -50,6 +51,13 @@ interface Reminder {
 }
 interface Notification {
     notification_id: number; user_id: number; text: string; type: 'reminder' | 'confirmation'; created_at: number;
+}
+interface Message {
+  message_id: number;
+  user_id: number;
+  subject: string;
+  body: string;
+  sent_at: string;
 }
 // FIX: Removed `| null` from Toast type to prevent potential runtime errors and improve type safety.
 // A toast object should never be null in the toasts array.
@@ -170,10 +178,10 @@ const Header = ({ user, impersonatedUser, onLogout, onStopImpersonating, notific
 };
 const Sidebar = ({ user, onNavigate, activeView }) => {
     const sidebarLinks = {
-      Admin: [ { name: 'Dashboard', icon: ChartBarIcon, view: 'AdminDashboard' }, { name: 'Users', icon: UserGroupIcon, view: 'UserManagement' }, { name: 'Programs', icon: CalendarIcon, view: 'ProgramManagement' }, { name: 'Payments', icon: CreditCardIcon, view: 'PaymentManagement' }, { name: 'Audit Log', icon: DocumentTextIcon, view: 'AdminLog' }, ],
-      Coach: [ { name: 'My Athletes', icon: UserGroupIcon, view: 'CoachDashboard' }, { name: 'Calendar', icon: CalendarIcon, view: 'CalendarView' }, ],
-      Parent: [ { name: 'My Children', icon: UserGroupIcon, view: 'ParentDashboard' }, { name: 'Schedule', icon: CalendarIcon, view: 'ScheduleView' }, { name: 'Payments', icon: CreditCardIcon, view: 'ParentPayments' }, ],
-      Athlete: [ { name: 'My Progress', icon: ChartBarIcon, view: 'AthleteDashboard' }, { name: 'Schedule', icon: CalendarIcon, view: 'ScheduleView' }, ],
+      Admin: [ { name: 'Dashboard', icon: ChartBarIcon, view: 'AdminDashboard' }, { name: 'Users', icon: UserGroupIcon, view: 'UserManagement' }, { name: 'Programs', icon: CalendarIcon, view: 'ProgramManagement' }, { name: 'Payments', icon: CreditCardIcon, view: 'PaymentManagement' }, { name: 'Messages', icon: EnvelopeIcon, view: 'MessagesView' }, { name: 'Audit Log', icon: DocumentTextIcon, view: 'AdminLog' }, ],
+      Coach: [ { name: 'My Athletes', icon: UserGroupIcon, view: 'CoachDashboard' }, { name: 'Calendar', icon: CalendarIcon, view: 'CalendarView' }, { name: 'Contact Admin', icon: EnvelopeIcon, view: 'ContactUs' } ],
+      Parent: [ { name: 'My Children', icon: UserGroupIcon, view: 'ParentDashboard' }, { name: 'Schedule', icon: CalendarIcon, view: 'ScheduleView' }, { name: 'Payments', icon: CreditCardIcon, view: 'ParentPayments' }, { name: 'Contact Admin', icon: EnvelopeIcon, view: 'ContactUs' } ],
+      Athlete: [ { name: 'My Progress', icon: ChartBarIcon, view: 'AthleteDashboard' }, { name: 'Schedule', icon: CalendarIcon, view: 'ScheduleView' }, { name: 'Contact Admin', icon: EnvelopeIcon, view: 'ContactUs' } ],
     };
     const links = sidebarLinks[user.role] || [];
     return (
@@ -426,6 +434,89 @@ const CalendarView = ({ coach, sessions, users, onSetReminder }) => {
 
     return (<div className="calendar-container">{renderHeader()}{viewMode === 'Month' ? renderMonthView() : viewMode === 'Week' ? renderWeekView() : renderDayView()}</div>);
 };
+const MessagesView = ({ messages, users }) => {
+    const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
+    return (
+        <div>
+            <div className="view-header"><h1>Inbox</h1></div>
+            <div className="table-container">
+                <table>
+                    <thead>
+                        <tr><th>From</th><th>Subject</th><th>Date</th><th>Actions</th></tr>
+                    </thead>
+                    <tbody>
+                        {messages.length === 0 ? (
+                            <tr><td colSpan={4} style={{ textAlign: 'center' }}>No messages found.</td></tr>
+                        ) : (
+                            messages.map(msg => {
+                                const sender = users.find(u => u.user_id === msg.user_id);
+                                return (
+                                    <React.Fragment key={msg.message_id}>
+                                        <tr>
+                                            <td>{sender ? sender.name : 'Unknown User'}</td>
+                                            <td>{msg.subject}</td>
+                                            <td>{new Date(msg.sent_at).toLocaleString()}</td>
+                                            <td className="action-cell">
+                                                <button onClick={() => setSelectedMessage(selectedMessage?.message_id === msg.message_id ? null : msg)} className="btn btn-secondary btn-sm">
+                                                    {selectedMessage?.message_id === msg.message_id ? 'Hide' : 'View'}
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        {selectedMessage?.message_id === msg.message_id && (
+                                            <tr className="message-body-row">
+                                                <td colSpan={4}>
+                                                    <div className="message-body-content"><p>{selectedMessage.body}</p></div>
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </React.Fragment>
+                                );
+                            })
+                        )}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    );
+};
+const ContactUs = ({ onSendMessage, addToast }) => {
+    const [subject, setSubject] = useState('');
+    const [body, setBody] = useState('');
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        if (!subject.trim() || !body.trim()) {
+            addToast("Please fill out both subject and message.", 'error');
+            return;
+        }
+        onSendMessage(subject, body);
+        setSubject('');
+        setBody('');
+    };
+
+    return (
+        <div>
+            <div className="view-header"><h1>Contact Admin</h1></div>
+            <div className="card customer-card">
+                <h3>Send a Message</h3>
+                <p>If you have any questions or concerns, please send us a message below.</p>
+                <form onSubmit={handleSubmit} style={{ marginTop: '20px' }}>
+                    <div className="form-group">
+                        <label htmlFor="subject">Subject</label>
+                        <input type="text" id="subject" value={subject} onChange={(e) => setSubject(e.target.value)} required />
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="body">Message</label>
+                        <textarea id="body" rows={6} value={body} onChange={(e) => setBody(e.target.value)} required ></textarea>
+                    </div>
+                    <div className="form-actions">
+                        <button type="submit" className="btn btn-primary">Send Message</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+};
 const ToastContainer = ({ toasts, removeToast }) => (
     <div className="toast-container">
         {toasts.map(toast => (
@@ -457,6 +548,8 @@ const DashboardLayout = ({ user, impersonatedUser, onLogout, onStopImpersonating
             case 'AdminLog': return <AdminLogView logs={data.adminLogs} users={data.users} />;
             case 'ScheduleView': return <ScheduleView user={effectiveUser} sessions={data.sessions} users={data.users} onConfirmBooking={handlers.confirmBooking} onSetReminder={handlers.openReminderModal}/>;
             case 'CalendarView': return <CalendarView coach={effectiveUser} sessions={data.sessions} users={data.users} onSetReminder={handlers.openReminderModal}/>;
+            case 'MessagesView': return <MessagesView messages={data.messages} users={data.users} />;
+            case 'ContactUs': return <ContactUs onSendMessage={handlers.sendMessage} addToast={handlers.addToast} />;
             default: return <div>Select a view from the sidebar.</div>;
         }
     };
@@ -483,6 +576,7 @@ const App = () => {
     const [sessions, setSessions] = useLocalStorage<Session[]>('fsc_sessions', initialSessions);
     const [reminders, setReminders] = useLocalStorage<Reminder[]>('fsc_reminders', []);
     const [notifications, setNotifications] = useLocalStorage<Notification[]>('fsc_notifications', []);
+    const [messages, setMessages] = useLocalStorage<Message[]>('fsc_messages', []);
     const [isReminderModalOpen, setIsReminderModalOpen] = useState(false);
     const [sessionForReminder, setSessionForReminder] = useState<Session | null>(null);
     const [toasts, setToasts] = useState<Toast[]>([]);
@@ -547,10 +641,27 @@ const App = () => {
         setIsReminderModalOpen(false);
     };
     const handleDismissNotification = (notificationId) => setNotifications(prev => prev.filter(n => n.notification_id !== notificationId));
+    const handleSendMessage = (subject: string, body: string) => {
+        const user = impersonatedUser || currentUser;
+        if (!user) {
+            addToast('You must be logged in to send a message.', 'error');
+            return;
+        }
+        const newMessage: Message = {
+            message_id: Date.now(),
+            user_id: user.user_id,
+            subject,
+            body,
+            sent_at: new Date().toISOString(),
+        };
+        setMessages(prev => [newMessage, ...prev]);
+        addToast('Message sent successfully!');
+    };
 
-    const data = { users, progress, payments, adminLogs, sessions, notifications };
+
+    const data = { users, progress, payments, adminLogs, sessions, notifications, messages };
     const handlers = {
-        impersonateUser: handleImpersonate, addUser: handleAddUser, updateUser: handleUpdateUser, deleteUser: handleDeleteUser, updateProgress: handleUpdateProgress, confirmBooking: handleConfirmBooking, openReminderModal: handleOpenReminderModal, dismissNotification: handleDismissNotification,
+        impersonateUser: handleImpersonate, addUser: handleAddUser, updateUser: handleUpdateUser, deleteUser: handleDeleteUser, updateProgress: handleUpdateProgress, confirmBooking: handleConfirmBooking, openReminderModal: handleOpenReminderModal, dismissNotification: handleDismissNotification, sendMessage: handleSendMessage, addToast: addToast,
     };
 
     if (!currentUser) return <LoginPage onLogin={handleLogin} error={loginError} />;
