@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, useRef, SetStateAction } from 'react';
 
 // --- SVG Icons ---
@@ -23,6 +24,9 @@ const PencilIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" vie
 const BellIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" aria-hidden="true" focusable="false"><path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" /></svg>;
 const EnvelopeIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" aria-hidden="true" focusable="false"><path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25-2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" /></svg>;
 const PaperAirplaneIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" aria-hidden="true" focusable="false"><path strokeLinecap="round" strokeLinejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" /></svg>;
+const TrashIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" aria-hidden="true" focusable="false"><path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.134-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.067-2.09 1.02-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg>;
+const ChevronLeftIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" aria-hidden="true" focusable="false"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" /></svg>;
+const ChevronRightIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" aria-hidden="true" focusable="false"><path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" /></svg>;
 
 
 // --- Data & Hooks ---
@@ -50,12 +54,12 @@ const useLocalStorage = <T,>(key: string, initialValue: T): [T, (value: SetState
 };
 
 const initialUsers = [
-  { id: 1, name: 'Admin User', email: 'admin@funport.com', role: 'Admin' },
-  { id: 2, name: 'Coach Sarah', email: 'sarah@funport.com', role: 'Coach' },
-  { id: 3, name: 'John Doe (Parent)', email: 'john@email.com', role: 'Parent', children: [4] },
-  { id: 4, name: 'Leo Doe', email: 'leo@email.com', role: 'Athlete', parentId: 3, coachId: 2 },
-  { id: 5, name: 'Jane Smith (Parent)', email: 'jane@email.com', role: 'Parent', children: [6] },
-  { id: 6, name: 'Mia Smith', email: 'mia@email.com', role: 'Athlete', parentId: 5, coachId: 2 },
+  { id: 1, name: 'Admin User', email: 'admin@funport.com', password: 'password123', role: 'Admin' },
+  { id: 2, name: 'Coach Sarah', email: 'sarah@funport.com', password: 'password123', role: 'Coach' },
+  { id: 3, name: 'John Doe (Parent)', email: 'john@email.com', password: 'password123', role: 'Parent', children: [4] },
+  { id: 4, name: 'Leo Doe', email: 'leo@email.com', password: 'password123', role: 'Athlete', parentId: 3, coachId: 2 },
+  { id: 5, name: 'Jane Smith (Parent)', email: 'jane@email.com', password: 'password123', role: 'Parent', children: [6] },
+  { id: 6, name: 'Mia Smith', email: 'mia@email.com', password: 'password123', role: 'Athlete', parentId: 5, coachId: 2 },
 ];
 
 const initialAthletes = [
@@ -78,10 +82,10 @@ const initialLogs = [
 ];
 
 const initialSchedules = [
-    { id: 1, coachId: 2, date: '2024-08-05', time: '4:00PM - 5:00PM', location: 'Main Rink', athleteIds: [4] },
-    { id: 2, coachId: 2, date: '2024-08-05', time: '5:00PM - 6:00PM', location: 'Main Rink', athleteIds: [6] },
-    { id: 3, coachId: 2, date: '2024-08-07', time: '4:30PM - 5:30PM', location: 'Practice Area', athleteIds: [4, 6] },
-    { id: 4, coachId: 2, date: '2024-08-09', time: '4:00PM - 5:00PM', location: 'Main Rink', athleteIds: [4, 6] },
+    { id: 1, coachId: 2, date: '2024-08-05', time: '16:00', location: 'Main Rink', athleteIds: [4], title: 'Leo D. - Private' },
+    { id: 2, coachId: 2, date: '2024-08-05', time: '17:00', location: 'Main Rink', athleteIds: [6], title: 'Mia S. - Private' },
+    { id: 3, coachId: 2, date: '2024-08-07', time: '16:30', location: 'Practice Area', athleteIds: [4, 6], title: 'Group Session' },
+    { id: 4, coachId: 2, date: '2024-08-09', time: '16:00', location: 'Main Rink', athleteIds: [4, 6], title: 'Group Session' },
 ];
 
 const initialInvoices = [
@@ -184,7 +188,7 @@ const Header = ({ onBookNowClick, onLoginClick, user, onLogout, unreadCount, onN
     <header className={`header ${scrolled ? 'scrolled' : ''}`}>
       <div className="container">
         <nav className="nav">
-          <a href="#" className="logo">
+          <a href="#" className="logo" onClick={(e) => { e.preventDefault(); onNavigate({ name: 'Dashboard' }); }}>
             <span className="funpot">funpot </span>
             <span className="skating">SKATING</span>
           </a>
@@ -428,44 +432,77 @@ const BookingModal = ({ isOpen, onClose }) => {
   );
 };
 
-const LoginModal = ({ isOpen, onClose, onLogin, users }) => {
-  const modalContentRef = useRef(null);
+const LoginFormModal = ({ isOpen, onClose, onLoginAttempt }) => {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+    const modalContentRef = useRef(null);
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (modalContentRef.current && !modalContentRef.current.contains(event.target)) {
-        onClose();
-      }
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        setError('');
+        const loginError = onLoginAttempt(email, password);
+        if (loginError) {
+            setError(loginError);
+        } else {
+            setEmail('');
+            setPassword('');
+        }
     };
-    if (isOpen) document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isOpen, onClose]);
+    
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (modalContentRef.current && !modalContentRef.current.contains(event.target)) {
+                onClose();
+            }
+        };
+        if (isOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+            setError(''); // Reset error on open
+        }
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [isOpen, onClose]);
 
-  const handleLogin = (user) => {
-    onLogin(user);
-    onClose();
-  };
+    if (!isOpen) return null;
 
-  if (!isOpen) return null;
-
-  return (
-    <div className={`modal-overlay ${isOpen ? 'show' : ''}`}>
-      <div className="modal-content" ref={modalContentRef}>
-        <div className="modal-header">
-          <h2>Select User to Login</h2>
-          <button onClick={onClose} className="close-btn" aria-label="Close"><CloseIcon /></button>
+    return (
+        <div className={`modal-overlay ${isOpen ? 'show' : ''}`}>
+            <div className="modal-content" ref={modalContentRef}>
+                <div className="modal-header">
+                    <h2>Club Portal Login</h2>
+                    <button onClick={onClose} className="close-btn" aria-label="Close"><CloseIcon /></button>
+                </div>
+                <form onSubmit={handleSubmit}>
+                    {error && <p className="form-error">{error}</p>}
+                    <div className="form-group">
+                        <label htmlFor="login-email">Email Address</label>
+                        <input 
+                            type="email" 
+                            id="login-email" 
+                            value={email} 
+                            onChange={(e) => setEmail(e.target.value)} 
+                            required 
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="login-password">Password</label>
+                        <input 
+                            type="password" 
+                            id="login-password" 
+                            value={password} 
+                            onChange={(e) => setPassword(e.target.value)} 
+                            required 
+                        />
+                    </div>
+                    <div className="form-actions">
+                        <button type="submit" className="btn btn-primary">Login</button>
+                    </div>
+                </form>
+            </div>
         </div>
-        <div className="login-options">
-          {users.map(user => (
-            <button key={user.id} onClick={() => handleLogin(user)} className="btn btn-primary">
-              {user.name} ({user.role})
-            </button>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
+    );
 };
+
 
 const LandingPage = ({ onBookNowClick }) => (
     <main>
@@ -488,17 +525,19 @@ const sidebarLinks = {
   ],
   Coach: [
     { name: 'Dashboard', icon: DashboardIcon, view: 'Dashboard' },
+    { name: 'Calendar', icon: CalendarIcon, view: 'Calendar' },
     { name: 'My Athletes', icon: UserGroupIcon, view: 'My Athletes' },
-    { name: 'Schedule', icon: CalendarIcon, view: 'Schedule' },
     { name: 'Messages', icon: EnvelopeIcon, view: 'Messages' },
   ],
   Parent: [
     { name: 'Dashboard', icon: DashboardIcon, view: 'Dashboard' },
+    { name: 'Schedule', icon: CalendarIcon, view: 'Schedule' },
     { name: 'Payments', icon: CreditCardIcon, view: 'Payments' },
     { name: 'Messages', icon: EnvelopeIcon, view: 'Messages' },
   ],
   Athlete: [
     { name: 'My Progress', icon: ChartBarIcon, view: 'My Progress' },
+    { name: 'Schedule', icon: CalendarIcon, view: 'Schedule' },
     { name: 'Personal Log', icon: CheckBadgeIcon, view: 'Personal Log' },
     { name: 'Messages', icon: EnvelopeIcon, view: 'Messages' },
   ],
@@ -533,10 +572,50 @@ const Sidebar = ({ userRole, activeView, onNavigate }) => {
 
 const DashboardHome = ({ user }) => (
     <div>
-        <h1>Welcome back, {user.name}!</h1>
+        <h1>Welcome back, {user.name.split(' ')[0]}!</h1>
         <p>This is your central hub for managing your activities at Funport Skating Club.</p>
+        <p>Select an option from the sidebar to get started.</p>
     </div>
 );
+
+const StatCard = ({ title, value, icon: Icon }) => (
+    <div className="stat-card">
+        <div className="stat-icon"><Icon /></div>
+        <div className="stat-content">
+            <p className="stat-value">{value}</p>
+            <p className="stat-title">{title}</p>
+        </div>
+    </div>
+);
+
+const AdminDashboard = ({ users, schedules, invoices }) => {
+    const totalUsers = users.length;
+    const totalAthletes = users.filter(u => u.role === 'Athlete').length;
+    
+    const upcomingSessions = schedules.filter(s => {
+        const sessionDate = new Date(s.date);
+        const today = new Date();
+        const nextWeek = new Date();
+        nextWeek.setDate(today.getDate() + 7);
+        return sessionDate >= today && sessionDate <= nextWeek;
+    }).length;
+
+    const pendingPayments = invoices.filter(inv => inv.status === 'Due').length;
+
+    return (
+        <div>
+            <div className="dashboard-header"><h1>Admin Dashboard</h1></div>
+            <div className="stat-card-grid">
+                <StatCard title="Total Users" value={totalUsers} icon={UsersIcon} />
+                <StatCard title="Active Athletes" value={totalAthletes} icon={UserGroupIcon} />
+                <StatCard title="Upcoming Sessions (7 days)" value={upcomingSessions} icon={CalendarIcon} />
+                <StatCard title="Pending Payments" value={pendingPayments} icon={CreditCardIcon} />
+            </div>
+            {/* Additional admin components can be added here */}
+        </div>
+    );
+};
+
 
 const UserFormModal = ({ isOpen, onClose, onSave, userToEdit, users }) => {
     const [formData, setFormData] = useState({ name: '', email: '', role: 'Athlete', coachId: '' });
@@ -822,44 +901,45 @@ const PersonalLog = ({ currentUser, logs, onAddLog }) => {
 };
 
 const Schedule = ({ schedules, users, currentUser }) => {
-    const coachSchedules = (schedules as typeof initialSchedules)
-        .filter(s => s.coachId === currentUser.id)
-        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    // This component is now a simple list for Parents/Athletes
+    let relevantSchedules = [];
+    if (currentUser.role === 'Parent' && currentUser.children) {
+        relevantSchedules = schedules.filter(s => s.athleteIds.some(id => currentUser.children.includes(id)));
+    } else if (currentUser.role === 'Athlete') {
+        relevantSchedules = schedules.filter(s => s.athleteIds.includes(currentUser.id));
+    }
+    
+    relevantSchedules.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-    const groupedSchedules = coachSchedules.reduce((acc, schedule) => {
+    const groupedSchedules = relevantSchedules.reduce((acc, schedule) => {
         const date = new Date(schedule.date).toDateString();
         if (!acc[date]) {
             acc[date] = [];
         }
         acc[date].push(schedule);
         return acc;
-    }, {} as Record<string, typeof initialSchedules>);
+    }, {});
 
     return (
         <div>
             <div className="dashboard-header"><h1>My Schedule</h1></div>
-            <div className="schedule-container">
-                {Object.entries(groupedSchedules).sort((a, b) => new Date(a[0]).getTime() - new Date(b[0]).getTime()).map(([date, sessions]) => (
-                    <div key={date} className="card schedule-group">
-                        <h3 className="schedule-date">{new Date(date).toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}</h3>
-                        {(sessions as Schedule[]).map((session: Schedule) => (
-                            <div key={session.id} className="session-card">
-                                <h4>{session.time}</h4>
-                                <div className="session-location"><MapPinIcon /> {session.location}</div>
-                                <div className="session-athletes">
-                                    <strong>Athletes:</strong>
-                                    <ul>
-                                        {session.athleteIds.map(id => {
-                                            const athlete = users.find(u => u.id === id);
-                                            return <li key={id}>{athlete ? athlete.name : 'Unknown'}</li>;
-                                        })}
-                                    </ul>
+             {Object.keys(groupedSchedules).length === 0 ? (
+                <div className="card"><p>You have no upcoming sessions.</p></div>
+            ) : (
+                <div className="schedule-container">
+                    {Object.entries(groupedSchedules).map(([date, sessions]) => (
+                        <div key={date} className="card schedule-group">
+                            <h3 className="schedule-date">{new Date(date).toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}</h3>
+                            {sessions.map((session) => (
+                                <div key={session.id} className="session-card">
+                                    <h4>{session.time} - {session.title}</h4>
+                                    <div className="session-location"><MapPinIcon /> {session.location}</div>
                                 </div>
-                            </div>
-                        ))}
-                    </div>
-                ))}
-            </div>
+                            ))}
+                        </div>
+                    ))}
+                </div>
+            )}
         </div>
     );
 };
@@ -1140,35 +1220,249 @@ const Messaging = ({ currentUser, users, conversations, messages, onSendMessage,
     )
 };
 
-const Dashboard = ({ currentUser, users, athletes, logs, onAddUser, onEditUser, onSelectAthlete, onAddLog, schedules, invoices, onPayInvoice, conversations, messages, onSendMessage, onMarkAsRead, onCreateConversation, onNavigate, activeView }) => {
+const CalendarView = ({ currentUser, users, schedules, onAdd, onUpdate, onDelete }) => {
+    const [currentDate, setCurrentDate] = useState(new Date());
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedSession, setSelectedSession] = useState<Schedule | null>(null);
+    const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+
+    const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+    const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+    const startDay = startOfMonth.getDay(); // 0 for Sunday, 1 for Monday, etc.
+    const daysInMonth = endOfMonth.getDate();
+
+    const changeMonth = (offset) => {
+        setCurrentDate(prev => new Date(prev.getFullYear(), prev.getMonth() + offset, 1));
+    };
+
+    const handleDayClick = (day) => {
+        setSelectedDate(new Date(currentDate.getFullYear(), currentDate.getMonth(), day));
+        setSelectedSession(null);
+        setIsModalOpen(true);
+    };
+
+    const handleSessionClick = (session) => {
+        setSelectedSession(session);
+        setSelectedDate(null);
+        setIsModalOpen(true);
+    };
+    
+    const handleCloseModal = () => setIsModalOpen(false);
+
+    const allDays = [];
+    for (let i = 0; i < startDay; i++) {
+        allDays.push(<div key={`empty-${i}`} className="calendar-day empty"></div>);
+    }
+    for (let day = 1; day <= daysInMonth; day++) {
+        const dateStr = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const daySessions = schedules.filter(s => s.date === dateStr);
+        
+        allDays.push(
+            <div key={day} className="calendar-day" onClick={() => handleDayClick(day)}>
+                <div className="day-number">{day}</div>
+                <div className="sessions-container">
+                    {daySessions.map(session => (
+                        <div key={session.id} className="session-event" onClick={(e) => { e.stopPropagation(); handleSessionClick(session); }}>
+                            <span className="session-time">{session.time}</span> {session.title}
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+    }
+    
+    return (
+        <div>
+            <div className="dashboard-header">
+                <h1>My Calendar</h1>
+                <button className="btn btn-primary" onClick={() => { setSelectedDate(new Date()); setSelectedSession(null); setIsModalOpen(true); }}>New Session</button>
+            </div>
+            <div className="calendar-container card">
+                <div className="calendar-header">
+                    <button onClick={() => changeMonth(-1)} className="btn-icon"><ChevronLeftIcon /></button>
+                    <h2>{currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}</h2>
+                    <button onClick={() => changeMonth(1)} className="btn-icon"><ChevronRightIcon /></button>
+                </div>
+                <div className="calendar-grid">
+                    <div className="calendar-day-header">Sun</div>
+                    <div className="calendar-day-header">Mon</div>
+                    <div className="calendar-day-header">Tue</div>
+                    <div className="calendar-day-header">Wed</div>
+                    <div className="calendar-day-header">Thu</div>
+                    <div className="calendar-day-header">Fri</div>
+                    <div className="calendar-day-header">Sat</div>
+                    {allDays}
+                </div>
+            </div>
+            {isModalOpen && (
+                <SessionModal 
+                    isOpen={isModalOpen}
+                    onClose={handleCloseModal}
+                    sessionToEdit={selectedSession}
+                    selectedDate={selectedDate}
+                    onSave={selectedSession ? onUpdate : onAdd}
+                    onDelete={onDelete}
+                    users={users}
+                    currentUser={currentUser}
+                />
+            )}
+        </div>
+    );
+};
+
+// Fix: Define an interface for the session form data to ensure type safety for all properties.
+interface SessionFormData {
+    id?: number;
+    coachId?: number;
+    title: string;
+    date: string;
+    time: string;
+    location: string;
+    athleteIds: number[];
+}
+
+const SessionModal = ({ isOpen, onClose, sessionToEdit, selectedDate, onSave, onDelete, users, currentUser }) => {
+    // Fix: Use the SessionFormData interface for the state to prevent type inference issues.
+    const [formData, setFormData] = useState<SessionFormData>({
+        title: '',
+        date: '',
+        time: '',
+        location: 'Main Rink',
+        athleteIds: []
+    });
+    const modalContentRef = useRef(null);
+
+    useEffect(() => {
+        if (sessionToEdit) {
+            setFormData({ ...sessionToEdit, athleteIds: sessionToEdit.athleteIds || [] });
+        } else if (selectedDate) {
+            setFormData({
+                title: '',
+                date: selectedDate.toISOString().split('T')[0],
+                time: '16:00',
+                location: 'Main Rink',
+                athleteIds: []
+            });
+        }
+    }, [sessionToEdit, selectedDate, isOpen]);
+
+    // Fix: Add types for event handlers to ensure type safety on event targets.
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    // Fix: Add types for event handlers to ensure type safety on event targets.
+    const handleAthleteChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const selectedIds = Array.from(e.target.selectedOptions, option => Number(option.value));
+        setFormData(prev => ({ ...prev, athleteIds: selectedIds }));
+    };
+
+    // Fix: Add types for event handlers to ensure type safety on event targets.
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        const dataToSave = {
+            ...formData,
+            id: sessionToEdit ? sessionToEdit.id : undefined,
+            coachId: currentUser.id,
+        }
+        onSave(dataToSave);
+        onClose();
+    };
+
+    const handleDelete = () => {
+        if (sessionToEdit && window.confirm('Are you sure you want to delete this session?')) {
+            onDelete(sessionToEdit.id);
+            onClose();
+        }
+    };
+    
+    const coachAthletes = users.filter(u => u.role === 'Athlete' && u.coachId === currentUser.id);
+
+    return (
+        <div className="modal-overlay show">
+            <div className="modal-content" ref={modalContentRef}>
+                <div className="modal-header">
+                    <h2>{sessionToEdit ? 'Edit Session' : 'New Session'}</h2>
+                    <button onClick={onClose} className="close-btn" aria-label="Close"><CloseIcon /></button>
+                </div>
+                <form onSubmit={handleSubmit}>
+                    <div className="form-group">
+                        <label htmlFor="title">Title</label>
+                        <input type="text" id="title" name="title" value={formData.title} onChange={handleChange} required placeholder="e.g., Group Practice, Leo Private"/>
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="date">Date</label>
+                        <input type="date" id="date" name="date" value={formData.date} onChange={handleChange} required />
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="time">Time</label>
+                        <input type="time" id="time" name="time" value={formData.time} onChange={handleChange} required />
+                    </div>
+                     <div className="form-group">
+                        <label htmlFor="location">Location</label>
+                        <select id="location" name="location" value={formData.location} onChange={handleChange}>
+                            <option>Main Rink</option>
+                            <option>Practice Area</option>
+                            <option>Outdoor Track</option>
+                        </select>
+                    </div>
+                     <div className="form-group">
+                        <label htmlFor="athleteIds">Athletes</label>
+                        <select id="athleteIds" name="athleteIds" multiple value={formData.athleteIds.map(String)} onChange={handleAthleteChange} className="multi-select">
+                            {coachAthletes.map(athlete => (
+                                <option key={athlete.id} value={athlete.id}>{athlete.name}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="form-actions">
+                         {sessionToEdit && (
+                            <button type="button" className="btn-icon delete-btn" onClick={handleDelete} aria-label="Delete session"><TrashIcon /></button>
+                        )}
+                        <div style={{ flexGrow: 1 }}></div>
+                        <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
+                        <button type="submit" className="btn btn-primary">Save Session</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+};
+
+const Dashboard = ({ currentUser, users, athletes, logs, schedules, invoices, conversations, messages, activeView, onNavigate, ...handlers }) => {
     
     const renderContent = () => {
         switch (activeView.name) {
             case 'Dashboard':
+                if (currentUser.role === 'Admin') {
+                    return <AdminDashboard users={users} schedules={schedules} invoices={invoices} />;
+                }
                 return <DashboardHome user={currentUser} />;
             case 'User Management':
-                return <UserManagement users={users} onAddUser={onAddUser} onEditUser={onEditUser} />;
+                return <UserManagement users={users} onAddUser={handlers.onAddUser} onEditUser={handlers.onEditUser} />;
             case 'My Athletes':
-                return <MyAthletes users={users} athletes={athletes} onSelectAthlete={onSelectAthlete} currentUser={currentUser} />;
+                return <MyAthletes users={users} athletes={athletes} onSelectAthlete={handlers.onSelectAthlete} currentUser={currentUser} />;
             case 'Athlete Profile':
-                return <AthleteProfile athleteId={activeView.athleteId} users={users} athletes={athletes} logs={logs} onAddLog={onAddLog} />;
+                return <AthleteProfile athleteId={activeView.athleteId} users={users} athletes={athletes} logs={logs} onAddLog={handlers.onAddLog} />;
             case 'My Progress':
                 return <MyProgress currentUser={currentUser} users={users} athletes={athletes} />;
             case 'Personal Log':
-                return <PersonalLog currentUser={currentUser} logs={logs} onAddLog={onAddLog} />;
-            case 'Schedule':
+                return <PersonalLog currentUser={currentUser} logs={logs} onAddLog={handlers.onAddLog} />;
+            case 'Calendar': // For coaches
+                return <CalendarView currentUser={currentUser} users={users} schedules={schedules} onAdd={handlers.onAddSchedule} onUpdate={handlers.onUpdateSchedule} onDelete={handlers.onDeleteSchedule} />;
+            case 'Schedule': // For athletes/parents
                 return <Schedule schedules={schedules} users={users} currentUser={currentUser} />;
             case 'Payments':
-                return <Payments currentUser={currentUser} users={users} invoices={invoices} onPayInvoice={onPayInvoice} />;
+                return <Payments currentUser={currentUser} users={users} invoices={invoices} onPayInvoice={handlers.onPayInvoice} />;
             case 'Messages':
                 return <Messaging 
                             currentUser={currentUser} 
                             users={users} 
                             conversations={conversations} 
                             messages={messages} 
-                            onSendMessage={onSendMessage} 
-                            onMarkAsRead={onMarkAsRead}
-                            onCreateConversation={onCreateConversation}
+                            onSendMessage={handlers.onSendMessage} 
+                            onMarkAsRead={handlers.onMarkAsRead}
+                            onCreateConversation={handlers.onCreateConversation}
                             onNavigate={onNavigate}
                             activeConversationId={activeView.conversationId}
                        />;
@@ -1211,6 +1505,16 @@ const App = () => {
         }
     }, [currentUser]);
 
+    const handleLoginAttempt = (email, password) => {
+        const user = users.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password === password);
+        if (user) {
+            setCurrentUser(user);
+            setLoginModalOpen(false);
+            return null; // Success
+        }
+        return "Invalid email or password."; // Error message
+    };
+
     const handleLogout = () => {
         setCurrentUser(null);
         setActiveView({name: 'Dashboard'});
@@ -1225,7 +1529,7 @@ const App = () => {
     };
 
     const handleAddUser = (userData) => {
-        const newUser = { ...userData, id: Math.max(...users.map(u => u.id)) + 1 };
+        const newUser = { ...userData, id: Math.max(...users.map(u => u.id)) + 1, password: 'password123' };
         setUsers(prev => [...prev, newUser]);
     };
     
@@ -1236,7 +1540,7 @@ const App = () => {
     const handleAddLog = (logData) => {
         const newLog = { 
             ...logData, 
-            id: Math.max(...logs.map(l => l.id)) + 1,
+            id: Math.max(...logs.map(l => l.id), 0) + 1,
             author: currentUser.name,
             date: new Date().toISOString().split('T')[0]
         };
@@ -1246,10 +1550,24 @@ const App = () => {
     const handlePayInvoice = (invoiceId: number) => {
         setInvoices(prev => prev.map(inv => inv.id === invoiceId ? { ...inv, status: 'Paid' } : inv));
     };
+    
+    const handleAddSchedule = (scheduleData) => {
+        const newSchedule = { ...scheduleData, id: Math.max(...schedules.map(s => s.id), 0) + 1 };
+        setSchedules(prev => [...prev, newSchedule]);
+    };
+
+    const handleUpdateSchedule = (scheduleData) => {
+        setSchedules(prev => prev.map(s => s.id === scheduleData.id ? scheduleData : s));
+    };
+
+    const handleDeleteSchedule = (scheduleId) => {
+        setSchedules(prev => prev.filter(s => s.id !== scheduleId));
+    };
+
 
     const handleSendMessage = (conversationId: number, content: string) => {
         const newMessage: Message = {
-            id: Math.max(...messages.map(m => m.id)) + 1,
+            id: Math.max(...messages.map(m => m.id), 0) + 1,
             conversationId,
             senderId: currentUser.id,
             content,
@@ -1269,7 +1587,6 @@ const App = () => {
     };
 
     const handleCreateConversation = (recipientId: number, firstMessage: string) => {
-        // Check if a conversation already exists
         const existingConvo = conversations.find(c =>
             c.participantIds.includes(currentUser.id) && c.participantIds.includes(recipientId)
         );
@@ -1301,6 +1618,20 @@ const App = () => {
             return lastMsg && !lastMsg.readBy.includes(currentUser.id);
         }).length : 0;
 
+    const dashboardHandlers = {
+        onAddUser: handleAddUser,
+        onEditUser: handleEditUser,
+        onSelectAthlete: handleSelectAthlete,
+        onAddLog: handleAddLog,
+        onPayInvoice: handlePayInvoice,
+        onAddSchedule: handleAddSchedule,
+        onUpdateSchedule: handleUpdateSchedule,
+        onDeleteSchedule: handleDeleteSchedule,
+        onSendMessage: handleSendMessage,
+        onMarkAsRead: handleMarkConversationAsRead,
+        onCreateConversation: handleCreateConversation,
+    };
+
     return (
         <>
             <Header 
@@ -1322,16 +1653,9 @@ const App = () => {
                     invoices={invoices}
                     conversations={conversations}
                     messages={messages}
-                    onAddUser={handleAddUser}
-                    onEditUser={handleEditUser}
-                    onSelectAthlete={handleSelectAthlete}
-                    onAddLog={handleAddLog}
-                    onPayInvoice={handlePayInvoice}
-                    onSendMessage={handleSendMessage}
-                    onMarkAsRead={handleMarkConversationAsRead}
-                    onCreateConversation={handleCreateConversation}
                     onNavigate={handleNavigate}
                     activeView={activeView}
+                    {...dashboardHandlers}
                 />
             ) : (
                 <>
@@ -1341,11 +1665,10 @@ const App = () => {
             )}
             
             <BookingModal isOpen={isBookingModalOpen} onClose={() => setBookingModalOpen(false)} />
-            <LoginModal 
+            <LoginFormModal 
                 isOpen={isLoginModalOpen} 
                 onClose={() => setLoginModalOpen(false)}
-                onLogin={setCurrentUser}
-                users={users}
+                onLoginAttempt={handleLoginAttempt}
             />
         </>
     );
