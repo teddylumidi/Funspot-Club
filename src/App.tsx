@@ -18,6 +18,7 @@ const FunnelIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 
 const ChartPieIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6a7.5 7.5 0 1 0 7.5 7.5h-7.5V6Z" /><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0 0 13.5 3v7.5Z" /></svg>;
 const PlusIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>;
 const BookOpenIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" /></svg>;
+const UserCircleIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg>;
 
 
 // --- Type Definitions ---
@@ -51,7 +52,7 @@ const initialPrograms: Program[] = [
 const initialSessions: Session[] = [
     { session_id: 1, program_id: 1, date: '2024-07-29', time: '3:30PM-6:00PM', title: 'Summer Program - Week 1', coach_id: 2, athlete_ids: [5, 7], confirmed_athlete_ids: [5] },
     { session_id: 2, program_id: 2, date: '2024-08-03', time: '3:30PM-6:00PM', title: 'Weekend Session', coach_id: 3, athlete_ids: [8], confirmed_athlete_ids: [8] },
-    { session_id: 3, program_id: 1, date: '2024-08-05', time: '3:30PM-6:00PM', title: 'Summer Program - Week 2', coach_id: 2, athlete_ids: [], confirmed_athlete_ids: [] },
+    { session_id: 3, program_id: 1, date: '2024-08-05', time: '3:30PM-6:00PM', title: 'Summer Program - Week 2', coach_id: 2, athlete_ids: [5], confirmed_athlete_ids: [] },
     { session_id: 4, program_id: 3, date: '2024-08-06', time: '4:00PM-5:00PM', title: 'Beginner Basics - Week 1', coach_id: 2, athlete_ids: [], confirmed_athlete_ids: [] },
 ];
 const initialPayments: Payment[] = [
@@ -110,7 +111,7 @@ const PieChart: FC<{ data: { label: string; value: number }[]; showTooltip: Show
     );
 };
 
-const BarChart: FC<{ data: { label: string; value: number }[]; showTooltip: ShowTooltipFn; hideTooltip: HideTooltipFn; }> = ({ data, showTooltip, hideTooltip }) => {
+const BarChart: FC<{ data: { label: string; value: number }[]; showTooltip: ShowTooltipFn; hideTooltip: HideTooltipFn; yAxisLabel?: string; }> = ({ data, showTooltip, hideTooltip, yAxisLabel="Value" }) => {
     const maxValue = Math.max(...data.map(d => d.value), 0);
     const chartWidth = 300;
     const chartHeight = 150;
@@ -140,7 +141,7 @@ const BarChart: FC<{ data: { label: string; value: number }[]; showTooltip: Show
                         </g>
                     );
                 })}
-                 <text x="15" y={chartHeight / 2} textAnchor="middle" transform={`rotate(-90 15,${chartHeight/2})`}>Value</text>
+                 <text x="15" y={chartHeight / 2} textAnchor="middle" transform={`rotate(-90 15,${chartHeight/2})`}>{yAxisLabel}</text>
                  <text x="35" y="10" textAnchor="end">{maxValue}</text>
                  <text x="35" y={chartHeight} textAnchor="end">0</text>
             </svg>
@@ -196,10 +197,10 @@ const AdminDashboard: FC<{ users: User[], programs: Program[], payments: Payment
 
     const athleteEnrollmentData = useMemo(() => {
         return filteredPrograms.map(program => {
-            const enrollments = payments.filter(p => p.program_id === program.program_id && (p.status === 'paid' || p.status === 'pending')).length;
+            const enrollments = filteredPayments.filter(p => p.program_id === program.program_id).length;
             return { label: program.title.split(' ').slice(0, 2).join(' '), value: enrollments };
         });
-    }, [payments, filteredPrograms]);
+    }, [filteredPayments, filteredPrograms]);
     
 
     return (
@@ -239,7 +240,7 @@ const AdminDashboard: FC<{ users: User[], programs: Program[], payments: Payment
                 <div className="stats-grid">
                     <StatCard title="Total Users" value={filteredUsers.length.toString()} />
                     <StatCard title="Total Programs" value={filteredPrograms.length.toString()} />
-                    <StatCard title="Total Revenue" value={`$${(totalRevenue / 1).toFixed(2)}`} />
+                    <StatCard title="Total Revenue" value={`KES ${(totalRevenue).toLocaleString()}`} />
                     <StatCard title="Pending Payments" value={filteredPayments.filter(p => p.status === 'pending').length.toString()} />
                 </div>
                 <div className="charts-grid">
@@ -282,7 +283,7 @@ const CoachDashboard: FC<{ currentUser: User; users: User[]; progress: Progress[
             <div className="charts-grid" style={{ marginTop: '24px' }}>
                 <div className="chart-card">
                     <h3>Athlete Progress Overview</h3>
-                    <BarChart data={athleteProgressData} showTooltip={showTooltip} hideTooltip={hideTooltip} />
+                    <BarChart data={athleteProgressData} showTooltip={showTooltip} hideTooltip={hideTooltip} yAxisLabel="Avg. Progress %"/>
                 </div>
             </div>
         </div>
@@ -293,15 +294,15 @@ const ParentDashboard: FC<{ currentUser: User; users: User[]; progress: Progress
     const children = users.filter(u => u.role === 'Athlete' && u.parent_id === currentUser.user_id);
     return (
         <div>
-            {children.map(child => {
+            {children.length > 0 ? children.map(child => {
                 const childProgress = progress.filter(p => p.athlete_id === child.user_id);
                 return (
                     <div key={child.user_id} className="card" style={{ marginBottom: '24px' }}>
                         <h3>{child.name}'s Progress</h3>
-                        <BarChart data={childProgress.map(p => ({ label: p.skill, value: p.percentage }))} showTooltip={showTooltip} hideTooltip={hideTooltip} />
+                        <BarChart data={childProgress.map(p => ({ label: p.skill, value: p.percentage }))} showTooltip={showTooltip} hideTooltip={hideTooltip} yAxisLabel="Progress %"/>
                     </div>
                 );
-            })}
+            }) : <div className="card"><p>No children found. Please add an athlete user and assign yourself as the parent.</p></div>}
         </div>
     );
 };
@@ -311,13 +312,13 @@ const AthleteDashboard: FC<{ currentUser: User; progress: Progress[]; showToolti
     return (
         <div className="card">
             <h3>My Progress</h3>
-            <BarChart data={athleteProgress.map(p => ({ label: p.skill, value: p.percentage }))} showTooltip={showTooltip} hideTooltip={hideTooltip} />
+            <BarChart data={athleteProgress.map(p => ({ label: p.skill, value: p.percentage }))} showTooltip={showTooltip} hideTooltip={hideTooltip} yAxisLabel="Progress %"/>
         </div>
     );
 };
 
 // --- Management Views ---
-const UserManagement: FC<{ users: User[], onImpersonate: (user: User) => void, onEdit: (user: User) => void, onDelete: (user: User) => void, onAdd: () => void }> = ({ users, onImpersonate, onEdit, onDelete, onAdd }) => (
+const UserManagement: FC<{ users: User[], onImpersonate: (user: User) => void, onEdit: (user: User) => void, onDelete: (user: User) => void, onAdd: () => void, onViewProfile: (user:User) => void }> = ({ users, onImpersonate, onEdit, onDelete, onAdd, onViewProfile }) => (
     <div className="card">
         <div className="card-header">
             <h3>User Management</h3>
@@ -343,6 +344,7 @@ const UserManagement: FC<{ users: User[], onImpersonate: (user: User) => void, o
                             <td>{user.date_of_birth}</td>
                             <td>
                                 <div className="action-buttons">
+                                    <button onClick={() => onViewProfile(user)} className="btn-icon" title="View Profile"><UserCircleIcon/></button>
                                     <button onClick={() => onImpersonate(user)} className="btn-icon" title="Impersonate"><EyeIcon/></button>
                                     <button onClick={() => onEdit(user)} className="btn-icon" title="Edit"><PencilIcon/></button>
                                     <button onClick={() => onDelete(user)} className="btn-icon btn-icon-danger" title="Delete"><TrashIcon/></button>
@@ -382,7 +384,7 @@ const ProgramManagement: FC<{ programs: Program[], users: User[], onEdit: (p: Pr
                             <td>{p.title}</td>
                             <td>{getCoachName(p.coach_id)}</td>
                             <td>{p.schedule}</td>
-                            <td>${p.price}</td>
+                            <td>KES {p.price.toLocaleString()}</td>
                             <td><span className={`skill-badge skill-${p.skillLevel.split(' ')[0].toLowerCase()}`}>{p.skillLevel}</span></td>
                             <td>
                                 <div className="action-buttons">
@@ -398,7 +400,70 @@ const ProgramManagement: FC<{ programs: Program[], users: User[], onEdit: (p: Pr
     </div>
 )};
 
-const PaymentManagement = () => <div className="card">Payment Management Content</div>;
+const MyBookingsView: FC<{ currentUser: User; users: User[]; payments: Payment[]; programs: Program[]; sessions: Session[] }> = ({ currentUser, users, payments, programs, sessions }) => {
+    const userOrChildrenIds = useMemo(() => {
+        if (currentUser.role === 'Parent') {
+            return users.filter(u => u.parent_id === currentUser.user_id).map(u => u.user_id);
+        }
+        return [currentUser.user_id];
+    }, [currentUser, users]);
+
+    const bookings = useMemo(() => {
+        return payments
+            .filter(p => userOrChildrenIds.includes(p.user_id))
+            .map(payment => {
+                const program = programs.find(prog => prog.program_id === payment.program_id);
+                const user = users.find(u => u.user_id === payment.user_id);
+                const upcomingSessions = sessions.filter(s => s.program_id === payment.program_id && new Date(s.date) >= new Date()).sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+                return { payment, program, user, upcomingSessions };
+            })
+            .filter(booking => booking.program); // Filter out bookings with no matching program
+    }, [userOrChildrenIds, payments, programs, sessions, users]);
+
+    return (
+        <div className="bookings-container">
+            {bookings.length > 0 ? bookings.map(({ payment, program, user, upcomingSessions }) => (
+                <div key={payment.payment_id} className="card booking-card">
+                    <div className="booking-card-header">
+                        <div>
+                            <h3>{program!.title}</h3>
+                            {currentUser.role === 'Parent' && <p className="booking-card-athlete">For: {user?.name}</p>}
+                        </div>
+                        <div className="booking-card-payment-info">
+                            <span className="booking-card-price">KES {payment.amount.toLocaleString()}</span>
+                            <span className={`payment-status status-${payment.status}`}>{payment.status}</span>
+                        </div>
+                    </div>
+                    <div className="booking-card-body">
+                        <h4>Upcoming Sessions</h4>
+                        {upcomingSessions.length > 0 ? (
+                            <ul className="booking-session-list">
+                                {upcomingSessions.map(session => (
+                                    <li key={session.session_id}>
+                                        <span>{new Date(session.date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}</span>
+                                        <span>{session.time}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <p>No upcoming sessions scheduled for this program.</p>
+                        )}
+                    </div>
+                     <div className="booking-card-footer">
+                        {payment.status === 'pending' && <button className="btn btn-primary btn-sm">Pay Now</button>}
+                        {payment.status === 'failed' && <button className="btn btn-secondary btn-sm">Retry Payment</button>}
+                    </div>
+                </div>
+            )) : (
+                 <div className="card">
+                    <h3>No Bookings Found</h3>
+                    <p>You have not booked any programs yet. Visit the "Browse Programs" section to get started.</p>
+                </div>
+            )}
+        </div>
+    );
+};
+
 
 const BrowseProgramsView: FC<{ programs: Program[], currentUser: User, payments: Payment[], onBook: (program: Program) => void, users: User[] }> = ({ programs, currentUser, payments, onBook, users }) => {
     const isEnrolled = (programId: number) => {
@@ -422,7 +487,7 @@ const BrowseProgramsView: FC<{ programs: Program[], currentUser: User, payments:
                     <span><strong>Level:</strong> <span className={`skill-badge skill-${p.skillLevel.split(' ')[0].toLowerCase()}`}>{p.skillLevel}</span></span>
                 </div>
                 <div className="program-card-footer">
-                    <span className="program-card-price">${p.price}</span>
+                    <span className="program-card-price">KES {p.price.toLocaleString()}</span>
                     <button className="btn btn-primary" onClick={() => onBook(p)} disabled={isEnrolled(p.program_id)}>
                         {isEnrolled(p.program_id) ? 'Enrolled' : 'Book Now'}
                     </button>
@@ -449,7 +514,7 @@ const ScheduleView: FC<{ sessions: Session[], programs: Program[], users: User[]
                 <div key={date}>
                     <h3 className="schedule-date-header">{date}</h3>
                     <div className="schedule-list">
-                        {dateSessions.map(session => (
+                        {dateSessions.sort((a,b) => a.time.localeCompare(b.time)).map(session => (
                             <div key={session.session_id} className="schedule-item card" onClick={() => onSessionClick(session)}>
                                 <div className="schedule-item-time">{session.time}</div>
                                 <div className="schedule-item-details">
@@ -467,6 +532,88 @@ const ScheduleView: FC<{ sessions: Session[], programs: Program[], users: User[]
     );
 }
 
+const UserProfilePage: FC<{ profileUser: User; currentUser: User; users: User[]; progress: Progress[]; onEditUser: (user: User) => void; showTooltip: ShowTooltipFn; hideTooltip: HideTooltipFn; }> = ({ profileUser, currentUser, users, progress, onEditUser, showTooltip, hideTooltip }) => {
+    const isOwnProfile = profileUser.user_id === currentUser.user_id;
+    const canEdit = currentUser.role === 'Admin';
+    const children = profileUser.role === 'Parent' ? users.filter(u => u.parent_id === profileUser.user_id) : [];
+    const assignedAthletes = profileUser.role === 'Coach' ? users.filter(u => u.coach_id === profileUser.user_id) : [];
+    const userProgress = profileUser.role === 'Athlete' ? progress.filter(p => p.athlete_id === profileUser.user_id) : [];
+
+    const getParentName = (id: number | null) => id ? users.find(u => u.user_id === id)?.name : 'N/A';
+    const getCoachName = (id: number | null) => id ? users.find(u => u.user_id === id)?.name : 'N/A';
+
+    return (
+        <div className="profile-container">
+            <div className="card profile-header-card">
+                <div className="profile-info">
+                    <h2>{profileUser.name}</h2>
+                    <p>{profileUser.email}</p>
+                    <span className={`role-badge role-${profileUser.role.toLowerCase()}`}>{profileUser.role}</span>
+                </div>
+                {canEdit && <button className="btn btn-primary" onClick={() => onEditUser(profileUser)}><PencilIcon/> Edit User</button>}
+            </div>
+            
+            <div className="card profile-details-card">
+                <h3>Personal Information</h3>
+                <div className="profile-details-grid">
+                    <div><strong>Full Name:</strong> {profileUser.name}</div>
+                    <div><strong>Email:</strong> {profileUser.email}</div>
+                    <div><strong>Date of Birth:</strong> {profileUser.date_of_birth}</div>
+                    {profileUser.role === 'Athlete' && <>
+                        <div><strong>Parent:</strong> {getParentName(profileUser.parent_id)}</div>
+                        <div><strong>Assigned Coach:</strong> {getCoachName(profileUser.coach_id)}</div>
+                    </>}
+                </div>
+            </div>
+
+            {profileUser.role === 'Athlete' && userProgress.length > 0 && (
+                <div className="card">
+                    <h3>My Progress</h3>
+                    <BarChart data={userProgress.map(p => ({ label: p.skill, value: p.percentage }))} showTooltip={showTooltip} hideTooltip={hideTooltip} yAxisLabel="Progress %"/>
+                </div>
+            )}
+
+            {profileUser.role === 'Parent' && children.length > 0 && (
+                <div className="card">
+                    <h3>My Children</h3>
+                    {children.map(child => {
+                        const childProgress = progress.filter(p => p.athlete_id === child.user_id);
+                        return (
+                            <div key={child.user_id} className="profile-child-section">
+                                <h4>{child.name}'s Progress</h4>
+                                {childProgress.length > 0 ? (
+                                    <BarChart data={childProgress.map(p => ({ label: p.skill, value: p.percentage }))} showTooltip={showTooltip} hideTooltip={hideTooltip} yAxisLabel="Progress %"/>
+                                ) : <p>No progress data available for {child.name}.</p>}
+                            </div>
+                        )
+                    })}
+                </div>
+            )}
+            
+            {profileUser.role === 'Coach' && assignedAthletes.length > 0 && (
+                <div className="card">
+                    <h3>Assigned Athletes</h3>
+                    <div className="table-container">
+                        <table>
+                            <thead><tr><th>Name</th><th>Date of Birth</th><th>Parent</th></tr></thead>
+                            <tbody>
+                                {assignedAthletes.map(athlete => (
+                                    <tr key={athlete.user_id}>
+                                        <td>{athlete.name}</td>
+                                        <td>{athlete.date_of_birth}</td>
+                                        <td>{getParentName(athlete.parent_id)}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            )}
+        </div>
+    )
+}
+
+
 // --- Main App Component ---
 const App = () => {
     const [currentUser, setCurrentUser] = useLocalStorage<User | null>('currentUser', null);
@@ -481,6 +628,7 @@ const App = () => {
     const [error, setError] = useState('');
     const [tooltip, setTooltip] = useState<TooltipState>({ visible: false, content: '', x: 0, y: 0 });
     const [modal, setModal] = useState<ModalState>({ type: null });
+    const [viewingProfile, setViewingProfile] = useState<User | null>(null);
 
     const showTooltip: ShowTooltipFn = (content, event) => setTooltip({ visible: true, content, x: event.clientX, y: event.clientY });
     const hideTooltip: HideTooltipFn = () => setTooltip(prev => ({ ...prev, visible: false }));
@@ -491,13 +639,14 @@ const App = () => {
         const user = users.find(u => u.email === email && u.password_hash === pass);
         if (user) { setCurrentUser(user); setError(''); } else { setError('Invalid email or password.'); }
     };
-    const handleLogout = () => { setCurrentUser(null); setImpersonatedUser(null); setView('Dashboard'); };
+    const handleLogout = () => { setCurrentUser(null); setImpersonatedUser(null); setViewingProfile(null); setView('Dashboard'); };
     const handleImpersonate = (user: User) => { if (currentUser?.role === 'Admin') { setImpersonatedUser(user); setView('Dashboard'); } };
     const stopImpersonating = () => { setImpersonatedUser(null); setView('Dashboard'); };
 
     // --- CRUD Handlers ---
     const handleSaveUser = (user: User) => {
         setUsers(prev => user.user_id ? prev.map(u => u.user_id === user.user_id ? user : u) : [...prev, { ...user, user_id: Date.now() }]);
+        if(viewingProfile?.user_id === user.user_id) setViewingProfile(user); // Update profile view if editing the current profile
         setModal({type: null});
     };
     const handleDeleteUser = (user: User) => {
@@ -512,32 +661,45 @@ const App = () => {
         setPrograms(prev => prev.filter(p => p.program_id !== program.program_id));
         setModal({type: null});
     };
-    const handleBookProgram = (program: Program) => {
-        if (!displayUser) return;
-        // Simple booking logic, for parent, books for first child
-        let bookingUser = displayUser;
-        if(displayUser.role === 'Parent'){
-            const child = users.find(u => u.parent_id === displayUser.user_id);
-            if(child) bookingUser = child;
+    const handleConfirmBooking = (program: Program, athleteId: number) => {
+        if (!athleteId) return;
+        const isEnrolled = payments.some(p => p.program_id === program.program_id && p.user_id === athleteId);
+        if (isEnrolled) {
+            alert('This athlete is already enrolled in this program.');
+            setModal({type: null});
+            return;
         }
 
-        const newPayment: Payment = { payment_id: Date.now(), user_id: bookingUser.user_id, program_id: program.program_id, amount: program.price, status: 'pending', paid_at: null };
+        const newPayment: Payment = { payment_id: Date.now(), user_id: athleteId, program_id: program.program_id, amount: program.price, status: 'pending', paid_at: null };
         setPayments(prev => [...prev, newPayment]);
-        alert(`${program.title} booked! Please complete the payment.`);
+        alert(`${program.title} booked! Please complete the payment from the My Bookings section.`);
+        setModal({type: null});
     };
     const handleSessionRegister = (sessionId: number, athleteId: number, register: boolean) => {
-        setSessions(prev => prev.map(s => s.session_id === sessionId ? { ...s, athlete_ids: register ? [...s.athlete_ids, athleteId] : s.athlete_ids.filter(id => id !== athleteId) } : s));
+        setSessions(prev => prev.map(s => {
+            if(s.session_id !== sessionId) return s;
+            const updatedAthletes = register 
+                ? [...s.athlete_ids, athleteId]
+                : s.athlete_ids.filter(id => id !== athleteId);
+            return {...s, athlete_ids: Array.from(new Set(updatedAthletes))}; // Ensure unique IDs
+        }));
     }
+    const handleUpdateAttendance = (sessionId: number, confirmedIds: number[]) => {
+        setSessions(prev => prev.map(s => s.session_id === sessionId ? {...s, confirmed_athlete_ids: confirmedIds} : s));
+        setModal({type: null});
+        alert('Attendance saved!');
+    }
+
 
     if (!currentUser) {
         return <LoginPage onLogin={handleLogin} error={error} />;
     }
 
     const navigationLinks = {
-        Admin: [ { name: 'Dashboard', icon: ChartPieIcon }, { name: 'Users', icon: UserGroupIcon }, { name: 'Programs', icon: DocumentTextIcon }, { name: 'Payments', icon: CreditCardIcon } ],
-        Coach: [ { name: 'Dashboard', icon: ChartPieIcon }, { name: 'My Athletes', icon: UserGroupIcon }, { name: 'Schedule', icon: CalendarIcon } ],
-        Parent: [ { name: 'Dashboard', icon: ChartPieIcon }, { name: 'Browse Programs', icon: BookOpenIcon}, { name: 'My Children', icon: UserGroupIcon }, { name: 'Schedule', icon: CalendarIcon }, { name: 'Payments', icon: CreditCardIcon } ],
-        Athlete: [ { name: 'Dashboard', icon: ChartPieIcon }, { name: 'Browse Programs', icon: BookOpenIcon}, { name: 'My Progress', icon: ChartBarIcon }, { name: 'Schedule', icon: CalendarIcon } ],
+        Admin: [ { name: 'Dashboard', icon: ChartPieIcon }, { name: 'Users', icon: UserGroupIcon }, { name: 'Programs', icon: DocumentTextIcon }, { name: 'My Profile', icon: UserCircleIcon } ],
+        Coach: [ { name: 'Dashboard', icon: ChartPieIcon }, { name: 'Schedule', icon: CalendarIcon }, { name: 'My Profile', icon: UserCircleIcon } ],
+        Parent: [ { name: 'Dashboard', icon: ChartPieIcon }, { name: 'Browse Programs', icon: BookOpenIcon}, { name: 'My Bookings', icon: CreditCardIcon }, { name: 'Schedule', icon: CalendarIcon }, { name: 'My Profile', icon: UserCircleIcon } ],
+        Athlete: [ { name: 'Dashboard', icon: ChartPieIcon }, { name: 'Browse Programs', icon: BookOpenIcon}, { name: 'My Bookings', icon: CreditCardIcon }, { name: 'Schedule', icon: CalendarIcon }, { name: 'My Profile', icon: UserCircleIcon } ],
     };
 
     const renderView = () => {
@@ -548,12 +710,13 @@ const App = () => {
                 if (displayUser?.role === 'Parent') return <ParentDashboard currentUser={displayUser} users={users} progress={progress} showTooltip={showTooltip} hideTooltip={hideTooltip} />;
                 if (displayUser?.role === 'Athlete') return <AthleteDashboard currentUser={displayUser} progress={progress} showTooltip={showTooltip} hideTooltip={hideTooltip} />;
                 return null;
-            case 'Users': return <UserManagement users={users} onImpersonate={handleImpersonate} onEdit={(u) => setModal({type: 'edit-user', data: u})} onDelete={(u) => setModal({type: 'delete-user', data: u})} onAdd={() => setModal({type: 'add-user'})} />;
+            case 'Users': return <UserManagement users={users} onImpersonate={handleImpersonate} onEdit={(u) => setModal({type: 'edit-user', data: u})} onDelete={(u) => setModal({type: 'delete-user', data: u})} onAdd={() => setModal({type: 'add-user'})} onViewProfile={(u) => { setViewingProfile(u); setView('User Profile'); }} />;
             case 'Programs': return <ProgramManagement programs={programs} users={users} onEdit={(p) => setModal({type: 'edit-program', data: p})} onDelete={(p) => setModal({type: 'delete-program', data: p})} onAdd={() => setModal({type: 'add-program'})} />;
-            case 'Payments': return <PaymentManagement />;
-            case 'Browse Programs': return <BrowseProgramsView programs={programs} currentUser={displayUser!} payments={payments} users={users} onBook={handleBookProgram} />;
-            case 'Schedule': case 'My Athletes': case 'My Children': return <ScheduleView sessions={sessions} programs={programs} users={users} onSessionClick={(s) => setModal({type: 'session-details', data: s})} />;
-            case 'My Progress': return <AthleteDashboard currentUser={displayUser!} progress={progress} showTooltip={showTooltip} hideTooltip={hideTooltip} />;
+            case 'My Bookings': return <MyBookingsView currentUser={displayUser!} users={users} payments={payments} programs={programs} sessions={sessions} />;
+            case 'Browse Programs': return <BrowseProgramsView programs={programs} currentUser={displayUser!} payments={payments} users={users} onBook={(p) => setModal({ type: 'book-program', data: p })} />;
+            case 'Schedule': return <ScheduleView sessions={sessions} programs={programs} users={users} onSessionClick={(s) => setModal({type: 'session-details', data: s})} />;
+            case 'My Profile': setView('User Profile'); setViewingProfile(displayUser); return null;
+            case 'User Profile': return viewingProfile && <UserProfilePage profileUser={viewingProfile} currentUser={displayUser!} users={users} progress={progress} onEditUser={(u) => setModal({type: 'edit-user', data: u})} showTooltip={showTooltip} hideTooltip={hideTooltip}/>;
             default: return <div>Not Found</div>;
         }
     };
@@ -569,7 +732,7 @@ const App = () => {
                             <ul>
                                 {displayUser && navigationLinks[displayUser.role].map(link => (
                                     <li key={link.name}>
-                                        <a href="#" className={view === link.name ? 'active' : ''} onClick={() => setView(link.name)}>
+                                        <a href="#" className={view === link.name ? 'active' : ''} onClick={(e) => { e.preventDefault(); setViewingProfile(null); setView(link.name); }}>
                                             <link.icon />
                                             <span>{link.name}</span>
                                         </a>
@@ -604,7 +767,7 @@ const App = () => {
                     </div>
                 </main>
             </div>
-            {modal.type === 'session-details' && modal.data && <SessionDetailsModal session={modal.data} users={users} programs={programs} currentUser={displayUser!} onRegister={handleSessionRegister} onClose={() => setModal({ type: null })} />}
+            {modal.type === 'session-details' && modal.data && <SessionDetailsModal session={modal.data} users={users} programs={programs} currentUser={displayUser!} onRegister={handleSessionRegister} onUpdateAttendance={handleUpdateAttendance} onClose={() => setModal({ type: null })} />}
             {(modal.type === 'add-user' || modal.type === 'edit-user') && <UserFormModal user={modal.data} users={users} onSave={handleSaveUser} onClose={() => setModal({ type: null })} />}
             {(modal.type === 'add-program' || modal.type === 'edit-program') && <ProgramFormModal program={modal.data} users={users} onSave={handleSaveProgram} onClose={() => setModal({ type: null })} />}
             {(modal.type === 'delete-user' || modal.type === 'delete-program') && (
@@ -615,6 +778,7 @@ const App = () => {
                     onCancel={() => setModal({ type: null })}
                 />
             )}
+            {modal.type === 'book-program' && modal.data && <ProgramBookingModal program={modal.data} currentUser={displayUser!} users={users} onConfirm={handleConfirmBooking} onClose={() => setModal({ type: null })} />}
         </>
     );
 };
@@ -670,7 +834,7 @@ const UserFormModal: FC<{ user?: User, users: User[], onSave: (user: User) => vo
     }
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        onSave({ ...formData, password_hash: 'password123', user_id: formData.user_id || 0}); // Add password hashing in real app
+        onSave({ ...formData, password_hash: user?.password_hash || 'password123', user_id: formData.user_id || 0}); // Add password hashing in real app
     }
     const coaches = users.filter(u => u.role === 'Coach');
     const parents = users.filter(u => u.role === 'Parent');
@@ -759,7 +923,7 @@ const ProgramFormModal: FC<{ program?: Program, users: User[], onSave: (p: Progr
                         <input name="duration" value={formData.duration} onChange={handleChange} required/>
                     </div>
                     <div className="form-group">
-                        <label>Price ($)</label>
+                        <label>Price (KES)</label>
                         <input name="price" type="number" value={formData.price} onChange={handleChange} required/>
                     </div>
                     <div className="form-group">
@@ -785,12 +949,21 @@ const ProgramFormModal: FC<{ program?: Program, users: User[], onSave: (p: Progr
     )
 }
 
-const SessionDetailsModal: FC<{ session: Session, users: User[], programs: Program[], currentUser: User, onRegister: (sessionId: number, athleteId: number, register: boolean) => void, onClose: () => void }> = ({ session, users, programs, currentUser, onRegister, onClose }) => {
+const SessionDetailsModal: FC<{ session: Session, users: User[], programs: Program[], currentUser: User, onRegister: (sessionId: number, athleteId: number, register: boolean) => void, onUpdateAttendance: (sessionId: number, confirmedIds: number[]) => void, onClose: () => void }> = ({ session, users, programs, currentUser, onRegister, onUpdateAttendance, onClose }) => {
     const program = programs.find(p => p.program_id === session.program_id);
     const coach = users.find(u => u.user_id === session.coach_id);
     const registeredAthletes = users.filter(u => session.athlete_ids.includes(u.user_id));
-    
     const children = currentUser.role === 'Parent' ? users.filter(u => u.parent_id === currentUser.user_id) : [];
+
+    const [confirmedIds, setConfirmedIds] = useState(new Set(session.confirmed_athlete_ids));
+    const handleAttendanceChange = (athleteId: number, isPresent: boolean) => {
+        setConfirmedIds(prev => {
+            const newSet = new Set(prev);
+            if(isPresent) newSet.add(athleteId);
+            else newSet.delete(athleteId);
+            return newSet;
+        });
+    }
 
     return (
         <Modal title={`Session Details: ${program?.title}`} onClose={onClose}>
@@ -799,9 +972,20 @@ const SessionDetailsModal: FC<{ session: Session, users: User[], programs: Progr
             <p><strong>Coach:</strong> {coach?.name}</p>
             <hr style={{margin: '16px 0'}}/>
 
-            <h4>Registered Athletes ({registeredAthletes.length})</h4>
+            <h4>{currentUser.role === 'Coach' ? 'Take Attendance' : `Registered Athletes (${registeredAthletes.length})`}</h4>
             <ul className="attendee-list">
-                {registeredAthletes.length > 0 ? registeredAthletes.map(a => <li key={a.user_id}>{a.name}</li>) : <li>No athletes registered yet.</li>}
+                {registeredAthletes.length > 0 ? registeredAthletes.map(a => (
+                    <li key={a.user_id} className="attendee-item">
+                        {currentUser.role === 'Coach' ? (
+                            <label>
+                                <input type="checkbox" checked={confirmedIds.has(a.user_id)} onChange={(e) => handleAttendanceChange(a.user_id, e.target.checked)}/>
+                                {a.name}
+                            </label>
+                        ) : (
+                            <span>{a.name} {session.confirmed_athlete_ids.includes(a.user_id) ? '(Attended)' : ''}</span>
+                        )}
+                    </li>
+                )) : <li>No athletes registered yet.</li>}
             </ul>
 
             <div className="modal-actions">
@@ -815,7 +999,54 @@ const SessionDetailsModal: FC<{ session: Session, users: User[], programs: Progr
                     <button key={child.user_id} className="btn btn-primary" onClick={() => onRegister(session.session_id, child.user_id, true)}>Register {child.name}</button> :
                     <button key={child.user_id} className="btn btn-danger" onClick={() => onRegister(session.session_id, child.user_id, false)}>Unregister {child.name}</button>
                 ))}
+                {currentUser.role === 'Coach' && <button className="btn btn-primary" onClick={() => onUpdateAttendance(session.session_id, Array.from(confirmedIds))}>Save Attendance</button>}
                  <button className="btn btn-secondary" onClick={onClose}>Close</button>
+            </div>
+        </Modal>
+    );
+}
+
+const ProgramBookingModal: FC<{ program: Program, currentUser: User, users: User[], onConfirm: (program: Program, athleteId: number) => void, onClose: () => void }> = ({ program, currentUser, users, onConfirm, onClose }) => {
+    const children = useMemo(() => users.filter(u => u.role === 'Athlete' && u.parent_id === currentUser.user_id), [users, currentUser]);
+    const [selectedChild, setSelectedChild] = useState<number | undefined>(children.length > 0 ? children[0].user_id : undefined);
+
+    const handleConfirm = () => {
+        if (currentUser.role === 'Athlete') {
+            onConfirm(program, currentUser.user_id);
+        } else if (currentUser.role === 'Parent' && selectedChild) {
+            onConfirm(program, selectedChild);
+        } else {
+            alert("Please select a child to enroll.");
+        }
+    };
+
+    return (
+        <Modal title={`Book Program: ${program.title}`} onClose={onClose}>
+            <p>You are about to book the following program. This will create a pending payment which you can complete from the My Bookings section.</p>
+            <div className="booking-details">
+                <span><strong>Price:</strong> KES {program.price.toLocaleString()}</span>
+                <span><strong>Duration:</strong> {program.duration}</span>
+            </div>
+
+            {currentUser.role === 'Parent' && (
+                <div className="form-group" style={{marginTop: '16px'}}>
+                    <label>Enroll for which child?</label>
+                    {children.length > 0 ? (
+                        <select value={selectedChild} onChange={e => setSelectedChild(Number(e.target.value))}>
+                            {children.map(child => <option key={child.user_id} value={child.user_id}>{child.name}</option>)}
+                        </select>
+                    ) : (
+                        <p>You have no children registered. Please add a child user first.</p>
+                    )}
+                </div>
+            )}
+             {currentUser.role === 'Athlete' && (
+                <p style={{marginTop: '16px'}}>This program will be booked for <strong>{currentUser.name}</strong>.</p>
+            )}
+
+            <div className="modal-actions">
+                <button className="btn btn-secondary" onClick={onClose}>Cancel</button>
+                <button className="btn btn-primary" onClick={handleConfirm} disabled={currentUser.role === 'Parent' && !selectedChild}>Confirm Booking</button>
             </div>
         </Modal>
     );
