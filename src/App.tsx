@@ -27,6 +27,7 @@ const PaperAirplaneIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="no
 const TrashIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" aria-hidden="true" focusable="false"><path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.134-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.067-2.09 1.02-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg>;
 const ChevronLeftIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" aria-hidden="true" focusable="false"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" /></svg>;
 const ChevronRightIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" aria-hidden="true" focusable="false"><path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" /></svg>;
+const ClockIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>;
 
 
 // --- Data & Hooks ---
@@ -54,12 +55,14 @@ const useLocalStorage = <T,>(key: string, initialValue: T): [T, (value: SetState
 };
 
 const initialUsers = [
-  { id: 1, name: 'Admin User', email: 'admin@funport.com', password: 'password123', role: 'Admin' },
-  { id: 2, name: 'Coach Sarah', email: 'sarah@funport.com', password: 'password123', role: 'Coach' },
-  { id: 3, name: 'John Doe (Parent)', email: 'john@email.com', password: 'password123', role: 'Parent', children: [4] },
-  { id: 4, name: 'Leo Doe', email: 'leo@email.com', password: 'password123', role: 'Athlete', parentId: 3, coachId: 2 },
-  { id: 5, name: 'Jane Smith (Parent)', email: 'jane@email.com', password: 'password123', role: 'Parent', children: [6] },
-  { id: 6, name: 'Mia Smith', email: 'mia@email.com', password: 'password123', role: 'Athlete', parentId: 5, coachId: 2 },
+    { id: 1, name: 'Admin User', email: 'admin@funport.com', password: 'password123', role: 'Admin' },
+    { id: 2, name: 'Coach Sarah', email: 'sarah@funport.com', password: 'password123', role: 'Coach' },
+    { id: 3, name: 'John Doe', email: 'john@email.com', password: 'password123', role: 'Parent', children: [4] },
+    { id: 4, name: 'Leo Doe', email: 'leo@email.com', password: 'password123', role: 'Athlete', parentId: 3, coachId: 2 },
+    { id: 5, name: 'Jane Smith', email: 'jane@email.com', password: 'password123', role: 'Parent', children: [6] },
+    { id: 6, name: 'Mia Smith', email: 'mia@email.com', password: 'password123', role: 'Athlete', parentId: 5, coachId: 2 },
+    { id: 7, name: 'Coach Mike', email: 'mike@funport.com', password: 'password123', role: 'Coach' },
+    { id: 8, name: 'Anna Belle', email: 'anna@funport.com', password: 'password123', role: 'Athlete', parentId: null, coachId: 7 },
 ];
 
 const initialAthletes = [
@@ -72,6 +75,11 @@ const initialAthletes = [
         userId: 6,
         name: 'Mia Smith',
         progress: { 'Balance': 90, 'Gliding': 85, 'Stopping': 80, 'Speed': 70 }
+    },
+    {
+        userId: 8,
+        name: 'Anna Belle',
+        progress: { 'Balance': 95, 'Gliding': 90, 'Stopping': 85, 'Speed': 88 }
     }
 ];
 
@@ -79,31 +87,38 @@ const initialLogs = [
     { id: 1, athleteId: 4, author: 'Coach Sarah', date: '2024-07-20', content: 'Leo worked on his T-stops today. Showing great improvement in control.' },
     { id: 2, athleteId: 4, author: 'Leo Doe', date: '2024-07-21', content: 'Practiced skating backwards for 20 minutes. It was hard but fun!' },
     { id: 3, athleteId: 6, author: 'Coach Sarah', date: '2024-07-22', content: 'Mia has mastered forward gliding. Next week, we will start on crossovers.' },
+    { id: 4, athleteId: 8, author: 'Coach Mike', date: '2024-08-01', content: 'Anna is preparing for the regional competition. Focus is on speed and endurance.' },
 ];
 
 const initialSchedules = [
-    { id: 1, coachId: 2, date: '2024-08-05', time: '16:00', location: 'Main Rink', athleteIds: [4], title: 'Leo D. - Private' },
-    { id: 2, coachId: 2, date: '2024-08-05', time: '17:00', location: 'Main Rink', athleteIds: [6], title: 'Mia S. - Private' },
-    { id: 3, coachId: 2, date: '2024-08-07', time: '16:30', location: 'Practice Area', athleteIds: [4, 6], title: 'Group Session' },
-    { id: 4, coachId: 2, date: '2024-08-09', time: '16:00', location: 'Main Rink', athleteIds: [4, 6], title: 'Group Session' },
+    { id: 1, coachId: 2, date: '2024-08-12', time: '16:00', location: 'Main Rink', athleteIds: [4], title: 'Leo D. - Private Gliding', confirmedAthleteIds: [4] },
+    { id: 2, coachId: 2, date: '2024-08-12', time: '17:00', location: 'Main Rink', athleteIds: [6], title: 'Mia S. - Private Stops', confirmedAthleteIds: [] },
+    { id: 3, coachId: 2, date: '2024-08-14', time: '16:30', location: 'Practice Area', athleteIds: [4, 6], title: 'Group Session - Crossovers', confirmedAthleteIds: [4] },
+    { id: 4, coachId: 7, date: '2024-08-13', time: '15:30', location: 'Outdoor Track', athleteIds: [8], title: 'Anna B. - Advanced Speed', confirmedAthleteIds: [] },
+    { id: 5, coachId: 7, date: '2024-08-15', time: '16:00', location: 'Main Rink', athleteIds: [4, 6, 8], title: 'Group Session - All Levels', confirmedAthleteIds: [] },
+    { id: 6, coachId: 2, date: '2024-07-29', time: '16:00', location: 'Main Rink', athleteIds: [4], title: 'PAST: Leo D. - Balance Drills', confirmedAthleteIds: [4] }
 ];
 
 const initialInvoices = [
     { id: 1, userId: 4, description: 'August Training Fees - Leo Doe', amount: 8000, status: 'Due', dueDate: '2024-08-01' },
     { id: 2, userId: 4, description: 'July Training Fees - Leo Doe', amount: 8000, status: 'Paid', dueDate: '2024-07-01' },
     { id: 3, userId: 6, description: 'August Training Fees - Mia Smith', amount: 8000, status: 'Due', dueDate: '2024-08-01' },
+    { id: 4, userId: 8, description: 'August Training Fees - Anna Belle', amount: 10000, status: 'Due', dueDate: '2024-08-01' },
 ];
 
 const initialConversations = [
-    { id: 1, participantIds: [1, 2], lastMessageTimestamp: new Date().toISOString() },
+    { id: 1, participantIds: [1, 2], lastMessageTimestamp: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString() },
     { id: 2, participantIds: [2, 3], lastMessageTimestamp: new Date().toISOString() },
+    { id: 3, participantIds: [7, 8], lastMessageTimestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString() },
 ];
 
 const initialMessages = [
-    { id: 1, conversationId: 1, senderId: 1, content: "Hi Sarah, can you please send me the updated roster for this week?", timestamp: new Date(Date.now() - 1000 * 60 * 5).toISOString(), readBy: [1] },
-    { id: 2, conversationId: 1, senderId: 2, content: "Of course, I'll send it over shortly.", timestamp: new Date(Date.now() - 1000 * 60 * 4).toISOString(), readBy: [1, 2] },
+    { id: 1, conversationId: 1, senderId: 1, content: "Hi Sarah, can you please send me the updated roster for this week?", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), readBy: [1, 2] },
+    { id: 2, conversationId: 1, senderId: 2, content: "Of course, I'll send it over shortly.", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 23).toISOString(), readBy: [1, 2] },
     { id: 3, conversationId: 2, senderId: 3, content: "Hello Coach Sarah, just wanted to confirm Leo's session time for Wednesday.", timestamp: new Date(Date.now() - 1000 * 60 * 10).toISOString(), readBy: [2, 3] },
     { id: 4, conversationId: 2, senderId: 2, content: "Hi John! Yes, Leo is confirmed for 4:30 PM on Wednesday.", timestamp: new Date(Date.now() - 1000 * 60 * 9).toISOString(), readBy: [3] },
+    { id: 5, conversationId: 3, senderId: 8, content: "Hey Coach Mike, looking forward to our session tomorrow. Anything specific I should prepare?", timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString(), readBy: [8] },
+    { id: 6, conversationId: 3, senderId: 7, content: "Hi Anna! Just be warmed up and ready to work on explosive starts. See you then.", timestamp: new Date(Date.now() - 1000 * 60 * 28).toISOString(), readBy: [] },
 ];
 
 
@@ -127,6 +142,15 @@ type Schedule = (typeof initialSchedules)[0];
 type Invoice = (typeof initialInvoices)[0];
 type Conversation = (typeof initialConversations)[0];
 type Message = (typeof initialMessages)[0];
+type Reminder = {
+    id: number;
+    sessionId: number;
+    userId: number;
+    remindAt: string; // ISO string
+    sessionTitle: string;
+    sessionTime: string;
+    dismissed: boolean;
+};
 
 interface ActiveView {
   name: string;
@@ -137,9 +161,10 @@ interface ActiveView {
 
 // --- Components ---
 
-const Notifications = ({ unreadCount, onNotificationClick }) => {
+const Notifications = ({ unreadMessagesCount, activeReminders, onNotificationClick, onDismissReminder }) => {
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef(null);
+    const totalUnread = unreadMessagesCount + activeReminders.length;
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -153,20 +178,35 @@ const Notifications = ({ unreadCount, onNotificationClick }) => {
 
     return (
         <div className="notification-bell" ref={dropdownRef}>
-            <button onClick={() => setIsOpen(prev => !prev)} aria-label={`${unreadCount} unread notifications`}>
+            <button onClick={() => setIsOpen(prev => !prev)} aria-label={`${totalUnread} unread notifications`}>
                 <BellIcon />
-                {unreadCount > 0 && <span className="notification-badge">{unreadCount}</span>}
+                {totalUnread > 0 && <span className="notification-badge">{totalUnread}</span>}
             </button>
             {isOpen && (
                 <div className="notification-dropdown">
                     <div className="notification-header">Notifications</div>
                     <div className="notification-content">
-                        {unreadCount > 0 ? (
-                            <a href="#" onClick={(e) => { e.preventDefault(); onNotificationClick(); setIsOpen(false); }}>
-                                You have {unreadCount} unread conversation{unreadCount > 1 ? 's' : ''}.
-                            </a>
+                        {totalUnread === 0 ? (
+                           <p className="no-notifications">No new notifications.</p>
                         ) : (
-                            <p>No new notifications.</p>
+                            <>
+                                {activeReminders.map(reminder => (
+                                    <div key={reminder.id} className="notification-item reminder">
+                                        <div className="notification-icon"><ClockIcon /></div>
+                                        <div>
+                                            <p><strong>Reminder:</strong> {reminder.sessionTitle}</p>
+                                            <p className="time">{new Date(reminder.remindAt).toLocaleDateString()} at {reminder.sessionTime}</p>
+                                        </div>
+                                        <button onClick={() => onDismissReminder(reminder.id)} className="close-btn dismiss-btn" aria-label="Dismiss reminder"><CloseIcon/></button>
+                                    </div>
+                                ))}
+                                {unreadMessagesCount > 0 && (
+                                     <div className="notification-item message" onClick={(e) => { e.preventDefault(); onNotificationClick(); setIsOpen(false); }}>
+                                         <div className="notification-icon"><EnvelopeIcon /></div>
+                                         <p>You have {unreadMessagesCount} unread message{unreadMessagesCount > 1 ? 's' : ''}.</p>
+                                     </div>
+                                )}
+                            </>
                         )}
                     </div>
                 </div>
@@ -175,7 +215,8 @@ const Notifications = ({ unreadCount, onNotificationClick }) => {
     );
 };
 
-const Header = ({ onBookNowClick, onLoginClick, user, onLogout, unreadCount, onNavigate }) => {
+
+const Header = ({ onBookNowClick, onLoginClick, user, onLogout, unreadMessagesCount, activeReminders, onNavigate, onDismissReminder }) => {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -188,7 +229,7 @@ const Header = ({ onBookNowClick, onLoginClick, user, onLogout, unreadCount, onN
     <header className={`header ${scrolled ? 'scrolled' : ''}`}>
       <div className="container">
         <nav className="nav">
-          <a href="#" className="logo" onClick={(e) => { e.preventDefault(); onNavigate({ name: 'Dashboard' }); }}>
+          <a href="#" className="logo" onClick={(e) => { e.preventDefault(); if (user) onNavigate({ name: 'Dashboard' }); }}>
             <span className="funpot">funpot </span>
             <span className="skating">SKATING</span>
           </a>
@@ -208,7 +249,12 @@ const Header = ({ onBookNowClick, onLoginClick, user, onLogout, unreadCount, onN
           ) : (
             <div className="header-actions">
                 <span className="user-role">Welcome, <strong>{user.name.split(' ')[0]}</strong>!</span>
-                 <Notifications unreadCount={unreadCount} onNotificationClick={() => onNavigate({name: 'Messages'})} />
+                 <Notifications 
+                    unreadMessagesCount={unreadMessagesCount} 
+                    activeReminders={activeReminders}
+                    onNotificationClick={() => onNavigate({name: 'Messages'})} 
+                    onDismissReminder={onDismissReminder}
+                />
                 <button onClick={onLogout} className="btn btn-secondary logout-btn" aria-label="Logout">
                   <LogoutIcon />
                 </button>
@@ -595,6 +641,7 @@ const AdminDashboard = ({ users, schedules, invoices }) => {
     const upcomingSessions = schedules.filter(s => {
         const sessionDate = new Date(s.date);
         const today = new Date();
+        today.setHours(0,0,0,0);
         const nextWeek = new Date();
         nextWeek.setDate(today.getDate() + 7);
         return sessionDate >= today && sessionDate <= nextWeek;
@@ -771,7 +818,7 @@ const MyAthletes = ({ users, athletes, onSelectAthlete, currentUser }) => {
                     return (
                         <div key={athleteUser.id} className="card">
                             <h3>{athleteUser.name}</h3>
-                            <p>Level: Beginner</p>
+                            <p>Level: {athleteData?.progress?.Speed > 80 ? 'Advanced' : 'Beginner'}</p>
                             <button className="btn btn-secondary" onClick={() => onSelectAthlete(athleteUser.id)}>View Profile</button>
                         </div>
                     )
@@ -900,13 +947,18 @@ const PersonalLog = ({ currentUser, logs, onAddLog }) => {
     );
 };
 
-const Schedule = ({ schedules, users, currentUser }) => {
-    // This component is now a simple list for Parents/Athletes
+const Schedule = ({ schedules, users, currentUser, onConfirmBooking, onAddReminder, reminders }) => {
     let relevantSchedules = [];
+    const userAthleteIds = [];
+
     if (currentUser.role === 'Parent' && currentUser.children) {
-        relevantSchedules = schedules.filter(s => s.athleteIds.some(id => currentUser.children.includes(id)));
+        userAthleteIds.push(...currentUser.children);
     } else if (currentUser.role === 'Athlete') {
-        relevantSchedules = schedules.filter(s => s.athleteIds.includes(currentUser.id));
+        userAthleteIds.push(currentUser.id);
+    }
+
+    if (userAthleteIds.length > 0) {
+        relevantSchedules = schedules.filter(s => s.athleteIds.some(id => userAthleteIds.includes(id)));
     }
     
     relevantSchedules.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
@@ -919,6 +971,12 @@ const Schedule = ({ schedules, users, currentUser }) => {
         acc[date].push(schedule);
         return acc;
     }, {});
+    
+    const reminderOptions = [
+        { label: '15 minutes before', value: 15 },
+        { label: '1 hour before', value: 60 },
+        { label: '1 day before', value: 1440 },
+    ];
 
     return (
         <div>
@@ -930,12 +988,38 @@ const Schedule = ({ schedules, users, currentUser }) => {
                     {Object.entries(groupedSchedules).map(([date, sessions]) => (
                         <div key={date} className="card schedule-group">
                             <h3 className="schedule-date">{new Date(date).toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}</h3>
-                            {sessions.map((session) => (
+                            {sessions.map((session) => {
+                                const athletesInSession = users.filter(u => session.athleteIds.includes(u.id));
+                                const athletesToConfirm = currentUser.role === 'Parent' ? athletesInSession.filter(a => currentUser.children.includes(a.id)) : [currentUser];
+                                const isAllConfirmed = athletesToConfirm.every(a => session.confirmedAthleteIds.includes(a.id));
+                                const hasReminder = reminders.some(r => r.sessionId === session.id && r.userId === currentUser.id);
+
+                                return (
                                 <div key={session.id} className="session-card">
                                     <h4>{session.time} - {session.title}</h4>
                                     <div className="session-location"><MapPinIcon /> {session.location}</div>
+                                    <div className="session-actions">
+                                        {isAllConfirmed ? (
+                                            <span className="confirmed-badge"><CheckCircleIcon /> Confirmed</span>
+                                        ) : (
+                                            <button onClick={() => onConfirmBooking(session.id)} className="btn btn-secondary confirm-btn">Confirm Booking</button>
+                                        )}
+                                        <div className="reminder-dropdown-wrapper">
+                                            <button className={`btn-icon ${hasReminder ? 'active' : ''}`} aria-label="Set Reminder"><BellIcon /></button>
+                                            <div className="reminder-dropdown">
+                                                {hasReminder ? <p className="reminder-set">Reminder is set.</p> : <p>Set reminder:</p>}
+                                                <ul>
+                                                {reminderOptions.map(opt => (
+                                                    <li key={opt.value}>
+                                                        <button onClick={() => onAddReminder(session.id, opt.value)}>{opt.label}</button>
+                                                    </li>
+                                                ))}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                            ))}
+                            )})}
                         </div>
                     ))}
                 </div>
@@ -943,6 +1027,7 @@ const Schedule = ({ schedules, users, currentUser }) => {
         </div>
     );
 };
+
 
 const PaymentModal = ({ invoice, onConfirm, onClose }) => {
     const [step, setStep] = useState(1); // 1: choice, 2: confirmation
@@ -1005,7 +1090,10 @@ const Payments = ({ currentUser, users, invoices, onPayInvoice }) => {
     } else if (currentUser.role === 'Parent' && currentUser.children) {
         const childIds = currentUser.children;
         userInvoices = (invoices as Invoice[]).filter(inv => childIds.includes(inv.userId));
+    } else if (currentUser.role === 'Athlete') {
+        userInvoices = invoices.filter(inv => inv.userId === currentUser.id);
     }
+
 
     return (
         <div>
@@ -1055,6 +1143,9 @@ const NewConversationModal = ({ isOpen, onClose, users, currentUser, onCreateCon
         if (recipientId && message) {
             onCreateConversation(Number(recipientId), message);
             onClose();
+            // Reset form
+            setRecipientId('');
+            setMessage('');
         }
     };
 
@@ -1220,56 +1311,145 @@ const Messaging = ({ currentUser, users, conversations, messages, onSendMessage,
     )
 };
 
+const athleteColors = ['#4F46E5', '#D97706', '#059669', '#DB2777', '#6D28D9', '#0891B2'];
+const getAthleteColor = (id: number) => athleteColors[id % athleteColors.length];
+
 const CalendarView = ({ currentUser, users, schedules, onAdd, onUpdate, onDelete }) => {
+    const [viewMode, setViewMode] = useState<'month' | 'week' | 'day'>('month');
     const [currentDate, setCurrentDate] = useState(new Date());
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedSession, setSelectedSession] = useState<Schedule | null>(null);
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
-    const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-    const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
-    const startDay = startOfMonth.getDay(); // 0 for Sunday, 1 for Monday, etc.
-    const daysInMonth = endOfMonth.getDate();
-
-    const changeMonth = (offset) => {
-        setCurrentDate(prev => new Date(prev.getFullYear(), prev.getMonth() + offset, 1));
+    const changeDate = (offset: number) => {
+        setCurrentDate(prev => {
+            const newDate = new Date(prev);
+            if (viewMode === 'month') newDate.setMonth(prev.getMonth() + offset);
+            else if (viewMode === 'week') newDate.setDate(prev.getDate() + (offset * 7));
+            else newDate.setDate(prev.getDate() + offset);
+            return newDate;
+        });
     };
 
-    const handleDayClick = (day) => {
-        setSelectedDate(new Date(currentDate.getFullYear(), currentDate.getMonth(), day));
+    const handleDayClick = (dayDate: Date) => {
+        setSelectedDate(dayDate);
         setSelectedSession(null);
         setIsModalOpen(true);
     };
 
-    const handleSessionClick = (session) => {
+    const handleSessionClick = (session: Schedule) => {
         setSelectedSession(session);
         setSelectedDate(null);
         setIsModalOpen(true);
     };
-    
-    const handleCloseModal = () => setIsModalOpen(false);
 
-    const allDays = [];
-    for (let i = 0; i < startDay; i++) {
-        allDays.push(<div key={`empty-${i}`} className="calendar-day empty"></div>);
-    }
-    for (let day = 1; day <= daysInMonth; day++) {
-        const dateStr = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-        const daySessions = schedules.filter(s => s.date === dateStr);
-        
-        allDays.push(
-            <div key={day} className="calendar-day" onClick={() => handleDayClick(day)}>
-                <div className="day-number">{day}</div>
-                <div className="sessions-container">
-                    {daySessions.map(session => (
-                        <div key={session.id} className="session-event" onClick={(e) => { e.stopPropagation(); handleSessionClick(session); }}>
-                            <span className="session-time">{session.time}</span> {session.title}
-                        </div>
-                    ))}
+    const renderHeader = () => {
+        let title = '';
+        if (viewMode === 'month') title = currentDate.toLocaleString('default', { month: 'long', year: 'numeric' });
+        else if (viewMode === 'week') {
+            const startOfWeek = new Date(currentDate);
+            startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
+            const endOfWeek = new Date(startOfWeek);
+            endOfWeek.setDate(startOfWeek.getDate() + 6);
+            title = `${startOfWeek.toLocaleDateString()} - ${endOfWeek.toLocaleDateString()}`;
+        } else {
+            title = currentDate.toLocaleDateString('default', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        }
+        return (
+             <div className="calendar-header">
+                <div className="calendar-nav">
+                    <button onClick={() => changeDate(-1)} className="btn-icon"><ChevronLeftIcon /></button>
+                    <button onClick={() => setCurrentDate(new Date())} className="btn btn-secondary today-btn">Today</button>
+                    <button onClick={() => changeDate(1)} className="btn-icon"><ChevronRightIcon /></button>
+                </div>
+                <h2>{title}</h2>
+                <div className="calendar-view-switcher">
+                    <button onClick={() => setViewMode('month')} className={viewMode === 'month' ? 'active' : ''}>Month</button>
+                    <button onClick={() => setViewMode('week')} className={viewMode === 'week' ? 'active' : ''}>Week</button>
+                    <button onClick={() => setViewMode('day')} className={viewMode === 'day' ? 'active' : ''}>Day</button>
                 </div>
             </div>
-        );
+        )
     }
+
+    const renderMonthView = () => {
+        const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+        const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+        const startDay = startOfMonth.getDay();
+        const daysInMonth = endOfMonth.getDate();
+        const days = [];
+        for (let i = 0; i < startDay; i++) {
+            days.push(<div key={`empty-${i}`} className="calendar-day empty"></div>);
+        }
+        for (let day = 1; day <= daysInMonth; day++) {
+            const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+            const dateStr = date.toISOString().split('T')[0];
+            const daySessions = schedules.filter(s => s.date === dateStr);
+            days.push(
+                <div key={day} className="calendar-day" onClick={() => handleDayClick(date)}>
+                    <div className="day-number">{day}</div>
+                    <div className="sessions-container">
+                        {daySessions.map(session => (
+                             <div key={session.id} className="session-event" onClick={(e) => { e.stopPropagation(); handleSessionClick(session); }} style={{ backgroundColor: session.title.toLowerCase().includes('group') ? 'var(--group-session-color)' : getAthleteColor(session.athleteIds[0])}}>
+                                <span className="session-time">{session.time}</span> {session.title}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        }
+        return (
+            <div className="calendar-grid-month">
+                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => <div key={d} className="calendar-day-header">{d}</div>)}
+                {days}
+            </div>
+        );
+    };
+
+    const renderWeekView = () => {
+        const startOfWeek = new Date(currentDate);
+        startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
+        const days = [];
+        for (let i = 0; i < 7; i++) {
+            const day = new Date(startOfWeek);
+            day.setDate(startOfWeek.getDate() + i);
+            const dateStr = day.toISOString().split('T')[0];
+            const daySessions = schedules.filter(s => s.date === dateStr);
+            days.push(
+                <div key={i} className="week-day-column">
+                    <div className="week-day-header">{day.toLocaleString('default', { weekday: 'short' })} {day.getDate()}</div>
+                    <div className="sessions-container-week">
+                        {daySessions.map(session => (
+                            <div key={session.id} className="session-event-week" onClick={(e) => { e.stopPropagation(); handleSessionClick(session); }} style={{ backgroundColor: session.title.toLowerCase().includes('group') ? 'var(--group-session-color)' : getAthleteColor(session.athleteIds[0])}}>
+                                <p className="session-title">{session.title}</p>
+                                <p className="session-time">{session.time}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        }
+        return <div className="calendar-grid-week">{days}</div>;
+    };
+    
+    const renderDayView = () => {
+        const dateStr = currentDate.toISOString().split('T')[0];
+        const daySessions = schedules.filter(s => s.date === dateStr);
+        return (
+            <div className="calendar-grid-day">
+                 {daySessions.sort((a,b) => a.time.localeCompare(b.time)).map(session => (
+                    <div key={session.id} className="session-event-day" onClick={() => handleSessionClick(session)}>
+                        <div className="session-day-time">{session.time}</div>
+                        <div className="session-day-details" style={{ borderLeftColor: session.title.toLowerCase().includes('group') ? 'var(--group-session-color)' : getAthleteColor(session.athleteIds[0])}}>
+                           <p className="session-title">{session.title}</p>
+                           <p className="session-location"><MapPinIcon/> {session.location}</p>
+                           <p className="session-attendees"><UserGroupIcon/> {users.filter(u => session.athleteIds.includes(u.id)).map(u => u.name.split(' ')[0]).join(', ')}</p>
+                        </div>
+                    </div>
+                 ))}
+            </div>
+        )
+    };
     
     return (
         <div>
@@ -1278,26 +1458,15 @@ const CalendarView = ({ currentUser, users, schedules, onAdd, onUpdate, onDelete
                 <button className="btn btn-primary" onClick={() => { setSelectedDate(new Date()); setSelectedSession(null); setIsModalOpen(true); }}>New Session</button>
             </div>
             <div className="calendar-container card">
-                <div className="calendar-header">
-                    <button onClick={() => changeMonth(-1)} className="btn-icon"><ChevronLeftIcon /></button>
-                    <h2>{currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}</h2>
-                    <button onClick={() => changeMonth(1)} className="btn-icon"><ChevronRightIcon /></button>
-                </div>
-                <div className="calendar-grid">
-                    <div className="calendar-day-header">Sun</div>
-                    <div className="calendar-day-header">Mon</div>
-                    <div className="calendar-day-header">Tue</div>
-                    <div className="calendar-day-header">Wed</div>
-                    <div className="calendar-day-header">Thu</div>
-                    <div className="calendar-day-header">Fri</div>
-                    <div className="calendar-day-header">Sat</div>
-                    {allDays}
-                </div>
+                {renderHeader()}
+                {viewMode === 'month' && renderMonthView()}
+                {viewMode === 'week' && renderWeekView()}
+                {viewMode === 'day' && renderDayView()}
             </div>
             {isModalOpen && (
                 <SessionModal 
                     isOpen={isModalOpen}
-                    onClose={handleCloseModal}
+                    onClose={() => setIsModalOpen(false)}
                     sessionToEdit={selectedSession}
                     selectedDate={selectedDate}
                     onSave={selectedSession ? onUpdate : onAdd}
@@ -1309,6 +1478,7 @@ const CalendarView = ({ currentUser, users, schedules, onAdd, onUpdate, onDelete
         </div>
     );
 };
+
 
 // Fix: Define an interface for the session form data to ensure type safety for all properties.
 interface SessionFormData {
@@ -1372,6 +1542,7 @@ const SessionModal = ({ isOpen, onClose, sessionToEdit, selectedDate, onSave, on
 
     const handleDelete = () => {
         if (sessionToEdit && window.confirm('Are you sure you want to delete this session?')) {
+            // FIX: Corrected typo from sessionTo-edit.id to sessionToEdit.id
             onDelete(sessionToEdit.id);
             onClose();
         }
@@ -1409,7 +1580,8 @@ const SessionModal = ({ isOpen, onClose, sessionToEdit, selectedDate, onSave, on
                     </div>
                      <div className="form-group">
                         <label htmlFor="athleteIds">Athletes</label>
-                        <select id="athleteIds" name="athleteIds" multiple value={formData.athleteIds.map(String)} onChange={handleAthleteChange} className="multi-select">
+                        {/* FIX: Ensure formData.athleteIds is treated as an array before calling .map() to prevent type errors when the state type is not correctly inferred. */}
+                        <select id="athleteIds" name="athleteIds" multiple value={Array.isArray(formData.athleteIds) ? (formData.athleteIds as any[]).map(String) : []} onChange={handleAthleteChange} className="multi-select">
                             {coachAthletes.map(athlete => (
                                 <option key={athlete.id} value={athlete.id}>{athlete.name}</option>
                             ))}
@@ -1429,13 +1601,17 @@ const SessionModal = ({ isOpen, onClose, sessionToEdit, selectedDate, onSave, on
     );
 };
 
-const Dashboard = ({ currentUser, users, athletes, logs, schedules, invoices, conversations, messages, activeView, onNavigate, ...handlers }) => {
+const Dashboard = ({ currentUser, users, athletes, logs, schedules, invoices, conversations, messages, activeView, onNavigate, reminders, ...handlers }) => {
     
     const renderContent = () => {
         switch (activeView.name) {
             case 'Dashboard':
                 if (currentUser.role === 'Admin') {
                     return <AdminDashboard users={users} schedules={schedules} invoices={invoices} />;
+                }
+                if (currentUser.role === 'Coach') {
+                    // Redirect coach to their calendar by default
+                     return <CalendarView currentUser={currentUser} users={users} schedules={schedules} onAdd={handlers.onAddSchedule} onUpdate={handlers.onUpdateSchedule} onDelete={handlers.onDeleteSchedule} />;
                 }
                 return <DashboardHome user={currentUser} />;
             case 'User Management':
@@ -1451,7 +1627,7 @@ const Dashboard = ({ currentUser, users, athletes, logs, schedules, invoices, co
             case 'Calendar': // For coaches
                 return <CalendarView currentUser={currentUser} users={users} schedules={schedules} onAdd={handlers.onAddSchedule} onUpdate={handlers.onUpdateSchedule} onDelete={handlers.onDeleteSchedule} />;
             case 'Schedule': // For athletes/parents
-                return <Schedule schedules={schedules} users={users} currentUser={currentUser} />;
+                return <Schedule schedules={schedules} users={users} currentUser={currentUser} onConfirmBooking={handlers.onConfirmBooking} onAddReminder={handlers.onAddReminder} reminders={reminders}/>;
             case 'Payments':
                 return <Payments currentUser={currentUser} users={users} invoices={invoices} onPayInvoice={handlers.onPayInvoice} />;
             case 'Messages':
@@ -1495,13 +1671,22 @@ const App = () => {
     const [invoices, setInvoices] = useLocalStorage<Invoice[]>('invoices', initialInvoices);
     const [conversations, setConversations] = useLocalStorage<Conversation[]>('conversations', initialConversations);
     const [messages, setMessages] = useLocalStorage<Message[]>('messages', initialMessages);
+    const [reminders, setReminders] = useLocalStorage<Reminder[]>('reminders', []);
+
 
     const [activeView, setActiveView] = useState<ActiveView>({ name: 'Dashboard' });
     
     useEffect(() => {
         if (currentUser) {
-            const defaultView = sidebarLinks[currentUser.role]?.[0]?.view || 'Dashboard';
+            let defaultView = sidebarLinks[currentUser.role]?.[0]?.view || 'Dashboard';
+            // Redirect coach to calendar by default
+            if (currentUser.role === 'Coach') {
+                defaultView = 'Calendar';
+            }
             setActiveView({name: defaultView});
+        } else {
+            // Reset to a non-view when logged out
+             setActiveView({name: ''});
         }
     }, [currentUser]);
 
@@ -1517,7 +1702,6 @@ const App = () => {
 
     const handleLogout = () => {
         setCurrentUser(null);
-        setActiveView({name: 'Dashboard'});
     };
     
     const handleNavigate = (view: ActiveView) => {
@@ -1552,12 +1736,12 @@ const App = () => {
     };
     
     const handleAddSchedule = (scheduleData) => {
-        const newSchedule = { ...scheduleData, id: Math.max(...schedules.map(s => s.id), 0) + 1 };
+        const newSchedule = { ...scheduleData, id: Math.max(...schedules.map(s => s.id), 0) + 1, confirmedAthleteIds: [] };
         setSchedules(prev => [...prev, newSchedule]);
     };
 
     const handleUpdateSchedule = (scheduleData) => {
-        setSchedules(prev => prev.map(s => s.id === scheduleData.id ? scheduleData : s));
+        setSchedules(prev => prev.map(s => s.id === scheduleData.id ? {...s, ...scheduleData} : s));
     };
 
     const handleDeleteSchedule = (scheduleId) => {
@@ -1608,8 +1792,58 @@ const App = () => {
         setActiveView({ name: 'Messages', conversationId: newConversationId });
     };
 
+    const handleConfirmBooking = (sessionId: number) => {
+        const session = schedules.find(s => s.id === sessionId);
+        if (!session || !currentUser) return;
 
-    const unreadCount = currentUser ? conversations
+        let athleteIdsToConfirm: number[] = [];
+        let confirmerName: string = currentUser.name;
+
+        if (currentUser.role === 'Athlete') {
+            athleteIdsToConfirm.push(currentUser.id);
+        } else if (currentUser.role === 'Parent' && currentUser.children) {
+            athleteIdsToConfirm = currentUser.children.filter(childId => session.athleteIds.includes(childId));
+            confirmerName = `${currentUser.name} (Parent)`;
+        }
+
+        if (athleteIdsToConfirm.length > 0) {
+            setSchedules(prev => prev.map(s => s.id === sessionId ? { ...s, confirmedAthleteIds: [...new Set([...s.confirmedAthleteIds, ...athleteIdsToConfirm])] } : s));
+
+            const coach = users.find(u => u.id === session.coachId);
+            if (coach) {
+                const athletesConfirmed = users.filter(u => athleteIdsToConfirm.includes(u.id)).map(u => u.name).join(', ');
+                const message = `${athletesConfirmed} confirmed for "${session.title}" on ${session.date}.`;
+                handleCreateConversation(coach.id, message);
+            }
+        }
+    };
+    
+    const handleAddReminder = (sessionId: number, minutesBefore: number) => {
+        const session = schedules.find(s => s.id === sessionId);
+        if (!session || !currentUser) return;
+
+        const sessionDateTime = new Date(`${session.date}T${session.time}`);
+        const remindAtTime = new Date(sessionDateTime.getTime() - minutesBefore * 60000);
+
+        const newReminder: Reminder = {
+            id: Date.now(),
+            sessionId,
+            userId: currentUser.id,
+            remindAt: remindAtTime.toISOString(),
+            sessionTitle: session.title,
+            sessionTime: session.time,
+            dismissed: false,
+        };
+        // Remove existing reminder for same session/user before adding new one
+        setReminders(prev => [...prev.filter(r => !(r.sessionId === sessionId && r.userId === currentUser.id)), newReminder]);
+    };
+    
+    const handleDismissReminder = (reminderId: number) => {
+        setReminders(prev => prev.map(r => r.id === reminderId ? { ...r, dismissed: true } : r));
+    };
+
+
+    const unreadMessagesCount = currentUser ? conversations
         .filter(c => c.participantIds.includes(currentUser.id))
         .filter(c => {
             const lastMsg = messages
@@ -1617,6 +1851,8 @@ const App = () => {
                 .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())[0];
             return lastMsg && !lastMsg.readBy.includes(currentUser.id);
         }).length : 0;
+        
+    const activeReminders = currentUser ? reminders.filter(r => r.userId === currentUser.id && !r.dismissed && new Date(r.remindAt) < new Date()) : [];
 
     const dashboardHandlers = {
         onAddUser: handleAddUser,
@@ -1630,6 +1866,8 @@ const App = () => {
         onSendMessage: handleSendMessage,
         onMarkAsRead: handleMarkConversationAsRead,
         onCreateConversation: handleCreateConversation,
+        onConfirmBooking: handleConfirmBooking,
+        onAddReminder: handleAddReminder,
     };
 
     return (
@@ -1639,8 +1877,10 @@ const App = () => {
                 onLoginClick={() => setLoginModalOpen(true)}
                 user={currentUser}
                 onLogout={handleLogout}
-                unreadCount={unreadCount}
+                unreadMessagesCount={unreadMessagesCount}
+                activeReminders={activeReminders}
                 onNavigate={handleNavigate}
+                onDismissReminder={handleDismissReminder}
             />
             
             {currentUser ? (
@@ -1655,6 +1895,7 @@ const App = () => {
                     messages={messages}
                     onNavigate={handleNavigate}
                     activeView={activeView}
+                    reminders={reminders}
                     {...dashboardHandlers}
                 />
             ) : (
