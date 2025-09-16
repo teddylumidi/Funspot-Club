@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo, FC, SetStateAction, useRef } from 'react';
 
 // --- SVG Icons ---
@@ -135,12 +136,42 @@ const AthleteDashboard: FC<{ currentUser: User; progress: Progress[]; showToolti
 };
 
 // --- Management Views ---
-const UserManagement: FC<{ users: User[], onImpersonate: (user: User) => void, onEdit: (user: User) => void, onDelete: (user: User) => void, onAdd: () => void, onViewProfile: (user:User) => void }> = ({ users, onImpersonate, onEdit, onDelete, onAdd, onViewProfile }) => (
-    <div className="card"><div className="card-header"><h3>User Management</h3><button className="btn btn-primary" onClick={onAdd}><UserPlusIcon/> Add User</button></div><div className="table-container"><table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>DOB</th><th>Actions</th></tr></thead><tbody>{users.map(user => (<tr key={user.user_id}><td data-label="Name"><div className="user-name-cell"><img src={user.photo_url} alt={user.name} className="table-avatar"/>{user.name}</div></td><td data-label="Email">{user.email}</td><td data-label="Role"><span className={`role-badge role-${user.role.toLowerCase()}`}>{user.role}</span></td><td data-label="DOB">{user.date_of_birth}</td><td data-label="Actions"><div className="action-buttons"><button onClick={() => onViewProfile(user)} className="btn-icon" title="View Profile"><UserCircleIcon/></button><button onClick={() => onImpersonate(user)} className="btn-icon" title="Impersonate"><EyeIcon/></button><button onClick={() => onEdit(user)} className="btn-icon" title="Edit"><PencilIcon/></button><button onClick={() => onDelete(user)} className="btn-icon btn-icon-danger" title="Delete"><TrashIcon/></button></div></td></tr>))}</tbody></table></div></div>
+const UserManagement: FC<{ users: User[], onImpersonate: (user: User) => void, onEdit: (user: User) => void, onDelete: (user: User) => void, onAdd: () => void, onViewProfile: (user:User) => void, searchValue: string, onSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void }> = ({ users, onImpersonate, onEdit, onDelete, onAdd, onViewProfile, searchValue, onSearchChange }) => (
+    <div className="card">
+        <div className="card-header">
+            <h3>User Management</h3>
+            <div className="header-actions">
+                <input type="text" placeholder="Search by name or email..." value={searchValue} onChange={onSearchChange} className="search-input" />
+                <button className="btn btn-primary" onClick={onAdd}><UserPlusIcon/> Add User</button>
+            </div>
+        </div>
+        <div className="table-container">
+            <table>
+                <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>DOB</th><th>Actions</th></tr></thead>
+                <tbody>{users.map(user => (<tr key={user.user_id}><td data-label="Name"><div className="user-name-cell"><img src={user.photo_url} alt={user.name} className="table-avatar"/>{user.name}</div></td><td data-label="Email">{user.email}</td><td data-label="Role"><span className={`role-badge role-${user.role.toLowerCase()}`}>{user.role}</span></td><td data-label="DOB">{user.date_of_birth}</td><td data-label="Actions"><div className="action-buttons"><button onClick={() => onViewProfile(user)} className="btn-icon" title="View Profile"><UserCircleIcon/></button><button onClick={() => onImpersonate(user)} className="btn-icon" title="Impersonate"><EyeIcon/></button><button onClick={() => onEdit(user)} className="btn-icon" title="Edit"><PencilIcon/></button><button onClick={() => onDelete(user)} className="btn-icon btn-icon-danger" title="Delete"><TrashIcon/></button></div></td></tr>))}</tbody>
+            </table>
+        </div>
+    </div>
 );
-const ProgramManagement: FC<{ programs: Program[], users: User[], onEdit: (p: Program) => void, onDelete: (p: Program) => void, onAdd: () => void, onView: (p: Program) => void }> = ({ programs, users, onEdit, onDelete, onAdd, onView }) => {
+const ProgramManagement: FC<{ programs: Program[], users: User[], onEdit: (p: Program) => void, onDelete: (p: Program) => void, onAdd: () => void, onView: (p: Program) => void, searchValue: string, onSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void }> = ({ programs, users, onEdit, onDelete, onAdd, onView, searchValue, onSearchChange }) => {
     const getCoachName = (id: number) => users.find(u => u.user_id === id)?.name || 'Unknown';
-    return ( <div className="card"><div className="card-header"><h3>Program Management</h3><button className="btn btn-primary" onClick={onAdd}><PlusIcon/> Add Program</button></div><div className="table-container"><table><thead><tr><th>Title</th><th>Coach</th><th>Price</th><th>Skill Level</th><th>Actions</th></tr></thead><tbody>{programs.map(p => (<tr key={p.program_id}><td data-label="Title">{p.title}</td><td data-label="Coach">{getCoachName(p.coach_id)}</td><td data-label="Price">KES {p.price.toLocaleString()}</td><td data-label="Skill Level"><span className={`skill-badge skill-${p.skillLevel.split(' ')[0].toLowerCase()}`}>{p.skillLevel}</span></td><td data-label="Actions"><div className="action-buttons"><button onClick={() => onView(p)} className="btn-icon" title="View Details"><EyeIcon/></button><button onClick={() => onEdit(p)} className="btn-icon" title="Edit"><PencilIcon/></button><button onClick={() => onDelete(p)} className="btn-icon btn-icon-danger" title="Delete"><TrashIcon/></button></div></td></tr>))}</tbody></table></div></div> );
+    return (
+        <div className="card">
+            <div className="card-header">
+                <h3>Program Management</h3>
+                <div className="header-actions">
+                    <input type="text" placeholder="Search by title or coach..." value={searchValue} onChange={onSearchChange} className="search-input" />
+                    <button className="btn btn-primary" onClick={onAdd}><PlusIcon/> Add Program</button>
+                </div>
+            </div>
+            <div className="table-container">
+                <table>
+                    <thead><tr><th>Title</th><th>Coach</th><th>Price</th><th>Skill Level</th><th>Actions</th></tr></thead>
+                    <tbody>{programs.map(p => (<tr key={p.program_id}><td data-label="Title">{p.title}</td><td data-label="Coach">{getCoachName(p.coach_id)}</td><td data-label="Price">KES {p.price.toLocaleString()}</td><td data-label="Skill Level"><span className={`skill-badge skill-${p.skillLevel.split(' ')[0].toLowerCase()}`}>{p.skillLevel}</span></td><td data-label="Actions"><div className="action-buttons"><button onClick={() => onView(p)} className="btn-icon" title="View Details"><EyeIcon/></button><button onClick={() => onEdit(p)} className="btn-icon" title="Edit"><PencilIcon/></button><button onClick={() => onDelete(p)} className="btn-icon btn-icon-danger" title="Delete"><TrashIcon/></button></div></td></tr>))}</tbody>
+                </table>
+            </div>
+        </div>
+    );
 };
 const MyBookingsView: FC<{ currentUser: User; users: User[]; payments: Payment[]; programs: Program[]; sessions: Session[] }> = ({ currentUser, users, payments, programs, sessions }) => {
     const userOrChildrenIds = useMemo(() => { if (currentUser.role === 'Parent') { return users.filter(u => u.parent_id === currentUser.user_id).map(u => u.user_id); } return [currentUser.user_id]; }, [currentUser, users]);
@@ -205,27 +236,33 @@ const App = () => {
     const [showNotifications, setShowNotifications] = useState(false);
     const notifRef = useRef<HTMLDivElement>(null);
     
+    const [userSearch, setUserSearch] = useState('');
+    const [programSearch, setProgramSearch] = useState('');
+
     const isMobile = useMediaQuery('(max-width: 768px)');
     
-    useEffect(() => {
-        document.documentElement.setAttribute('data-theme', theme);
-    }, [theme]);
+    useEffect(() => { document.documentElement.setAttribute('data-theme', theme); }, [theme]);
 
     useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (notifRef.current && !notifRef.current.contains(event.target as Node)) {
-                setShowNotifications(false);
-            }
-        };
+        const handleClickOutside = (event: MouseEvent) => { if (notifRef.current && !notifRef.current.contains(event.target as Node)) { setShowNotifications(false); } };
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, [notifRef]);
 
-
     const showTooltip: ShowTooltipFn = (content, event) => setTooltip({ visible: true, content, x: event.clientX, y: event.clientY });
     const hideTooltip: HideTooltipFn = () => setTooltip(prev => ({ ...prev, visible: false }));
-
     const displayUser = impersonatedUser || currentUser;
+
+    const filteredUsers = useMemo(() => {
+        if (!userSearch) return users;
+        return users.filter(u => u.name.toLowerCase().includes(userSearch.toLowerCase()) || u.email.toLowerCase().includes(userSearch.toLowerCase()) );
+    }, [users, userSearch]);
+
+    const filteredPrograms = useMemo(() => {
+        if (!programSearch) return programs;
+        const coachMap = new Map(users.filter(u => u.role === 'Coach').map(c => [c.user_id, c.name]));
+        return programs.filter(p => p.title.toLowerCase().includes(programSearch.toLowerCase()) || (coachMap.get(p.coach_id) || '').toLowerCase().includes(programSearch.toLowerCase()) );
+    }, [programs, users, programSearch]);
 
     const handleLogin = (user: User) => { setCurrentUser(user); };
     const handleLogout = () => { setCurrentUser(null); setImpersonatedUser(null); setViewingProfile(null); setView('Dashboard'); };
@@ -235,7 +272,11 @@ const App = () => {
     // --- CRUD Handlers ---
     const handleSaveUser = (user: User) => { setUsers(prev => user.user_id ? prev.map(u => u.user_id === user.user_id ? user : u) : [...prev, { ...user, user_id: Date.now(), photo_url: `https://i.pravatar.cc/150?u=${Date.now()}` }]); if(viewingProfile?.user_id === user.user_id) setViewingProfile(user); setModal({type: null}); };
     const handleDeleteUserClick = (userToDelete: User) => { let warning = ''; if (userToDelete.role === 'Coach') { const assignedProgramsCount = programs.filter(p => p.coach_id === userToDelete.user_id).length; if (assignedProgramsCount > 0) { warning = `This coach is assigned to ${assignedProgramsCount} program(s). Deleting this user will unassign them.`; } } if (userToDelete.role === 'Parent') { const childCount = users.filter(u => u.parent_id === userToDelete.user_id).length; if (childCount > 0) { warning = `This parent is linked to ${childCount} child athlete(s). Deleting this user will remove the parent link.`; } } setModal({ type: 'delete-user', data: userToDelete, warning }); };
-    const handleDeleteUser = (user: User) => { if (user.role === 'Coach') { setPrograms(prev => prev.map(p => p.coach_id === user.user_id ? { ...p, coach_id: 0 } : p)); setUsers(prev => prev.map(u => u.coach_id === user.user_id ? { ...u, coach_id: null } : u)); } if (user.role === 'Parent') { setUsers(prev => prev.map(u => u.parent_id === user.user_id ? { ...u, parent_id: null } : u)); } setUsers(prev => prev.filter(u => u.user_id !== user.user_id)); setModal({type: null}); };
+    const handleDeleteUser = (user: User) => {
+        if (user.role === 'Coach') { setPrograms(prev => prev.map(p => p.coach_id === user.user_id ? { ...p, coach_id: 0 } : p)); }
+        setUsers(prev => { let updatedUsers = prev; if (user.role === 'Parent') { updatedUsers = updatedUsers.map(u => u.parent_id === user.user_id ? { ...u, parent_id: null } : u); } if (user.role === 'Coach') { updatedUsers = updatedUsers.map(u => u.coach_id === user.user_id ? { ...u, coach_id: null } : u); } return updatedUsers.filter(u => u.user_id !== user.user_id); });
+        setModal({ type: null });
+    };
     const handleSaveProgram = (program: Program) => { setPrograms(prev => program.program_id ? prev.map(p => p.program_id === program.program_id ? program : p) : [...prev, { ...program, program_id: Date.now() }]); setModal({type: null}); };
     const handleDeleteProgram = (program: Program) => { setPrograms(prev => prev.filter(p => p.program_id !== program.program_id)); setModal({type: null}); };
     const handleConfirmBooking = (program: Program, athleteId: number) => { if (!athleteId) return; const isEnrolled = payments.some(p => p.program_id === program.program_id && p.user_id === athleteId); if (isEnrolled) { alert('This athlete is already enrolled in this program.'); setModal({type: null}); return; } const newPayment: Payment = { payment_id: Date.now(), user_id: athleteId, program_id: program.program_id, amount: program.price, status: 'pending', paid_at: null }; setPayments(prev => [...prev, newPayment]); alert(`${program.title} booked! Please complete the payment from the My Bookings section.`); setModal({type: null}); };
@@ -253,13 +294,8 @@ const App = () => {
     };
 
     const handleNavClick = (linkName: string) => {
-        if (linkName === 'My Profile') {
-            setViewingProfile(displayUser);
-            setView('User Profile');
-        } else {
-            setViewingProfile(null);
-            setView(linkName);
-        }
+        if (linkName === 'My Profile') { setViewingProfile(displayUser); setView('User Profile'); } 
+        else { setViewingProfile(null); setView(linkName); }
     }
     
     const renderView = () => {
@@ -270,8 +306,8 @@ const App = () => {
                 if (displayUser?.role === 'Parent') return <ParentDashboard currentUser={displayUser} users={users} progress={progress} showTooltip={showTooltip} hideTooltip={hideTooltip} />;
                 if (displayUser?.role === 'Athlete') return <AthleteDashboard currentUser={displayUser} progress={progress} showTooltip={showTooltip} hideTooltip={hideTooltip} />;
                 return null;
-            case 'Users': return <UserManagement users={users} onImpersonate={handleImpersonate} onEdit={(u) => setModal({type: 'edit-user', data: u})} onDelete={handleDeleteUserClick} onAdd={() => setModal({type: 'add-user'})} onViewProfile={(u) => { setViewingProfile(u); setView('User Profile'); }} />;
-            case 'Programs': return <ProgramManagement programs={programs} users={users} onEdit={(p) => setModal({type: 'edit-program', data: p})} onDelete={(p) => setModal({type: 'delete-program', data: p})} onAdd={() => setModal({type: 'add-program'})} onView={(p) => setModal({type: 'program-details', data: p})} />;
+            case 'Users': return <UserManagement users={filteredUsers} onImpersonate={handleImpersonate} onEdit={(u) => setModal({type: 'edit-user', data: u})} onDelete={handleDeleteUserClick} onAdd={() => setModal({type: 'add-user'})} onViewProfile={(u) => { setViewingProfile(u); setView('User Profile'); }} searchValue={userSearch} onSearchChange={e => setUserSearch(e.target.value)} />;
+            case 'Programs': return <ProgramManagement programs={filteredPrograms} users={users} onEdit={(p) => setModal({type: 'edit-program', data: p})} onDelete={(p) => setModal({type: 'delete-program', data: p})} onAdd={() => setModal({type: 'add-program'})} onView={(p) => setModal({type: 'program-details', data: p})} searchValue={programSearch} onSearchChange={e => setProgramSearch(e.target.value)} />;
             case 'My Bookings': return <MyBookingsView currentUser={displayUser!} users={users} payments={payments} programs={programs} sessions={sessions} />;
             case 'Browse Programs': return <BrowseProgramsView programs={programs} currentUser={displayUser!} payments={payments} users={users} onBook={(p) => setModal({ type: 'book-program', data: p })} onView={(p) => setModal({type: 'program-details', data: p})} />;
             case 'Schedule': return <ScheduleView sessions={sessions} programs={programs} users={users} onSessionClick={(s) => setModal({type: 'session-details', data: s})} />;
@@ -286,11 +322,7 @@ const App = () => {
             <div className="dashboard-layout">
                 {isMobile ? <BottomNav links={displayUser ? navigationLinks[displayUser.role] : []} activeView={view} onNavClick={handleNavClick} /> : <Sidebar links={displayUser ? navigationLinks[displayUser.role] : []} activeView={view} onNavClick={handleNavClick} />}
                 <main className="main-content">
-                    {impersonatedUser && (
-                        <div className="impersonation-banner">
-                            <EyeIcon /><span>Viewing as {impersonatedUser.name} ({impersonatedUser.role})</span><button onClick={stopImpersonating} className="btn-secondary btn-sm">Stop Impersonating</button>
-                        </div>
-                    )}
+                    {impersonatedUser && ( <div className="impersonation-banner"><EyeIcon /><span>Viewing as {impersonatedUser.name} ({impersonatedUser.role})</span><button onClick={stopImpersonating} className="btn-secondary btn-sm">Stop Impersonating</button></div> )}
                     <Header title={view} user={displayUser!} onLogout={handleLogout} theme={theme} onToggleTheme={toggleTheme} notifications={notifications} showNotifications={showNotifications} setShowNotifications={setShowNotifications} notifRef={notifRef} />
                     <div className="content-area">{renderView()}</div>
                 </main>
