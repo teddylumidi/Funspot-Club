@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef, SetStateAction } from 'react';
+import React, 'react';
+import { useState, useEffect, useRef, SetStateAction } from 'react';
 
 // --- SVG Icons ---
 const EyeIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639l4.43-7.532a1.012 1.012 0 0 1 1.638 0l4.43 7.532a1.012 1.012 0 0 1 0 .639l-4.43 7.532a1.012 1.012 0 0 1-1.638 0l-4.43-7.532Z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg>;
@@ -18,6 +19,10 @@ const ClockIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" view
 const CheckCircleIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>;
 const EnvelopeIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" /></svg>;
 const PlusCircleIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>;
+const MegaphoneIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" /></svg>;
+const ChatBubbleLeftRightIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193l-3.72 3.72a1.5 1.5 0 0 1-2.12 0l-3.72-3.72C7.847 17.1 7 16.136 7 15v-4.286c0-.97.616-1.813 1.5-2.097M6.75 6.025C7.66 5.64 8.5 5.25 9.42 5.25c.92 0 1.76.39 2.67.775 1.824.77 3.35 1.636 4.732 2.308M3.75 10.5C4.66 10.115 5.5 9.75 6.42 9.75c.92 0 1.76.39 2.67.775 1.824.77 3.35 1.636 4.732 2.308" /></svg>;
+const PaperAirplaneIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" /></svg>;
+const ShieldCheckIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.286Zm0 13.036h.008v.008H12v-.008Z" /></svg>;
 
 
 // --- Type Definitions ---
@@ -59,6 +64,19 @@ interface Message {
   subject: string;
   body: string;
   sent_at: string;
+}
+interface Announcement {
+    announcement_id: number;
+    title: string;
+    content: string;
+    created_at: string;
+}
+interface PrivateMessage {
+    message_id: number;
+    sender_id: number;
+    receiver_id: number;
+    content: string;
+    timestamp: string;
 }
 type Toast = { id: number; message: string; type: 'success' | 'error'; };
 
@@ -108,6 +126,14 @@ const initialSessions: Session[] = [
     { session_id: 3, program_id: 1, date: '2024-08-14', time: '16:30', title: 'Group Session', coach_id: 2, athlete_ids: [5, 7], confirmed_athlete_ids: [7] },
     { session_id: 4, program_id: 2, date: '2024-08-17', time: '15:30', title: 'Anna B. - Speed', coach_id: 3, athlete_ids: [8], confirmed_athlete_ids: [] },
     { session_id: 5, program_id: 2, date: '2024-08-18', time: '16:00', title: 'Group Session', coach_id: 3, athlete_ids: [8], confirmed_athlete_ids: [] },
+];
+const initialAnnouncements: Announcement[] = [
+    { announcement_id: 1, title: "Welcome to the New Portal!", content: "We're excited to launch our new club management portal. Please explore the features and let us know if you have any feedback.", created_at: "2024-07-28T10:00:00Z" },
+    { announcement_id: 2, title: "Summer Program Reminder", content: "The Summer Weekly Program is starting soon. Make sure your payments and bookings are confirmed.", created_at: "2024-07-27T15:30:00Z" },
+];
+const initialPrivateMessages: PrivateMessage[] = [
+    { message_id: 1, sender_id: 2, receiver_id: 4, content: "Hi John, just a reminder that Leo's session tomorrow is focused on gliding. He's doing great!", timestamp: "2024-07-28T11:00:00Z" },
+    { message_id: 2, sender_id: 4, receiver_id: 2, content: "Thanks for the update, Coach Sarah! He's very excited.", timestamp: "2024-07-28T11:05:00Z" },
 ];
 
 // --- Components ---
@@ -177,10 +203,10 @@ const Header = ({ user, impersonatedUser, onLogout, onStopImpersonating, notific
 };
 const Sidebar = ({ user, onNavigate, activeView }) => {
     const sidebarLinks = {
-      Admin: [ { name: 'Dashboard', icon: ChartBarIcon, view: 'AdminDashboard' }, { name: 'Users', icon: UserGroupIcon, view: 'UserManagement' }, { name: 'Programs', icon: CalendarIcon, view: 'ProgramManagement' }, { name: 'Payments', icon: CreditCardIcon, view: 'PaymentManagement' }, { name: 'Messages', icon: EnvelopeIcon, view: 'MessagesView' }, { name: 'Audit Log', icon: DocumentTextIcon, view: 'AdminLog' }, ],
-      Coach: [ { name: 'My Athletes', icon: UserGroupIcon, view: 'CoachDashboard' }, { name: 'Calendar', icon: CalendarIcon, view: 'CalendarView' }, { name: 'Contact Admin', icon: EnvelopeIcon, view: 'ContactUs' } ],
-      Parent: [ { name: 'My Children', icon: UserGroupIcon, view: 'ParentDashboard' }, { name: 'Schedule', icon: CalendarIcon, view: 'ScheduleView' }, { name: 'Payments', icon: CreditCardIcon, view: 'ParentPayments' }, { name: 'Contact Admin', icon: EnvelopeIcon, view: 'ContactUs' } ],
-      Athlete: [ { name: 'My Progress', icon: ChartBarIcon, view: 'AthleteDashboard' }, { name: 'Schedule', icon: CalendarIcon, view: 'ScheduleView' }, { name: 'Contact Admin', icon: EnvelopeIcon, view: 'ContactUs' } ],
+      Admin: [ { name: 'Dashboard', icon: ChartBarIcon, view: 'AdminDashboard' }, { name: 'Users', icon: UserGroupIcon, view: 'UserManagement' }, { name: 'Programs', icon: CalendarIcon, view: 'ProgramManagement' }, { name: 'Announcements', icon: MegaphoneIcon, view: 'AnnouncementManagement' }, { name: 'Payments', icon: CreditCardIcon, view: 'PaymentManagement' }, { name: 'Messages', icon: EnvelopeIcon, view: 'MessagesView' }, { name: 'Chat Monitor', icon: ShieldCheckIcon, view: 'AdminMessagingMonitor' }, { name: 'Audit Log', icon: DocumentTextIcon, view: 'AdminLog' }, ],
+      Coach: [ { name: 'My Athletes', icon: UserGroupIcon, view: 'CoachDashboard' }, { name: 'Calendar', icon: CalendarIcon, view: 'CalendarView' }, { name: 'Private Chat', icon: ChatBubbleLeftRightIcon, view: 'PrivateMessagingView' }, { name: 'Contact Admin', icon: EnvelopeIcon, view: 'ContactUs' } ],
+      Parent: [ { name: 'My Children', icon: UserGroupIcon, view: 'ParentDashboard' }, { name: 'Schedule', icon: CalendarIcon, view: 'ScheduleView' }, { name: 'Payments', icon: CreditCardIcon, view: 'ParentPayments' }, { name: 'Private Chat', icon: ChatBubbleLeftRightIcon, view: 'PrivateMessagingView' }, { name: 'Contact Admin', icon: EnvelopeIcon, view: 'ContactUs' } ],
+      Athlete: [ { name: 'My Progress', icon: ChartBarIcon, view: 'AthleteDashboard' }, { name: 'Schedule', icon: CalendarIcon, view: 'ScheduleView' }, { name: 'Private Chat', icon: ChatBubbleLeftRightIcon, view: 'PrivateMessagingView' }, { name: 'Contact Admin', icon: EnvelopeIcon, view: 'ContactUs' } ],
     };
     const links = sidebarLinks[user.role] || [];
     return (
@@ -268,6 +294,42 @@ const ProgramFormModal = ({ isOpen, onClose, onSave, programToEdit, coaches }) =
         </div>
     );
 };
+const AnnouncementFormModal = ({ isOpen, onClose, onSave, announcementToEdit }) => {
+    const initialFormState = { title: '', content: '' };
+    const [formData, setFormData] = useState(initialFormState);
+    const modalContentRef = useRef(null);
+
+    useEffect(() => {
+        setFormData(announcementToEdit || initialFormState);
+    }, [announcementToEdit, isOpen]);
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
+    const handleSubmit = (e) => { e.preventDefault(); onSave(formData); };
+
+    useEffect(() => {
+        const handleClickOutside = (event) => { if (modalContentRef.current && !modalContentRef.current.contains(event.target)) onClose(); };
+        if (isOpen) document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [isOpen, onClose]);
+
+    if (!isOpen) return null;
+
+    return (
+        <div className="modal-overlay show">
+            <div className="modal-content theme-navy-coral" ref={modalContentRef}>
+                <div className="modal-header"><h2>{announcementToEdit ? 'Edit Announcement' : 'New Announcement'}</h2><button onClick={onClose} className="close-btn"><CloseIcon /></button></div>
+                <form onSubmit={handleSubmit}>
+                    <div className="form-group"><label>Title</label><input type="text" name="title" value={formData.title} onChange={handleChange} required /></div>
+                    <div className="form-group"><label>Content</label><textarea name="content" value={formData.content} onChange={handleChange} required rows={5}></textarea></div>
+                    <div className="form-actions"><button type="submit" className="btn btn-primary">{announcementToEdit ? 'Save Changes' : 'Post Announcement'}</button></div>
+                </form>
+            </div>
+        </div>
+    );
+};
 const ReminderModal = ({ isOpen, onClose, onSave, session }) => {
     const [reminderTime, setReminderTime] = useState('60'); // default to 1 hour
     const modalContentRef = useRef(null);
@@ -333,10 +395,29 @@ const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, children }) => {
     );
 };
 // --- Dashboard Views ---
-const AdminDashboard = ({ users, programs, payments }) => {
+const AnnouncementsFeed = ({ announcements }) => {
+    const sortedAnnouncements = [...announcements].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    return (
+        <div className="announcements-feed theme-navy-coral">
+            <h3><MegaphoneIcon/> Club Announcements</h3>
+            {sortedAnnouncements.length === 0 ? <p>No announcements yet.</p> : (
+                <div className="announcements-list">
+                    {sortedAnnouncements.map(a => (
+                        <div key={a.announcement_id} className="announcement-card">
+                            <h4 className="announcement-title">{a.title}</h4>
+                            <p className="announcement-content">{a.content}</p>
+                            <p className="announcement-date">{new Date(a.created_at).toLocaleString()}</p>
+                        </div>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+};
+const AdminDashboard = ({ users, programs, payments, announcements }) => {
     const totalUsers = users.length; const activeAthletes = users.filter(u => u.role === 'Athlete').length; const pendingPayments = payments.filter(p => p.status === 'pending').reduce((sum, p) => sum + p.amount, 0); const totalRevenue = payments.filter(p => p.status === 'paid').reduce((sum, p) => sum + p.amount, 0);
     const StatCard = ({ title, value, icon: Icon }) => (<div className="stat-card"><div className="stat-icon"><Icon /></div><div className="stat-content"><p className="stat-value">{value}</p><p className="stat-title">{title}</p></div></div>);
-    return (<div><div className="stat-card-grid"><StatCard title="Total Users" value={totalUsers} icon={UserGroupIcon} /><StatCard title="Active Athletes" value={activeAthletes} icon={UserGroupIcon} /><StatCard title="Pending Payments" value={`KES ${pendingPayments.toLocaleString()}`} icon={CreditCardIcon} /><StatCard title="Total Revenue" value={`KES ${totalRevenue.toLocaleString()}`} icon={CreditCardIcon} /></div></div>);
+    return (<div className="dashboard-grid"><div className="main-panel"><div className="stat-card-grid"><StatCard title="Total Users" value={totalUsers} icon={UserGroupIcon} /><StatCard title="Active Athletes" value={activeAthletes} icon={UserGroupIcon} /><StatCard title="Pending Payments" value={`KES ${pendingPayments.toLocaleString()}`} icon={CreditCardIcon} /><StatCard title="Total Revenue" value={`KES ${totalRevenue.toLocaleString()}`} icon={CreditCardIcon} /></div></div><div className="side-panel"><AnnouncementsFeed announcements={announcements}/></div></div>);
 }
 const UserManagement = ({ users, onImpersonate, onAdd, onEdit, onDelete }) => {
     const [isModalOpen, setIsModalOpen] = useState(false); const [userToEdit, setUserToEdit] = useState<User | null>(null);
@@ -449,15 +530,62 @@ const ProgramManagement = ({ programs, users, onAdd, onEdit, onDelete }) => {
         </div>
     );
 };
-const CoachDashboard = ({ coach, users, progress, onUpdateProgress }) => {
+const AnnouncementManagement = ({ announcements, onAdd, onEdit, onDelete }) => {
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [announcementToEdit, setAnnouncementToEdit] = useState<Announcement | null>(null);
+
+    const handleOpenModal = (announcement: Announcement | null = null) => {
+        setAnnouncementToEdit(announcement);
+        setIsModalOpen(true);
+    };
+
+    const handleSave = (formData) => {
+        if (announcementToEdit) onEdit({ ...announcementToEdit, ...formData });
+        else onAdd(formData);
+        setIsModalOpen(false);
+    };
+    
+    const sortedAnnouncements = [...announcements].sort((a,b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+    return (
+        <div className="theme-navy-coral">
+            <div className="view-header">
+                <h1>Manage Announcements</h1>
+                <button className="btn btn-primary" onClick={() => handleOpenModal()}><PlusCircleIcon /> New Announcement</button>
+            </div>
+            <div className="table-container">
+                <table>
+                    <thead><tr><th>Title</th><th>Created At</th><th>Actions</th></tr></thead>
+                    <tbody>
+                        {sortedAnnouncements.map(a => (
+                            <tr key={a.announcement_id}>
+                                <td>{a.title}</td>
+                                <td>{new Date(a.created_at).toLocaleString()}</td>
+                                <td className="action-cell">
+                                    <button onClick={() => handleOpenModal(a)} className="btn-icon" title="Edit"><PencilIcon /></button>
+                                    <button onClick={() => onDelete(a.announcement_id)} className="btn-icon btn-danger" title="Delete"><TrashIcon /></button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+            <AnnouncementFormModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSave={handleSave} announcementToEdit={announcementToEdit} />
+        </div>
+    );
+};
+const CoachDashboard = ({ coach, users, progress, onUpdateProgress, announcements }) => {
     const myAthletes = users.filter(u => u.role === 'Athlete' && u.coach_id === coach.user_id);
-    return (<div><div className="view-header"><h1>My Athletes</h1></div><div className="table-container"><table><thead><tr><th>Athlete</th><th>Skill</th><th>Progress</th><th>Actions</th></tr></thead><tbody>{myAthletes.length === 0 ? (<tr><td colSpan={4} style={{textAlign: 'center'}}>You have no assigned athletes.</td></tr>) : myAthletes.map(athlete => { const athleteProgress = progress.filter(p => p.athlete_id === athlete.user_id); return athleteProgress.map((p, index) => (<tr key={p.progress_id}>{index === 0 && <td rowSpan={athleteProgress.length}>{athlete.name}</td>}<td>{p.skill}</td><td><div className="progress-bar-table"><div className="progress-bar-fill" style={{ width: `${p.percentage}%` }}>{p.percentage}%</div></div></td><td><input type="range" min="0" max="100" value={p.percentage} onChange={(e) => onUpdateProgress(p.progress_id, parseInt(e.target.value))}/></td></tr>))})}</tbody></table></div></div>)
+    return (<div className="dashboard-grid"><div className="main-panel"><div className="view-header"><h1>My Athletes</h1></div><div className="table-container"><table><thead><tr><th>Athlete</th><th>Skill</th><th>Progress</th><th>Actions</th></tr></thead><tbody>{myAthletes.length === 0 ? (<tr><td colSpan={4} style={{textAlign: 'center'}}>You have no assigned athletes.</td></tr>) : myAthletes.map(athlete => { const athleteProgress = progress.filter(p => p.athlete_id === athlete.user_id); return athleteProgress.map((p, index) => (<tr key={p.progress_id}>{index === 0 && <td rowSpan={athleteProgress.length}>{athlete.name}</td>}<td>{p.skill}</td><td><div className="progress-bar-table"><div className="progress-bar-fill" style={{ width: `${p.percentage}%` }}>{p.percentage}%</div></div></td><td><input type="range" min="0" max="100" value={p.percentage} onChange={(e) => onUpdateProgress(p.progress_id, parseInt(e.target.value))}/></td></tr>))})}</tbody></table></div></div><div className="side-panel"><AnnouncementsFeed announcements={announcements} /></div></div>)
 };
 const ProgressDisplay = ({ title, progressItems }) => (<div className="card customer-card"><h3>{title}</h3>{progressItems.length === 0 ? (<p>No progress to display.</p>) : (<div className="progress-grid">{progressItems.map(p => (<div key={p.progress_id} className="progress-item"><label>{p.skill} <span className="progress-level">({p.level})</span></label><div className="progress-bar"><div className="progress-bar-fill" style={{ width: `${p.percentage}%` }}>{p.percentage}%</div></div></div>))}</div>)}</div>);
-const AthleteDashboard = ({ athlete, progress }) => { const myProgress = progress.filter(p => p.athlete_id === athlete.user_id); return (<div><div className="view-header"><h1>My Progress</h1></div><ProgressDisplay title="Your Skill Development" progressItems={myProgress} /></div>)};
-const ParentDashboard = ({ parent, users, progress }) => {
+const AthleteDashboard = ({ athlete, progress, announcements }) => { 
+    const myProgress = progress.filter(p => p.athlete_id === athlete.user_id); 
+    return (<div className="dashboard-grid"><div className="main-panel"><div className="view-header"><h1>My Progress</h1></div><ProgressDisplay title="Your Skill Development" progressItems={myProgress} /></div><div className="side-panel"><AnnouncementsFeed announcements={announcements} /></div></div>)
+};
+const ParentDashboard = ({ parent, users, progress, announcements }) => {
     const children = users.filter(u => u.parent_id === parent.user_id);
-    return (<div><div className="view-header"><h1>My Children's Progress</h1></div><div className="customer-dashboard-layout">{children.length === 0 ? (<p>No children linked to this account.</p>) : children.map(child => { const childProgress = progress.filter(p => p.athlete_id === child.user_id); return <ProgressDisplay key={child.user_id} title={`${child.name}'s Skills`} progressItems={childProgress} /> })}</div></div>)
+    return (<div className="dashboard-grid"><div className="main-panel"><div className="view-header"><h1>My Children's Progress</h1></div><div className="customer-dashboard-layout">{children.length === 0 ? (<p>No children linked to this account.</p>) : children.map(child => { const childProgress = progress.filter(p => p.athlete_id === child.user_id); return <ProgressDisplay key={child.user_id} title={`${child.name}'s Skills`} progressItems={childProgress} /> })}</div></div><div className="side-panel"><AnnouncementsFeed announcements={announcements} /></div></div>)
 }
 const PaymentManagement = ({ payments, users }) => {
     const [filterUser, setFilterUser] = useState('');
@@ -789,6 +917,114 @@ const ContactUs = ({ onSendMessage, addToast }) => {
         </div>
     );
 };
+const PrivateMessagingView = ({ currentUser, users, privateMessages, onSendMessage }) => {
+    const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+    const [newMessage, setNewMessage] = useState('');
+    const [searchTerm, setSearchTerm] = useState('');
+    const conversationEndRef = useRef<null | HTMLDivElement>(null);
+
+    const otherUsers = users.filter(u => u.user_id !== currentUser.user_id && u.role !== 'Admin');
+    const selectedUser = users.find(u => u.user_id === selectedUserId);
+
+    const conversation = privateMessages
+        .filter(m => (m.sender_id === currentUser.user_id && m.receiver_id === selectedUserId) || (m.sender_id === selectedUserId && m.receiver_id === currentUser.user_id))
+        .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+
+    const handleSendMessage = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (newMessage.trim() && selectedUserId) {
+            onSendMessage(selectedUserId, newMessage);
+            setNewMessage('');
+        }
+    };
+    
+    useEffect(() => {
+        conversationEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [conversation]);
+
+    const filteredUsers = otherUsers.filter(u => u.name.toLowerCase().includes(searchTerm.toLowerCase()));
+
+    return (
+        <div className="chat-container theme-navy-coral">
+            <div className="chat-layout">
+                <div className="contact-list">
+                    <div className="contact-list-header">
+                        <h3>Conversations</h3>
+                        <input type="text" placeholder="Search users..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+                    </div>
+                    <div className="contact-items">
+                        {filteredUsers.map(user => (
+                            <div key={user.user_id} className={`contact-item ${selectedUserId === user.user_id ? 'active' : ''}`} onClick={() => setSelectedUserId(user.user_id)}>
+                                <span className="contact-name">{user.name}</span>
+                                <span className="contact-role">{user.role}</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+                <div className="conversation-view">
+                    {selectedUser ? (
+                        <>
+                            <div className="conversation-header">
+                                <h3>Chat with {selectedUser.name}</h3>
+                            </div>
+                            <div className="conversation-messages">
+                                {conversation.map(msg => (
+                                    <div key={msg.message_id} className={`message-bubble ${msg.sender_id === currentUser.user_id ? 'sent' : 'received'}`}>
+                                        <p>{msg.content}</p>
+                                        <span>{new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                    </div>
+                                ))}
+                                <div ref={conversationEndRef} />
+                            </div>
+                            <form className="message-input-form" onSubmit={handleSendMessage}>
+                                <input type="text" placeholder="Type your message..." value={newMessage} onChange={e => setNewMessage(e.target.value)} />
+                                <button type="submit" className="btn btn-primary btn-icon"><PaperAirplaneIcon/></button>
+                            </form>
+                        </>
+                    ) : (
+                        <div className="conversation-placeholder">
+                            <ChatBubbleLeftRightIcon/>
+                            <p>Select a user to start a conversation</p>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+};
+const AdminMessagingMonitor = ({ users, privateMessages }) => {
+    const [user1Id, setUser1Id] = useState<number | null>(null);
+    const [user2Id, setUser2Id] = useState<number | null>(null);
+
+    const conversation = privateMessages
+        .filter(m => (m.sender_id === user1Id && m.receiver_id === user2Id) || (m.sender_id === user2Id && m.receiver_id === user1Id))
+        .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+        
+    const getUserName = (id) => users.find(u => u.user_id === id)?.name || 'Unknown';
+
+    return (
+        <div className="chat-container theme-navy-coral">
+            <div className="view-header"><h1>Chat Monitor</h1></div>
+            <div className="chat-monitor-controls">
+                <div className="form-group"><label>User 1</label><select value={user1Id || ''} onChange={e => setUser1Id(Number(e.target.value))}><option value="" disabled>Select User 1</option>{users.map(u => <option key={u.user_id} value={u.user_id}>{u.name}</option>)}</select></div>
+                <div className="form-group"><label>User 2</label><select value={user2Id || ''} onChange={e => setUser2Id(Number(e.target.value))}><option value="" disabled>Select User 2</option>{users.map(u => <option key={u.user_id} value={u.user_id}>{u.name}</option>)}</select></div>
+            </div>
+            <div className="conversation-view monitor">
+                {user1Id && user2Id ? (
+                    <div className="conversation-messages">
+                        {conversation.length === 0 ? <p>No messages between these users.</p> :
+                        conversation.map(msg => (
+                            <div key={msg.message_id} className={`message-bubble ${msg.sender_id === user1Id ? 'sent' : 'received'}`}>
+                                <p><strong>{getUserName(msg.sender_id)}:</strong> {msg.content}</p>
+                                <span>{new Date(msg.timestamp).toLocaleString()}</span>
+                            </div>
+                        ))}
+                    </div>
+                ) : <p>Please select two users to view their conversation.</p>}
+            </div>
+        </div>
+    );
+};
 const ToastContainer = ({ toasts, removeToast }) => (
     <div className="toast-container">
         {toasts.map(toast => (
@@ -811,18 +1047,21 @@ const DashboardLayout = ({ user, impersonatedUser, onLogout, onStopImpersonating
 
     const renderContent = () => {
         switch (activeView) {
-            case 'AdminDashboard': return <AdminDashboard users={data.users} programs={data.programs} payments={data.payments}/>
+            case 'AdminDashboard': return <AdminDashboard users={data.users} programs={data.programs} payments={data.payments} announcements={data.announcements}/>
             case 'UserManagement': return <UserManagement users={data.users} onImpersonate={handlers.impersonateUser} onAdd={handlers.addUser} onEdit={handlers.updateUser} onDelete={handlers.deleteUser} />;
             case 'ProgramManagement': return <ProgramManagement programs={data.programs} users={data.users} onAdd={handlers.addProgram} onEdit={handlers.updateProgram} onDelete={handlers.deleteProgram} />;
-            case 'CoachDashboard': return <CoachDashboard coach={effectiveUser} users={data.users} progress={data.progress} onUpdateProgress={handlers.updateProgress}/>;
-            case 'ParentDashboard': return <ParentDashboard parent={effectiveUser} users={data.users} progress={data.progress} />;
-            case 'AthleteDashboard': return <AthleteDashboard athlete={effectiveUser} progress={data.progress} />;
+            case 'AnnouncementManagement': return <AnnouncementManagement announcements={data.announcements} onAdd={handlers.addAnnouncement} onEdit={handlers.updateAnnouncement} onDelete={handlers.deleteAnnouncement} />;
+            case 'CoachDashboard': return <CoachDashboard coach={effectiveUser} users={data.users} progress={data.progress} onUpdateProgress={handlers.updateProgress} announcements={data.announcements} />;
+            case 'ParentDashboard': return <ParentDashboard parent={effectiveUser} users={data.users} progress={data.progress} announcements={data.announcements} />;
+            case 'AthleteDashboard': return <AthleteDashboard athlete={effectiveUser} progress={data.progress} announcements={data.announcements}/>;
             case 'PaymentManagement': return <PaymentManagement payments={data.payments} users={data.users} />;
             case 'AdminLog': return <AdminLogView logs={data.adminLogs} users={data.users} />;
             case 'ScheduleView': return <ScheduleView user={effectiveUser} sessions={data.sessions} users={data.users} programs={data.programs} onConfirmBooking={handlers.confirmBooking} onSetReminder={handlers.openReminderModal}/>;
             case 'CalendarView': return <CalendarView coach={effectiveUser} sessions={data.sessions} users={data.users} onSetReminder={handlers.openReminderModal}/>;
             case 'MessagesView': return <MessagesView messages={data.messages} users={data.users} />;
             case 'ContactUs': return <ContactUs onSendMessage={handlers.sendMessage} addToast={handlers.addToast} />;
+            case 'PrivateMessagingView': return <PrivateMessagingView currentUser={effectiveUser} users={data.users} privateMessages={data.privateMessages} onSendMessage={handlers.sendPrivateMessage} />;
+            case 'AdminMessagingMonitor': return <AdminMessagingMonitor users={data.users} privateMessages={data.privateMessages} />;
             default: return <div>Select a view from the sidebar.</div>;
         }
     };
@@ -851,6 +1090,8 @@ const App = () => {
     const [reminders, setReminders] = useLocalStorage<Reminder[]>('fsc_reminders', []);
     const [notifications, setNotifications] = useLocalStorage<Notification[]>('fsc_notifications', []);
     const [messages, setMessages] = useLocalStorage<Message[]>('fsc_messages', []);
+    const [announcements, setAnnouncements] = useLocalStorage<Announcement[]>('fsc_announcements', initialAnnouncements);
+    const [privateMessages, setPrivateMessages] = useLocalStorage<PrivateMessage[]>('fsc_privateMessages', initialPrivateMessages);
     const [isReminderModalOpen, setIsReminderModalOpen] = useState(false);
     const [sessionForReminder, setSessionForReminder] = useState<Session | null>(null);
     const [toasts, setToasts] = useState<Toast[]>([]);
@@ -956,9 +1197,13 @@ const App = () => {
         setMessages(prev => [newMessage, ...prev]);
         addToast('Your message has been sent successfully.');
     };
+    const handleAddAnnouncement = (formData) => { const newAnnouncement: Announcement = { announcement_id: Date.now(), title: formData.title, content: formData.content, created_at: new Date().toISOString() }; setAnnouncements(prev => [newAnnouncement, ...prev]); addAdminLog('Created announcement', newAnnouncement.announcement_id); addToast('Announcement posted.'); };
+    const handleUpdateAnnouncement = (updatedAnnouncement) => { setAnnouncements(prev => prev.map(a => a.announcement_id === updatedAnnouncement.announcement_id ? updatedAnnouncement : a)); addAdminLog('Updated announcement', updatedAnnouncement.announcement_id); addToast('Announcement updated.'); };
+    const handleDeleteAnnouncement = (announcementId) => { openConfirmationModal('Delete Announcement', 'Are you sure you want to delete this announcement?', () => { setAnnouncements(prev => prev.filter(a => a.announcement_id !== announcementId)); addAdminLog('Deleted announcement', announcementId); addToast('Announcement deleted.'); }); };
+    const handleSendPrivateMessage = (receiver_id: number, content: string) => { const user = impersonatedUser || currentUser; if (!user) return; const newMessage: PrivateMessage = { message_id: Date.now(), sender_id: user.user_id, receiver_id, content, timestamp: new Date().toISOString() }; setPrivateMessages(prev => [...prev, newMessage]); };
 
-    const data = { users, programs, progress, payments, adminLogs, sessions, notifications, messages };
-    const handlers = { impersonateUser: handleImpersonate, addUser: handleAddUser, updateUser: handleUpdateUser, deleteUser: handleDeleteUser, addProgram: handleAddProgram, updateProgram: handleUpdateProgram, deleteProgram: handleDeleteProgram, updateProgress: handleUpdateProgress, confirmBooking: handleConfirmBooking, openReminderModal: handleOpenReminderModal, dismissNotification: handleDismissNotification, sendMessage: handleSendMessage, addToast };
+    const data = { users, programs, progress, payments, adminLogs, sessions, notifications, messages, announcements, privateMessages };
+    const handlers = { impersonateUser: handleImpersonate, addUser: handleAddUser, updateUser: handleUpdateUser, deleteUser: handleDeleteUser, addProgram: handleAddProgram, updateProgram: handleUpdateProgram, deleteProgram: handleDeleteProgram, updateProgress: handleUpdateProgress, confirmBooking: handleConfirmBooking, openReminderModal: handleOpenReminderModal, dismissNotification: handleDismissNotification, sendMessage: handleSendMessage, addToast, addAnnouncement: handleAddAnnouncement, updateAnnouncement: handleUpdateAnnouncement, deleteAnnouncement: handleDeleteAnnouncement, sendPrivateMessage: handleSendPrivateMessage };
 
     if (!currentUser) { return <LoginPage onLogin={handleLogin} error={loginError} />; }
 
