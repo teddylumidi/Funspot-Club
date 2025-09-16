@@ -13,93 +13,60 @@ const CalendarIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" v
 const DocumentTextIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" /></svg>;
 const UserGroupIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m-7.5-2.962c.566-.16-1.168.356-1.168.356m3.633.82-1.168-.356m1.168.356c-.566.16-1.533-.205-1.533-.205m2.7 2.062a5.987 5.987 0 0 1-1.533-.205m1.533.205a5.987 5.987 0 0 0-1.533.205m-2.7-2.062a5.987 5.987 0 0 0-1.533.205m1.533-.205L8.25 15.75M12 12a2.25 2.25 0 1 0 0-4.5 2.25 2.25 0 0 0 0 4.5Z" /><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 21v-1.5a2.25 2.25 0 0 1 2.25-2.25h12a2.25 2.25 0 0 1 2.25 2.25v1.5" /></svg>;
 const CreditCardIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h6m3-3.75l-3 3m0 0l-3-3m3 3V15m6-1.5h.008v.008H18V15Zm-12 0h.008v.008H6V15Zm6 0h.008v.008H12V15Zm6 0h.008v.008H18V15Zm-6 0h.008v.008H12V15Z" /></svg>;
-const ClipboardDocumentListIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 12 2.25a2.251 2.251 0 0 1 1.024.223M7.5 21h9a2.25 2.25 0 0 0 2.25-2.25v-13.5a2.25 2.25 0 0 0-2.25-2.25h-9a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21Z" /></svg>;
+const BellIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" /></svg>;
+const ClockIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>;
+const CheckCircleIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>;
+
 
 // --- Type Definitions ---
 type Role = 'Admin' | 'Coach' | 'Athlete' | 'Parent';
 
 interface User {
-  user_id: number;
-  name: string;
-  email: string;
-  password_hash: string;
-  role: Role;
-  date_of_birth: string;
-  parent_id: number | null;
-  coach_id?: number;
+  user_id: number; name: string; email: string; password_hash: string; role: Role; date_of_birth: string; parent_id: number | null; coach_id?: number;
 }
-
 interface Program {
-  program_id: number;
-  title: string;
-  description: string;
-  schedule: string;
-  coach_id: number;
-  price: number;
+  program_id: number; title: string; description: string; schedule: string; coach_id: number; price: number;
 }
-
+interface Session {
+    session_id: number; program_id: number; date: string; time: string; title: string; coach_id: number; athlete_ids: number[]; confirmed_athlete_ids: number[];
+}
 interface Booking {
-  booking_id: number;
-  user_id: number;
-  program_id: number;
-  status: 'pending' | 'confirmed' | 'cancelled';
-  booked_at: string;
+  booking_id: number; user_id: number; program_id: number; status: 'pending' | 'confirmed' | 'cancelled'; booked_at: string;
 }
-
 interface Attendance {
-    attendance_id: number;
-    athlete_id: number;
-    program_id: number;
-    date: string;
-    status: 'present' | 'absent';
+    attendance_id: number; athlete_id: number; program_id: number; date: string; status: 'present' | 'absent';
 }
-
 interface Progress {
-    progress_id: number;
-    athlete_id: number;
-    skill: string;
-    level: 'beginner' | 'intermediate' | 'advanced';
-    percentage: number; // Added for UI
-    updated_at: string;
+    progress_id: number; athlete_id: number; skill: string; level: 'beginner' | 'intermediate' | 'advanced'; percentage: number; updated_at: string;
 }
-
 interface Payment {
-    payment_id: number;
-    user_id: number; // Parent or Athlete
-    booking_id: number;
-    amount: number;
-    status: 'paid' | 'pending' | 'failed';
-    paid_at: string | null;
+    payment_id: number; user_id: number; booking_id: number; amount: number; status: 'paid' | 'pending' | 'failed'; paid_at: string | null;
 }
-
 interface AdminLog {
-    log_id: number;
-    admin_id: number;
-    action: string;
-    target_id?: number;
-    timestamp: string;
+    log_id: number; admin_id: number; action: string; target_id?: number; timestamp: string;
 }
+interface Reminder {
+    reminder_id: number; session_id: number; user_id: number; remind_at: number; // timestamp
+}
+interface Notification {
+    notification_id: number; user_id: number; text: string; type: 'reminder' | 'confirmation'; created_at: number;
+}
+// FIX: Removed `| null` from Toast type to prevent potential runtime errors and improve type safety.
+// A toast object should never be null in the toasts array.
+type Toast = { id: number; message: string; type: 'success' | 'error'; };
 
 // --- Data Simulation & Hooks ---
 const useLocalStorage = <T,>(key: string, initialValue: T): [T, (value: SetStateAction<T>) => void] => {
     const [storedValue, setStoredValue] = useState<T>(() => {
         try {
-            const item = window.localStorage.getItem(key);
-            return item ? JSON.parse(item) : initialValue;
-        } catch (error) {
-            console.error(error);
-            return initialValue;
-        }
+            const item = window.localStorage.getItem(key); return item ? JSON.parse(item) : initialValue;
+        } catch (error) { console.error(error); return initialValue; }
     });
-
     const setValue = (value: SetStateAction<T>) => {
         try {
             const valueToStore = value instanceof Function ? value(storedValue) : value;
-            setStoredValue(valueToStore);
-            window.localStorage.setItem(key, JSON.stringify(valueToStore));
-        } catch (error) {
-            console.error(error);
-        }
+            setStoredValue(valueToStore); window.localStorage.setItem(key, JSON.stringify(valueToStore));
+        } catch (error) { console.error(error); }
     };
     return [storedValue, setValue];
 };
@@ -114,518 +81,383 @@ const initialUsers: User[] = [
     { user_id: 7, name: 'Mia Smith', email: 'mia@email.com', password_hash: 'password123', role: 'Athlete', date_of_birth: '2015-02-18', parent_id: 6, coach_id: 2 },
     { user_id: 8, name: 'Anna Belle', email: 'anna@funport.com', password_hash: 'password123', role: 'Athlete', date_of_birth: '2002-12-01', parent_id: null, coach_id: 3 },
 ];
-
 const initialPrograms: Program[] = [
     { program_id: 1, title: 'Summer Weekly Program', description: 'Intensive training on weekdays.', schedule: 'Mon, Wed & Fri 3:30PM–6:00PM', coach_id: 2, price: 8000 },
     { program_id: 2, title: 'Weekend Sessions', description: 'Flexible weekend training.', schedule: 'Sat & Sun 3:30PM–6:00PM', coach_id: 3, price: 6000 },
 ];
-
 const initialBookings: Booking[] = [
-    { booking_id: 1, user_id: 4, program_id: 1, status: 'confirmed', booked_at: '2024-07-01T10:00:00Z' },
-    { booking_id: 2, user_id: 6, program_id: 1, status: 'confirmed', booked_at: '2024-07-02T11:00:00Z' },
-    { booking_id: 3, user_id: 8, program_id: 2, status: 'pending', booked_at: '2024-07-20T14:00:00Z' },
+    { booking_id: 1, user_id: 4, program_id: 1, status: 'confirmed', booked_at: '2024-07-01T10:00:00Z' }, { booking_id: 2, user_id: 6, program_id: 1, status: 'confirmed', booked_at: '2024-07-02T11:00:00Z' }, { booking_id: 3, user_id: 8, program_id: 2, status: 'pending', booked_at: '2024-07-20T14:00:00Z' },
 ];
-
-const initialAttendance: Attendance[] = [
-    { attendance_id: 1, athlete_id: 5, program_id: 1, date: '2024-07-15', status: 'present' },
-    { attendance_id: 2, athlete_id: 7, program_id: 1, date: '2024-07-15', status: 'present' },
-    { attendance_id: 3, athlete_id: 5, program_id: 1, date: '2024-07-17', status: 'absent' },
-    { attendance_id: 4, athlete_id: 7, program_id: 1, date: '2024-07-17', status: 'present' },
-];
-
 const initialProgress: Progress[] = [
-    { progress_id: 1, athlete_id: 5, skill: 'Balance', level: 'intermediate', percentage: 80, updated_at: '2024-07-18T09:00:00Z' },
-    { progress_id: 2, athlete_id: 5, skill: 'Gliding', level: 'beginner', percentage: 60, updated_at: '2024-07-18T09:00:00Z' },
-    { progress_id: 3, athlete_id: 7, skill: 'Stopping', level: 'intermediate', percentage: 85, updated_at: '2024-07-18T09:00:00Z' },
-    { progress_id: 4, athlete_id: 8, skill: 'Speed', level: 'advanced', percentage: 90, updated_at: '2024-07-19T09:00:00Z' },
+    { progress_id: 1, athlete_id: 5, skill: 'Balance', level: 'intermediate', percentage: 80, updated_at: '2024-07-18T09:00:00Z' }, { progress_id: 2, athlete_id: 5, skill: 'Gliding', level: 'beginner', percentage: 60, updated_at: '2024-07-18T09:00:00Z' }, { progress_id: 3, athlete_id: 7, skill: 'Stopping', level: 'intermediate', percentage: 85, updated_at: '2024-07-18T09:00:00Z' }, { progress_id: 4, athlete_id: 8, skill: 'Speed', level: 'advanced', percentage: 90, updated_at: '2024-07-19T09:00:00Z' },
 ];
-
 const initialPayments: Payment[] = [
-    { payment_id: 1, user_id: 4, booking_id: 1, amount: 8000, status: 'paid', paid_at: '2024-07-01T10:05:00Z' },
-    { payment_id: 2, user_id: 6, booking_id: 2, amount: 8000, status: 'pending', paid_at: null },
-    { payment_id: 3, user_id: 8, booking_id: 3, amount: 6000, status: 'pending', paid_at: null },
+    { payment_id: 1, user_id: 4, booking_id: 1, amount: 8000, status: 'paid', paid_at: '2024-07-01T10:05:00Z' }, { payment_id: 2, user_id: 6, booking_id: 2, amount: 8000, status: 'pending', paid_at: null }, { payment_id: 3, user_id: 8, booking_id: 3, amount: 6000, status: 'pending', paid_at: null },
 ];
-
-const initialAdminLogs: AdminLog[] = [
-    { log_id: 1, admin_id: 1, action: 'User account created', target_id: 8, timestamp: '2024-07-15T12:00:00Z' },
+const initialAdminLogs: AdminLog[] = [{ log_id: 1, admin_id: 1, action: 'User account created', target_id: 8, timestamp: '2024-07-15T12:00:00Z' }];
+// New Session Data for Calendar/Schedule
+const initialSessions: Session[] = [
+    { session_id: 1, program_id: 1, date: '2024-08-12', time: '16:00', title: 'Leo D. - Gliding', coach_id: 2, athlete_ids: [5], confirmed_athlete_ids: [] },
+    { session_id: 2, program_id: 1, date: '2024-08-12', time: '17:00', title: 'Mia S. - Stopping', coach_id: 2, athlete_ids: [7], confirmed_athlete_ids: [7] },
+    { session_id: 3, program_id: 1, date: '2024-08-14', time: '16:30', title: 'Group Session', coach_id: 2, athlete_ids: [5, 7], confirmed_athlete_ids: [7] },
+    { session_id: 4, program_id: 2, date: '2024-08-17', time: '15:30', title: 'Anna B. - Speed', coach_id: 3, athlete_ids: [8], confirmed_athlete_ids: [] },
+    { session_id: 5, program_id: 2, date: '2024-08-18', time: '16:00', title: 'Group Session', coach_id: 3, athlete_ids: [8], confirmed_athlete_ids: [] },
 ];
-
 // --- Components ---
-
 const LoginPage = ({ onLogin, error }) => {
-    const [email, setEmail] = useState('admin@funport.com');
-    const [password, setPassword] = useState('password123');
-
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        onLogin(email, password);
-    };
-
+    const [email, setEmail] = useState('admin@funport.com'); const [password, setPassword] = useState('password123');
+    const handleSubmit = (e) => { e.preventDefault(); onLogin(email, password); };
     return (
         <div className="login-container">
             <div className="login-box">
-                <h1 className="login-title">
-                    <span className="funpot">funpot </span>
-                    <span className="skating">SKATING</span>
-                </h1>
+                <h1 className="login-title"><span className="funpot">funpot </span><span className="skating">SKATING</span></h1>
                 <p className="login-subtitle">Club Management Portal</p>
                 <form onSubmit={handleSubmit}>
                     {error && <p className="form-error">{error}</p>}
-                    <div className="form-group">
-                        <label htmlFor="email">Email</label>
-                        <input type="email" id="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="password">Password</label>
-                        <input type="password" id="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-                    </div>
+                    <div className="form-group"><label htmlFor="email">Email</label><input type="email" id="email" value={email} onChange={(e) => setEmail(e.target.value)} required /></div>
+                    <div className="form-group"><label htmlFor="password">Password</label><input type="password" id="password" value={password} onChange={(e) => setPassword(e.target.value)} required /></div>
                     <button type="submit" className="btn btn-primary btn-full">Login</button>
                 </form>
             </div>
         </div>
     );
 };
-
-const Header = ({ user, impersonatedUser, onLogout, onStopImpersonating }) => {
+const Header = ({ user, impersonatedUser, onLogout, onStopImpersonating, notifications, onDismissNotification }) => {
     const effectiveUser = impersonatedUser || user;
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const notificationRef = useRef(null);
+    const userNotifications = notifications.filter(n => n.user_id === effectiveUser.user_id);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (notificationRef.current && !notificationRef.current.contains(event.target)) setIsDropdownOpen(false);
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
     return (
         <header className="dashboard-header-bar">
-            {impersonatedUser && (
-                <div className="impersonation-banner">
-                    <ExclamationTriangleIcon/>
-                    <p>Viewing as <strong>{impersonatedUser.name}</strong> ({impersonatedUser.role}).</p>
-                    <button onClick={onStopImpersonating} className="btn btn-secondary btn-sm">Return to Admin View</button>
-                </div>
-            )}
+            {impersonatedUser && (<div className="impersonation-banner"><ExclamationTriangleIcon/><p>Viewing as <strong>{impersonatedUser.name}</strong> ({impersonatedUser.role}).</p><button onClick={onStopImpersonating} className="btn btn-secondary btn-sm">Return to Admin View</button></div>)}
             <div className="header-content">
-                <div className="header-left">
-                    <h2 className="header-title">
-                        {effectiveUser.role} Dashboard
-                    </h2>
-                </div>
+                <div className="header-left"><h2 className="header-title">{effectiveUser.role} Dashboard</h2></div>
                 <div className="header-right">
+                    <div className="notification-bell" ref={notificationRef}>
+                        <button onClick={() => setIsDropdownOpen(prev => !prev)} className="btn-icon" aria-label="Notifications">
+                            <BellIcon />
+                            {userNotifications.length > 0 && <span className="notification-badge">{userNotifications.length}</span>}
+                        </button>
+                        {isDropdownOpen && (
+                            <div className="notification-dropdown">
+                                <div className="notification-header">Notifications</div>
+                                {userNotifications.length > 0 ? (
+                                    userNotifications.map(n => (
+                                        <div key={n.notification_id} className="notification-item">
+                                            <p>{n.text}</p>
+                                            <button onClick={() => onDismissNotification(n.notification_id)} className="btn-icon btn-dismiss" title="Dismiss"><CloseIcon /></button>
+                                        </div>
+                                    ))
+                                ) : ( <div className="notification-empty">No new notifications</div> )}
+                            </div>
+                        )}
+                    </div>
                     <span>Welcome, <strong>{user.name}</strong></span>
-                    <button onClick={onLogout} className="btn-icon" aria-label="Logout">
-                        <LogoutIcon />
-                    </button>
+                    <button onClick={onLogout} className="btn-icon" aria-label="Logout"><LogoutIcon /></button>
                 </div>
             </div>
         </header>
     );
 };
-
 const Sidebar = ({ user, onNavigate, activeView }) => {
     const sidebarLinks = {
-      Admin: [
-        { name: 'Dashboard', icon: ChartBarIcon, view: 'AdminDashboard' },
-        { name: 'Users', icon: UserGroupIcon, view: 'UserManagement' },
-        { name: 'Programs', icon: CalendarIcon, view: 'ProgramManagement' },
-        { name: 'Payments', icon: CreditCardIcon, view: 'PaymentManagement' },
-        { name: 'Audit Log', icon: DocumentTextIcon, view: 'AdminLog' },
-      ],
-      Coach: [
-        { name: 'My Athletes', icon: UserGroupIcon, view: 'CoachDashboard' },
-        { name: 'Schedule', icon: CalendarIcon, view: 'CoachSchedule' },
-      ],
-      Parent: [
-        { name: 'My Children', icon: UserGroupIcon, view: 'ParentDashboard' },
-        { name: 'Payments', icon: CreditCardIcon, view: 'ParentPayments' },
-      ],
-      Athlete: [
-        { name: 'My Progress', icon: ChartBarIcon, view: 'AthleteDashboard' },
-        { name: 'Schedule', icon: CalendarIcon, view: 'AthleteSchedule' },
-      ],
+      Admin: [ { name: 'Dashboard', icon: ChartBarIcon, view: 'AdminDashboard' }, { name: 'Users', icon: UserGroupIcon, view: 'UserManagement' }, { name: 'Programs', icon: CalendarIcon, view: 'ProgramManagement' }, { name: 'Payments', icon: CreditCardIcon, view: 'PaymentManagement' }, { name: 'Audit Log', icon: DocumentTextIcon, view: 'AdminLog' }, ],
+      Coach: [ { name: 'My Athletes', icon: UserGroupIcon, view: 'CoachDashboard' }, { name: 'Calendar', icon: CalendarIcon, view: 'CalendarView' }, ],
+      Parent: [ { name: 'My Children', icon: UserGroupIcon, view: 'ParentDashboard' }, { name: 'Schedule', icon: CalendarIcon, view: 'ScheduleView' }, { name: 'Payments', icon: CreditCardIcon, view: 'ParentPayments' }, ],
+      Athlete: [ { name: 'My Progress', icon: ChartBarIcon, view: 'AthleteDashboard' }, { name: 'Schedule', icon: CalendarIcon, view: 'ScheduleView' }, ],
     };
-    
     const links = sidebarLinks[user.role] || [];
-    
     return (
         <aside className="sidebar">
-            <div className="sidebar-header">
-                <span className="funpot">funpot </span>
-                <span className="skating">SKATING</span>
-            </div>
-            <nav className="sidebar-nav">
-                <ul>
-                    {links.map(link => {
-                        const Icon = link.icon;
-                        return (
-                            <li key={link.name}>
-                                <a href="#" 
-                                   onClick={(e) => { e.preventDefault(); onNavigate(link.view); }}
-                                   className={activeView === link.view ? 'active' : ''}>
-                                    <Icon />
-                                    <span>{link.name}</span>
-                                </a>
-                            </li>
-                        )
-                    })}
-                </ul>
-            </nav>
+            <div className="sidebar-header"><span className="funpot">funpot </span><span className="skating">SKATING</span></div>
+            <nav className="sidebar-nav"><ul>{links.map(link => { const Icon = link.icon; return (<li key={link.name}><a href="#" onClick={(e) => { e.preventDefault(); onNavigate(link.view); }} className={activeView === link.view ? 'active' : ''}><Icon /><span>{link.name}</span></a></li>)})}</ul></nav>
         </aside>
     );
 };
-
 // --- Modals ---
 const UserFormModal = ({ isOpen, onClose, onSave, userToEdit, users }) => {
     const [formData, setFormData] = useState({ name: '', email: '', role: 'Athlete', date_of_birth: '', parent_id: '', coach_id: '' });
     const modalContentRef = useRef(null);
-
     useEffect(() => {
-        if (userToEdit) {
-            setFormData({
-                name: userToEdit.name,
-                email: userToEdit.email,
-                role: userToEdit.role,
-                date_of_birth: userToEdit.date_of_birth,
-                parent_id: userToEdit.parent_id || '',
-                coach_id: userToEdit.coach_id || '',
-            });
-        } else {
-            setFormData({ name: '', email: '', role: 'Athlete', date_of_birth: '', parent_id: '', coach_id: '' });
-        }
+        if (userToEdit) setFormData({ name: userToEdit.name, email: userToEdit.email, role: userToEdit.role, date_of_birth: userToEdit.date_of_birth, parent_id: userToEdit.parent_id || '', coach_id: userToEdit.coach_id || '', });
+        else setFormData({ name: '', email: '', role: 'Athlete', date_of_birth: '', parent_id: '', coach_id: '' });
     }, [userToEdit, isOpen]);
-
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
-    };
-
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        onSave(formData);
-    };
-    
+    const handleChange = (e) => { const { name, value } = e.target; setFormData(prev => ({ ...prev, [name]: value })); };
+    const handleSubmit = (e) => { e.preventDefault(); onSave(formData); };
     useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (modalContentRef.current && !modalContentRef.current.contains(event.target)) onClose();
-        };
+        const handleClickOutside = (event) => { if (modalContentRef.current && !modalContentRef.current.contains(event.target)) onClose(); };
         if (isOpen) document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [isOpen, onClose]);
-
     if (!isOpen) return null;
-    
-    const parents = users.filter(u => u.role === 'Parent');
-    const coaches = users.filter(u => u.role === 'Coach');
-
+    const parents = users.filter(u => u.role === 'Parent'); const coaches = users.filter(u => u.role === 'Coach');
     return (
         <div className="modal-overlay show">
             <div className="modal-content" ref={modalContentRef}>
-                <div className="modal-header">
-                    <h2>{userToEdit ? 'Edit User' : 'Add New User'}</h2>
-                    <button onClick={onClose} className="close-btn"><CloseIcon /></button>
-                </div>
-                <form onSubmit={handleSubmit}>
-                    <div className="form-group">
-                        <label>Full Name</label>
-                        <input type="text" name="name" value={formData.name} onChange={handleChange} required />
-                    </div>
-                    <div className="form-group">
-                        <label>Email Address</label>
-                        <input type="email" name="email" value={formData.email} onChange={handleChange} required />
-                    </div>
-                    <div className="form-group">
-                        <label>Date of Birth</label>
-                        <input type="date" name="date_of_birth" value={formData.date_of_birth} onChange={handleChange} required />
-                    </div>
-                    <div className="form-group">
-                        <label>Role</label>
-                        <select name="role" value={formData.role} onChange={handleChange}>
-                            <option value="Admin">Admin</option>
-                            <option value="Coach">Coach</option>
-                            <option value="Parent">Parent</option>
-                            <option value="Athlete">Athlete</option>
-                        </select>
-                    </div>
-                    {formData.role === 'Athlete' && (
-                        <>
-                            <div className="form-group">
-                                <label>Link to Parent</label>
-                                <select name="parent_id" value={formData.parent_id} onChange={handleChange}>
-                                    <option value="">No Parent</option>
-                                    {parents.map(p => <option key={p.user_id} value={p.user_id}>{p.name}</option>)}
-                                </select>
-                            </div>
-                             <div className="form-group">
-                                <label>Assign Coach</label>
-                                <select name="coach_id" value={formData.coach_id} onChange={handleChange}>
-                                    <option value="">No Coach</option>
-                                    {coaches.map(c => <option key={c.user_id} value={c.user_id}>{c.name}</option>)}
-                                </select>
-                            </div>
-                        </>
-                    )}
-                    <div className="form-actions">
-                        <button type="submit" className="btn btn-primary">{userToEdit ? 'Save Changes' : 'Create User'}</button>
-                    </div>
+                <div className="modal-header"><h2>{userToEdit ? 'Edit User' : 'Add New User'}</h2><button onClick={onClose} className="close-btn"><CloseIcon /></button></div>
+                <form onSubmit={handleSubmit}><div className="form-group"><label>Full Name</label><input type="text" name="name" value={formData.name} onChange={handleChange} required /></div><div className="form-group"><label>Email Address</label><input type="email" name="email" value={formData.email} onChange={handleChange} required /></div><div className="form-group"><label>Date of Birth</label><input type="date" name="date_of_birth" value={formData.date_of_birth} onChange={handleChange} required /></div><div className="form-group"><label>Role</label><select name="role" value={formData.role} onChange={handleChange}><option value="Admin">Admin</option><option value="Coach">Coach</option><option value="Parent">Parent</option><option value="Athlete">Athlete</option></select></div>
+                    {formData.role === 'Athlete' && (<><div className="form-group"><label>Link to Parent</label><select name="parent_id" value={formData.parent_id} onChange={handleChange}><option value="">No Parent</option>{parents.map(p => <option key={p.user_id} value={p.user_id}>{p.name}</option>)}</select></div><div className="form-group"><label>Assign Coach</label><select name="coach_id" value={formData.coach_id} onChange={handleChange}><option value="">No Coach</option>{coaches.map(c => <option key={c.user_id} value={c.user_id}>{c.name}</option>)}</select></div></>)}
+                    <div className="form-actions"><button type="submit" className="btn btn-primary">{userToEdit ? 'Save Changes' : 'Create User'}</button></div>
                 </form>
             </div>
         </div>
     );
 };
-
-// --- Dashboard Views ---
-
-const AdminDashboard = ({ users, programs, payments }) => {
-    const totalUsers = users.length;
-    const activeAthletes = users.filter(u => u.role === 'Athlete').length;
-    const pendingPayments = payments.filter(p => p.status === 'pending').reduce((sum, p) => sum + p.amount, 0);
-    const totalRevenue = payments.filter(p => p.status === 'paid').reduce((sum, p) => sum + p.amount, 0);
-
-    const StatCard = ({ title, value, icon: Icon }) => (
-        <div className="stat-card">
-            <div className="stat-icon"><Icon /></div>
-            <div className="stat-content">
-                <p className="stat-value">{value}</p>
-                <p className="stat-title">{title}</p>
-            </div>
-        </div>
-    );
-
+const ReminderModal = ({ isOpen, onClose, onSave, session }) => {
+    const [reminderTime, setReminderTime] = useState('60'); // default to 1 hour
+    const modalContentRef = useRef(null);
+    useEffect(() => {
+        const handleClickOutside = (event) => { if (modalContentRef.current && !modalContentRef.current.contains(event.target)) onClose(); };
+        if (isOpen) document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [isOpen, onClose]);
+    if (!isOpen || !session) return null;
+    const handleSubmit = (e) => { e.preventDefault(); onSave(session.session_id, parseInt(reminderTime, 10)); };
     return (
-        <div>
-            <div className="stat-card-grid">
-                <StatCard title="Total Users" value={totalUsers} icon={UserGroupIcon} />
-                <StatCard title="Active Athletes" value={activeAthletes} icon={UserGroupIcon} />
-                <StatCard title="Pending Payments" value={`KES ${pendingPayments.toLocaleString()}`} icon={CreditCardIcon} />
-                <StatCard title="Total Revenue" value={`KES ${totalRevenue.toLocaleString()}`} icon={CreditCardIcon} />
+        <div className="modal-overlay show">
+            <div className="modal-content" ref={modalContentRef}>
+                <div className="modal-header"><h2>Set Reminder for {session.title}</h2><button onClick={onClose} className="close-btn"><CloseIcon /></button></div>
+                <form onSubmit={handleSubmit}>
+                    <div className="form-group">
+                        <label>Notify me before the session:</label>
+                        <select value={reminderTime} onChange={(e) => setReminderTime(e.target.value)}>
+                            <option value="15">15 minutes before</option>
+                            <option value="60">1 hour before</option>
+                            <option value="1440">1 day before</option>
+                        </select>
+                    </div>
+                    <div className="form-actions"><button type="submit" className="btn btn-primary">Set Reminder</button></div>
+                </form>
             </div>
-        </div>
-    );
-}
-
-const UserManagement = ({ users, onImpersonate, onAdd, onEdit, onDelete }) => {
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [userToEdit, setUserToEdit] = useState<User | null>(null);
-
-    const handleOpenModal = (user: User | null = null) => {
-        setUserToEdit(user);
-        setIsModalOpen(true);
-    };
-
-    const handleSave = (formData) => {
-        if (userToEdit) {
-            onEdit({ ...userToEdit, ...formData });
-        } else {
-            onAdd(formData);
-        }
-        setIsModalOpen(false);
-    };
-
-    return (
-        <div>
-            <div className="view-header">
-                <h1>User Management</h1>
-                <button className="btn btn-primary" onClick={() => handleOpenModal()}><UserPlusIcon/> Add User</button>
-            </div>
-            <div className="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Role</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {users.map(user => (
-                            <tr key={user.user_id}>
-                                <td>{user.name}</td>
-                                <td>{user.email}</td>
-                                <td><span className={`role-badge role-${user.role.toLowerCase()}`}>{user.role}</span></td>
-                                <td className="action-cell">
-                                    <button onClick={() => onImpersonate(user)} className="btn-icon" title="Impersonate"><EyeIcon/></button>
-                                    <button onClick={() => handleOpenModal(user)} className="btn-icon" title="Edit"><PencilIcon/></button>
-                                    <button onClick={() => onDelete(user.user_id)} className="btn-icon btn-danger" title="Delete"><TrashIcon/></button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
-             <UserFormModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSave={handleSave} userToEdit={userToEdit} users={users}/>
         </div>
     );
 };
-
+// --- Dashboard Views ---
+const AdminDashboard = ({ users, programs, payments }) => {
+    const totalUsers = users.length; const activeAthletes = users.filter(u => u.role === 'Athlete').length; const pendingPayments = payments.filter(p => p.status === 'pending').reduce((sum, p) => sum + p.amount, 0); const totalRevenue = payments.filter(p => p.status === 'paid').reduce((sum, p) => sum + p.amount, 0);
+    const StatCard = ({ title, value, icon: Icon }) => (<div className="stat-card"><div className="stat-icon"><Icon /></div><div className="stat-content"><p className="stat-value">{value}</p><p className="stat-title">{title}</p></div></div>);
+    return (<div><div className="stat-card-grid"><StatCard title="Total Users" value={totalUsers} icon={UserGroupIcon} /><StatCard title="Active Athletes" value={activeAthletes} icon={UserGroupIcon} /><StatCard title="Pending Payments" value={`KES ${pendingPayments.toLocaleString()}`} icon={CreditCardIcon} /><StatCard title="Total Revenue" value={`KES ${totalRevenue.toLocaleString()}`} icon={CreditCardIcon} /></div></div>);
+}
+const UserManagement = ({ users, onImpersonate, onAdd, onEdit, onDelete }) => {
+    const [isModalOpen, setIsModalOpen] = useState(false); const [userToEdit, setUserToEdit] = useState<User | null>(null);
+    const handleOpenModal = (user: User | null = null) => { setUserToEdit(user); setIsModalOpen(true); };
+    const handleSave = (formData) => { if (userToEdit) onEdit({ ...userToEdit, ...formData }); else onAdd(formData); setIsModalOpen(false); };
+    return (<div><div className="view-header"><h1>User Management</h1><button className="btn btn-primary" onClick={() => handleOpenModal()}><UserPlusIcon/> Add User</button></div><div className="table-container"><table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Actions</th></tr></thead><tbody>{users.map(user => (<tr key={user.user_id}><td>{user.name}</td><td>{user.email}</td><td><span className={`role-badge role-${user.role.toLowerCase()}`}>{user.role}</span></td><td className="action-cell"><button onClick={() => onImpersonate(user)} className="btn-icon" title="Impersonate"><EyeIcon/></button><button onClick={() => handleOpenModal(user)} className="btn-icon" title="Edit"><PencilIcon/></button><button onClick={() => onDelete(user.user_id)} className="btn-icon btn-danger" title="Delete"><TrashIcon/></button></td></tr>))}</tbody></table></div><UserFormModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSave={handleSave} userToEdit={userToEdit} users={users}/></div>);
+};
 const CoachDashboard = ({ coach, users, progress, onUpdateProgress }) => {
     const myAthletes = users.filter(u => u.role === 'Athlete' && u.coach_id === coach.user_id);
-    
-    return (
-        <div>
-            <div className="view-header"><h1>My Athletes</h1></div>
-            <div className="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Athlete</th>
-                            <th>Skill</th>
-                            <th>Progress</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {myAthletes.map(athlete => {
-                            const athleteProgress = progress.filter(p => p.athlete_id === athlete.user_id);
-                            return athleteProgress.map((p, index) => (
-                                <tr key={p.progress_id}>
-                                    {index === 0 && <td rowSpan={athleteProgress.length}>{athlete.name}</td>}
-                                    <td>{p.skill}</td>
-                                    <td>
-                                        <div className="progress-bar-table">
-                                            <div className="progress-bar-fill" style={{ width: `${p.percentage}%` }}>{p.percentage}%</div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <input 
-                                            type="range" 
-                                            min="0" 
-                                            max="100" 
-                                            value={p.percentage} 
-                                            onChange={(e) => onUpdateProgress(p.progress_id, parseInt(e.target.value))}
-                                        />
-                                    </td>
-                                </tr>
-                            ))
-                        })}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    )
+    return (<div><div className="view-header"><h1>My Athletes</h1></div><div className="table-container"><table><thead><tr><th>Athlete</th><th>Skill</th><th>Progress</th><th>Actions</th></tr></thead><tbody>{myAthletes.length === 0 ? (<tr><td colSpan={4} style={{textAlign: 'center'}}>You have no assigned athletes.</td></tr>) : myAthletes.map(athlete => { const athleteProgress = progress.filter(p => p.athlete_id === athlete.user_id); return athleteProgress.map((p, index) => (<tr key={p.progress_id}>{index === 0 && <td rowSpan={athleteProgress.length}>{athlete.name}</td>}<td>{p.skill}</td><td><div className="progress-bar-table"><div className="progress-bar-fill" style={{ width: `${p.percentage}%` }}>{p.percentage}%</div></div></td><td><input type="range" min="0" max="100" value={p.percentage} onChange={(e) => onUpdateProgress(p.progress_id, parseInt(e.target.value))}/></td></tr>))})}</tbody></table></div></div>)
 };
-
-const ProgressDisplay = ({ title, progressItems }) => (
-     <div className="card customer-card">
-        <h3>{title}</h3>
-        <div className="progress-grid">
-            {progressItems.map(p => (
-                <div key={p.progress_id} className="progress-item">
-                    <label>{p.skill} <span className="progress-level">({p.level})</span></label>
-                    <div className="progress-bar">
-                        <div className="progress-bar-fill" style={{ width: `${p.percentage}%` }}>{p.percentage}%</div>
-                    </div>
-                </div>
-            ))}
-        </div>
-    </div>
-);
-
-
-const AthleteDashboard = ({ athlete, progress }) => {
-    const myProgress = progress.filter(p => p.athlete_id === athlete.user_id);
-    return (
-        <div>
-             <div className="view-header"><h1>My Progress</h1></div>
-             <ProgressDisplay title="Your Skill Development" progressItems={myProgress} />
-        </div>
-    )
-};
-
+const ProgressDisplay = ({ title, progressItems }) => (<div className="card customer-card"><h3>{title}</h3>{progressItems.length === 0 ? (<p>No progress to display.</p>) : (<div className="progress-grid">{progressItems.map(p => (<div key={p.progress_id} className="progress-item"><label>{p.skill} <span className="progress-level">({p.level})</span></label><div className="progress-bar"><div className="progress-bar-fill" style={{ width: `${p.percentage}%` }}>{p.percentage}%</div></div></div>))}</div>)}</div>);
+const AthleteDashboard = ({ athlete, progress }) => { const myProgress = progress.filter(p => p.athlete_id === athlete.user_id); return (<div><div className="view-header"><h1>My Progress</h1></div><ProgressDisplay title="Your Skill Development" progressItems={myProgress} /></div>)};
 const ParentDashboard = ({ parent, users, progress }) => {
     const children = users.filter(u => u.parent_id === parent.user_id);
+    return (<div><div className="view-header"><h1>My Children's Progress</h1></div><div className="customer-dashboard-layout">{children.length === 0 ? (<p>No children linked to this account.</p>) : children.map(child => { const childProgress = progress.filter(p => p.athlete_id === child.user_id); return <ProgressDisplay key={child.user_id} title={`${child.name}'s Skills`} progressItems={childProgress} /> })}</div></div>)
+}
+const PaymentManagement = ({ payments, users }) => (<div><div className="view-header"><h1>Payment Management</h1></div><div className="table-container"><table><thead><tr><th>User</th><th>Amount (KES)</th><th>Status</th><th>Date</th></tr></thead><tbody>{payments.map(p => { const user = users.find(u => u.user_id === p.user_id); return (<tr key={p.payment_id}><td>{user ? user.name : 'Unknown User'}</td><td>{p.amount.toLocaleString()}</td><td><span className={`status-badge status-${p.status}`}>{p.status}</span></td><td>{p.paid_at ? new Date(p.paid_at).toLocaleDateString() : 'N/A'}</td></tr>); })}</tbody></table></div></div>);
+const AdminLogView = ({ logs, users }) => (<div><div className="view-header"><h1>Admin Audit Log</h1></div><div className="table-container"><table><thead><tr><th>Admin</th><th>Action</th><th>Target ID</th><th>Timestamp</th></tr></thead><tbody>{logs.map(log => { const admin = users.find(u => u.user_id === log.admin_id); return (<tr key={log.log_id}><td>{admin ? admin.name : 'Unknown Admin'}</td><td>{log.action}</td><td>{log.target_id || 'N/A'}</td><td>{new Date(log.timestamp).toLocaleString()}</td></tr>); })}</tbody></table></div></div>);
+const ScheduleView = ({ user, sessions, users, onConfirmBooking, onSetReminder }) => {
+    const getAthleteId = () => user.role === 'Athlete' ? user.user_id : null;
+    const getChildrenIds = () => user.role === 'Parent' ? users.filter(u => u.parent_id === user.user_id).map(c => c.user_id) : [];
+
+    const userAthleteId = getAthleteId();
+    const childrenIds = getChildrenIds();
+
+    const upcomingSessions = sessions
+        .filter(s => new Date(s.date) >= new Date())
+        .filter(s => {
+            if (user.role === 'Athlete') return s.athlete_ids.includes(userAthleteId);
+            if (user.role === 'Parent') return s.athlete_ids.some(id => childrenIds.includes(id));
+            return false;
+        })
+        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
     return (
         <div>
-            <div className="view-header"><h1>My Children's Progress</h1></div>
-            <div className="customer-dashboard-layout">
-            {children.map(child => {
-                const childProgress = progress.filter(p => p.athlete_id === child.user_id);
-                return <ProgressDisplay key={child.user_id} title={`${child.name}'s Skills`} progressItems={childProgress} />
-            })}
+            <div className="view-header"><h1>My Schedule</h1></div>
+            <div className="schedule-list">
+                {upcomingSessions.length === 0 ? (<p>No upcoming sessions.</p>) : upcomingSessions.map(session => {
+                    const athleteForSession = user.role === 'Athlete' ? user : users.find(u => session.athlete_ids.includes(u.user_id) && childrenIds.includes(u.user_id));
+                    if (!athleteForSession) return null;
+
+                    const isConfirmed = session.confirmed_athlete_ids.includes(athleteForSession.user_id);
+                    return (
+                        <div className="schedule-item" key={session.session_id}>
+                            <div className="schedule-item-date">
+                                <span>{new Date(session.date).toLocaleString('en-US', { month: 'short' })}</span>
+                                <span>{new Date(session.date).getDate()}</span>
+                            </div>
+                            <div className="schedule-item-info">
+                                <h4>{session.title} {user.role === 'Parent' && `(${athleteForSession.name})`}</h4>
+                                <p>{new Date(session.date).toLocaleDateString([], { weekday: 'long' })} at {session.time}</p>
+                            </div>
+                            <div className="schedule-item-actions">
+                                {isConfirmed ? (
+                                    <span className="status-badge status-confirmed"><CheckCircleIcon/> Confirmed</span>
+                                ) : (
+                                    <button className="btn btn-primary btn-sm" onClick={() => onConfirmBooking(session.session_id, athleteForSession.user_id)}>Confirm Booking</button>
+                                )}
+                                <button className="btn btn-secondary btn-sm" onClick={() => onSetReminder(session)}><ClockIcon/> Set Reminder</button>
+                            </div>
+                        </div>
+                    );
+                })}
             </div>
         </div>
-    )
-}
+    );
+};
+const CalendarView = ({ coach, sessions, users, onSetReminder }) => {
+    const [viewMode, setViewMode] = useState('Month'); // Month, Week, Day
+    const [currentDate, setCurrentDate] = useState(new Date());
 
-const PaymentManagement = ({ payments, users }) => (
-    <div>
-        <div className="view-header"><h1>Payment Management</h1></div>
-        <div className="table-container">
-            <table>
-                <thead>
-                    <tr><th>User</th><th>Amount (KES)</th><th>Status</th><th>Date</th></tr>
-                </thead>
-                <tbody>
-                    {payments.map(p => {
-                        const user = users.find(u => u.user_id === p.user_id);
+    const athleteColorMap = useRef({});
+    const colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];
+    const getAthleteColor = (athleteId) => {
+        if (!athleteColorMap.current[athleteId]) {
+            athleteColorMap.current[athleteId] = colors[Object.keys(athleteColorMap.current).length % colors.length];
+        }
+        return athleteColorMap.current[athleteId];
+    };
+    
+    const coachSessions = sessions.filter(s => s.coach_id === coach.user_id);
+
+    const renderHeader = () => {
+        const dateFormat = viewMode === 'Month' ? 'MMMM yyyy' : (viewMode === 'Week' ? 'MMMM d, yyyy' : 'MMMM d, yyyy');
+        const formattedDate = new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long', day: viewMode !== 'Month' ? 'numeric' : undefined }).format(currentDate);
+
+        const changeDate = (amount) => {
+            const newDate = new Date(currentDate);
+            if(viewMode === 'Month') newDate.setMonth(newDate.getMonth() + amount);
+            if(viewMode === 'Week') newDate.setDate(newDate.getDate() + (amount * 7));
+            if(viewMode === 'Day') newDate.setDate(newDate.getDate() + amount);
+            setCurrentDate(newDate);
+        };
+
+        return (
+            <div className="calendar-header">
+                <div className="calendar-nav">
+                    <button onClick={() => changeDate(-1)}>‹</button>
+                    <h2>{formattedDate}</h2>
+                    <button onClick={() => changeDate(1)}>›</button>
+                </div>
+                <div className="calendar-view-switcher">
+                    <button onClick={() => setViewMode('Month')} className={viewMode === 'Month' ? 'active' : ''}>Month</button>
+                    <button onClick={() => setViewMode('Week')} className={viewMode === 'Week' ? 'active' : ''}>Week</button>
+                    <button onClick={() => setViewMode('Day')} className={viewMode === 'Day' ? 'active' : ''}>Day</button>
+                </div>
+            </div>
+        );
+    };
+
+    const renderMonthView = () => {
+        const monthStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+        const monthEnd = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+        const startDate = new Date(monthStart);
+        startDate.setDate(startDate.getDate() - monthStart.getDay());
+        const endDate = new Date(monthEnd);
+        endDate.setDate(endDate.getDate() + (6 - monthEnd.getDay()));
+        
+        const days = [];
+        let day = new Date(startDate);
+        while(day <= endDate) {
+            days.push(new Date(day));
+            day.setDate(day.getDate() + 1);
+        }
+        
+        const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+        return (
+            <>
+                <div className="calendar-days-header">{dayNames.map(d => <div key={d}>{d}</div>)}</div>
+                <div className="calendar-grid-month">
+                    {days.map(d => {
+                        const sessionsOnDay = coachSessions.filter(s => new Date(s.date).toDateString() === d.toDateString());
+                        const isCurrentMonth = d.getMonth() === currentDate.getMonth();
                         return (
-                            <tr key={p.payment_id}>
-                                <td>{user ? user.name : 'Unknown User'}</td>
-                                <td>{p.amount.toLocaleString()}</td>
-                                <td><span className={`status-badge status-${p.status}`}>{p.status}</span></td>
-                                <td>{p.paid_at ? new Date(p.paid_at).toLocaleDateString() : 'N/A'}</td>
-                            </tr>
-                        );
+                            <div key={d.toString()} className={`calendar-day ${isCurrentMonth ? '' : 'other-month'}`}>
+                                <span className="day-number">{d.getDate()}</span>
+                                <div className="sessions-container">
+                                {sessionsOnDay.map(s => (
+                                    <div key={s.session_id} className="calendar-event" style={{borderColor: s.athlete_ids.length > 1 ? '#8B5CF6' : getAthleteColor(s.athlete_ids[0])}}>
+                                        <p>{s.time} {s.title}</p>
+                                    </div>
+                                ))}
+                                </div>
+                            </div>
+                        )
                     })}
-                </tbody>
-            </table>
+                </div>
+            </>
+        );
+    };
+
+    // Week and Day views are simplified for brevity but would be built out similarly
+    const renderWeekView = () => {
+         const weekStart = new Date(currentDate);
+         weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+         const days = Array.from({length: 7}).map((_, i) => {
+            const d = new Date(weekStart);
+            d.setDate(d.getDate() + i);
+            return d;
+         });
+         return <div className="calendar-grid-week">{days.map(d => {
+             const sessionsOnDay = coachSessions.filter(s => new Date(s.date).toDateString() === d.toDateString());
+             return (<div key={d.toString()} className="calendar-day-week">
+                <h4>{d.toLocaleDateString([], {weekday: 'short', day: 'numeric'})}</h4>
+                {sessionsOnDay.map(s => <div key={s.session_id} className="calendar-event" style={{borderColor: s.athlete_ids.length > 1 ? '#8B5CF6' : getAthleteColor(s.athlete_ids[0])}}><p>{s.time} {s.title}</p></div>)}
+             </div>)
+         })}</div>
+    };
+    const renderDayView = () => {
+        const sessionsOnDay = coachSessions.filter(s => new Date(s.date).toDateString() === currentDate.toDateString());
+        return <div className="calendar-grid-day">
+            {sessionsOnDay.map(s => <div key={s.session_id} className="calendar-event" style={{borderColor: s.athlete_ids.length > 1 ? '#8B5CF6' : getAthleteColor(s.athlete_ids[0])}}><p>{s.time} {s.title}</p></div>)}
         </div>
+    };
+
+    return (<div className="calendar-container">{renderHeader()}{viewMode === 'Month' ? renderMonthView() : viewMode === 'Week' ? renderWeekView() : renderDayView()}</div>);
+};
+const ToastContainer = ({ toasts, removeToast }) => (
+    <div className="toast-container">
+        {toasts.map(toast => (
+            <div key={toast.id} className={`toast toast-${toast.type}`}>
+                {toast.message}
+                <button onClick={() => removeToast(toast.id)} className="close-btn"><CloseIcon /></button>
+            </div>
+        ))}
     </div>
 );
-
-const AdminLogView = ({ logs, users }) => (
-    <div>
-        <div className="view-header"><h1>Admin Audit Log</h1></div>
-        <div className="table-container">
-            <table>
-                <thead>
-                    <tr><th>Admin</th><th>Action</th><th>Target ID</th><th>Timestamp</th></tr>
-                </thead>
-                <tbody>
-                    {logs.map(log => {
-                        const admin = users.find(u => u.user_id === log.admin_id);
-                        return (
-                            <tr key={log.log_id}>
-                                <td>{admin ? admin.name : 'Unknown Admin'}</td>
-                                <td>{log.action}</td>
-                                <td>{log.target_id || 'N/A'}</td>
-                                <td>{new Date(log.timestamp).toLocaleString()}</td>
-                            </tr>
-                        );
-                    })}
-                </tbody>
-            </table>
-        </div>
-    </div>
-);
-
 
 const DashboardLayout = ({ user, impersonatedUser, onLogout, onStopImpersonating, data, handlers }) => {
     const [activeView, setActiveView] = useState('');
-
     const effectiveUser = impersonatedUser || user;
 
     useEffect(() => {
-        // Set default view on user change
-        const defaultViews = {
-            Admin: 'AdminDashboard',
-            Coach: 'CoachDashboard',
-            Parent: 'ParentDashboard',
-            Athlete: 'AthleteDashboard',
-        };
+        const defaultViews = { Admin: 'AdminDashboard', Coach: 'CoachDashboard', Parent: 'ParentDashboard', Athlete: 'AthleteDashboard', };
         setActiveView(defaultViews[effectiveUser.role] || '');
     }, [effectiveUser]);
 
     const renderContent = () => {
         switch (activeView) {
-            case 'AdminDashboard':
-                return <AdminDashboard users={data.users} programs={data.programs} payments={data.payments}/>
-            case 'UserManagement':
-                return <UserManagement users={data.users} onImpersonate={handlers.impersonateUser} onAdd={handlers.addUser} onEdit={handlers.updateUser} onDelete={handlers.deleteUser} />;
-            case 'CoachDashboard':
-                return <CoachDashboard coach={effectiveUser} users={data.users} progress={data.progress} onUpdateProgress={handlers.updateProgress}/>;
-            case 'ParentDashboard':
-                return <ParentDashboard parent={effectiveUser} users={data.users} progress={data.progress} />;
-            case 'AthleteDashboard':
-                return <AthleteDashboard athlete={effectiveUser} progress={data.progress} />;
-            case 'PaymentManagement':
-                 return <PaymentManagement payments={data.payments} users={data.users} />;
-            case 'AdminLog':
-                 return <AdminLogView logs={data.adminLogs} users={data.users} />;
-            default:
-                return <div>Select a view from the sidebar.</div>;
+            case 'AdminDashboard': return <AdminDashboard users={data.users} programs={data.programs} payments={data.payments}/>
+            case 'UserManagement': return <UserManagement users={data.users} onImpersonate={handlers.impersonateUser} onAdd={handlers.addUser} onEdit={handlers.updateUser} onDelete={handlers.deleteUser} />;
+            case 'CoachDashboard': return <CoachDashboard coach={effectiveUser} users={data.users} progress={data.progress} onUpdateProgress={handlers.updateProgress}/>;
+            case 'ParentDashboard': return <ParentDashboard parent={effectiveUser} users={data.users} progress={data.progress} />;
+            case 'AthleteDashboard': return <AthleteDashboard athlete={effectiveUser} progress={data.progress} />;
+            case 'PaymentManagement': return <PaymentManagement payments={data.payments} users={data.users} />;
+            case 'AdminLog': return <AdminLogView logs={data.adminLogs} users={data.users} />;
+            case 'ScheduleView': return <ScheduleView user={effectiveUser} sessions={data.sessions} users={data.users} onConfirmBooking={handlers.confirmBooking} onSetReminder={handlers.openReminderModal}/>;
+            case 'CalendarView': return <CalendarView coach={effectiveUser} sessions={data.sessions} users={data.users} onSetReminder={handlers.openReminderModal}/>;
+            default: return <div>Select a view from the sidebar.</div>;
         }
     };
 
@@ -633,10 +465,8 @@ const DashboardLayout = ({ user, impersonatedUser, onLogout, onStopImpersonating
         <div className="dashboard-layout">
             <Sidebar user={effectiveUser} onNavigate={setActiveView} activeView={activeView} />
             <div className="main-content">
-                <Header user={user} impersonatedUser={impersonatedUser} onLogout={onLogout} onStopImpersonating={onStopImpersonating} />
-                <main className="dashboard-content-area">
-                    {renderContent()}
-                </main>
+                <Header user={user} impersonatedUser={impersonatedUser} onLogout={onLogout} onStopImpersonating={onStopImpersonating} notifications={data.notifications} onDismissNotification={handlers.dismissNotification} />
+                <main className="dashboard-content-area">{renderContent()}</main>
             </div>
         </div>
     );
@@ -646,114 +476,91 @@ const App = () => {
     const [currentUser, setCurrentUser] = useLocalStorage<User | null>('currentUser', null);
     const [impersonatedUser, setImpersonatedUser] = useLocalStorage<User | null>('impersonatedUser', null);
     const [loginError, setLoginError] = useState('');
-
     const [users, setUsers] = useLocalStorage<User[]>('fsc_users', initialUsers);
-    const [programs, setPrograms] = useLocalStorage<Program[]>('fsc_programs', initialPrograms);
-    const [bookings, setBookings] = useLocalStorage<Booking[]>('fsc_bookings', initialBookings);
-    const [attendance, setAttendance] = useLocalStorage<Attendance[]>('fsc_attendance', initialAttendance);
     const [progress, setProgress] = useLocalStorage<Progress[]>('fsc_progress', initialProgress);
     const [payments, setPayments] = useLocalStorage<Payment[]>('fsc_payments', initialPayments);
     const [adminLogs, setAdminLogs] = useLocalStorage<AdminLog[]>('fsc_adminLogs', initialAdminLogs);
+    const [sessions, setSessions] = useLocalStorage<Session[]>('fsc_sessions', initialSessions);
+    const [reminders, setReminders] = useLocalStorage<Reminder[]>('fsc_reminders', []);
+    const [notifications, setNotifications] = useLocalStorage<Notification[]>('fsc_notifications', []);
+    const [isReminderModalOpen, setIsReminderModalOpen] = useState(false);
+    const [sessionForReminder, setSessionForReminder] = useState<Session | null>(null);
+    const [toasts, setToasts] = useState<Toast[]>([]);
 
-    const addAdminLog = (action: string, target_id?: number) => {
-        if (currentUser && currentUser.role === 'Admin') {
-            const newLog: AdminLog = {
-                log_id: Date.now(),
-                admin_id: currentUser.user_id,
-                action,
-                target_id,
-                timestamp: new Date().toISOString(),
-            };
-            setAdminLogs(prev => [newLog, ...prev]);
-        }
+    // FIX: Added explicit types for `message` and `type` parameters to resolve TypeScript error.
+    // This ensures that only valid toast types ('success' or 'error') are used.
+    const addToast = (message: string, type: 'success' | 'error' = 'success') => {
+        const id = Date.now();
+        setToasts(prev => [...prev, { id, message, type }]);
+        setTimeout(() => removeToast(id), 5000);
     };
+    const removeToast = (id: number) => setToasts(prev => prev.filter(t => t && t.id !== id));
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            const now = Date.now();
+            const dueReminders = reminders.filter(r => r.remind_at <= now);
+            if (dueReminders.length > 0) {
+                const newNotifications = dueReminders.map(r => {
+                    const session = sessions.find(s => s.session_id === r.session_id);
+                    return {
+                        notification_id: Date.now() + r.reminder_id, user_id: r.user_id, text: `Reminder: ${session?.title} is starting soon.`, type: 'reminder' as 'reminder', created_at: now
+                    };
+                });
+                setNotifications(prev => [...prev, ...newNotifications]);
+                setReminders(prev => prev.filter(r => !dueReminders.some(dr => dr.reminder_id === r.reminder_id)));
+            }
+        }, 60000); // Check every minute
+        return () => clearInterval(interval);
+    }, [reminders, sessions, setNotifications, setReminders]);
     
-    const handleLogin = (email, password) => {
-        const user = users.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password_hash === password);
-        if (user) {
-            setCurrentUser(user);
-            setLoginError('');
-            addAdminLog('User login');
-        } else {
-            setLoginError("Invalid email or password.");
+    const addAdminLog = (action: string, target_id?: number) => { if (currentUser && currentUser.role === 'Admin') { const newLog: AdminLog = { log_id: Date.now(), admin_id: currentUser.user_id, action, target_id, timestamp: new Date().toISOString(), }; setAdminLogs(prev => [newLog, ...prev]); }};
+    const handleLogin = (email, password) => { const user = users.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password_hash === password); if (user) { setCurrentUser(user); setLoginError(''); addAdminLog('User login'); } else { setLoginError("Invalid email or password."); } };
+    const handleLogout = () => { addAdminLog('User logout'); setCurrentUser(null); setImpersonatedUser(null); };
+    const handleImpersonate = (userToImpersonate: User) => { if (currentUser && currentUser.role === 'Admin') { addAdminLog('Impersonated user', userToImpersonate.user_id); setImpersonatedUser(userToImpersonate); }};
+    const handleStopImpersonating = () => { if(impersonatedUser) { addAdminLog('Stopped impersonating user', impersonatedUser.user_id); setImpersonatedUser(null); }};
+    const handleAddUser = (formData) => { const newUser: User = { user_id: Date.now(), name: formData.name, email: formData.email, password_hash: 'password123', role: formData.role, date_of_birth: formData.date_of_birth, parent_id: formData.parent_id ? Number(formData.parent_id) : null, coach_id: formData.coach_id ? Number(formData.coach_id) : undefined, }; setUsers(prev => [...prev, newUser]); addAdminLog('Created user', newUser.user_id); };
+    const handleUpdateUser = (updatedUser: User) => { setUsers(prev => prev.map(u => u.user_id === updatedUser.user_id ? updatedUser : u)); addAdminLog('Updated user', updatedUser.user_id); };
+    const handleDeleteUser = (userId: number) => { if (window.confirm("Are you sure?")) { setUsers(prev => prev.filter(u => u.user_id !== userId)); addAdminLog('Deleted user', userId); }};
+    const handleUpdateProgress = (progressId: number, newPercentage: number) => { setProgress(prev => prev.map(p => p.progress_id === progressId ? {...p, percentage: newPercentage, updated_at: new Date().toISOString()} : p)); }
+    const handleConfirmBooking = (sessionId: number, athleteId: number) => {
+        setSessions(prev => prev.map(s => s.session_id === sessionId ? { ...s, confirmed_athlete_ids: [...s.confirmed_athlete_ids, athleteId] } : s));
+        const session = sessions.find(s => s.session_id === sessionId);
+        const athlete = users.find(u => u.user_id === athleteId);
+        if(session && athlete) {
+            const newNotification: Notification = { notification_id: Date.now(), user_id: session.coach_id, text: `${athlete.name} has confirmed for ${session.title}.`, type: 'confirmation', created_at: Date.now() };
+            setNotifications(prev => [...prev, newNotification]);
         }
+        addToast('Booking confirmed successfully!');
     };
-
-    const handleLogout = () => {
-        addAdminLog('User logout');
-        setCurrentUser(null);
-        setImpersonatedUser(null);
-    };
-
-    const handleImpersonate = (userToImpersonate: User) => {
-        if (currentUser && currentUser.role === 'Admin') {
-            addAdminLog('Impersonated user', userToImpersonate.user_id);
-            setImpersonatedUser(userToImpersonate);
+    const handleOpenReminderModal = (session: Session) => { setSessionForReminder(session); setIsReminderModalOpen(true); };
+    const handleSetReminder = (sessionId, minutesBefore) => {
+        const session = sessions.find(s => s.session_id === sessionId);
+        const user = impersonatedUser || currentUser;
+        if(session && user) {
+            const sessionTime = new Date(`${session.date}T${session.time}`).getTime();
+            const remindAt = sessionTime - (minutesBefore * 60 * 1000);
+            const newReminder: Reminder = { reminder_id: Date.now(), session_id: sessionId, user_id: user.user_id, remind_at: remindAt };
+            setReminders(prev => [...prev, newReminder]);
+            addToast('Reminder set successfully!');
         }
+        setIsReminderModalOpen(false);
     };
+    const handleDismissNotification = (notificationId) => setNotifications(prev => prev.filter(n => n.notification_id !== notificationId));
 
-    const handleStopImpersonating = () => {
-        if(impersonatedUser) {
-           addAdminLog('Stopped impersonating user', impersonatedUser.user_id);
-           setImpersonatedUser(null);
-        }
-    };
-    
-    // --- CRUD Handlers ---
-    const handleAddUser = (formData) => {
-        const newUser: User = {
-            user_id: Date.now(),
-            name: formData.name,
-            email: formData.email,
-            password_hash: 'password123', // Default password
-            role: formData.role,
-            date_of_birth: formData.date_of_birth,
-            parent_id: formData.parent_id ? Number(formData.parent_id) : null,
-            coach_id: formData.coach_id ? Number(formData.coach_id) : undefined,
-        };
-        setUsers(prev => [...prev, newUser]);
-        addAdminLog('Created user', newUser.user_id);
-    };
-
-    const handleUpdateUser = (updatedUser: User) => {
-        setUsers(prev => prev.map(u => u.user_id === updatedUser.user_id ? updatedUser : u));
-        addAdminLog('Updated user', updatedUser.user_id);
-    };
-
-    const handleDeleteUser = (userId: number) => {
-        if (window.confirm("Are you sure you want to delete this user? This action cannot be undone.")) {
-            setUsers(prev => prev.filter(u => u.user_id !== userId));
-            addAdminLog('Deleted user', userId);
-        }
-    };
-    
-    const handleUpdateProgress = (progressId: number, newPercentage: number) => {
-        setProgress(prev => prev.map(p => p.progress_id === progressId ? {...p, percentage: newPercentage, updated_at: new Date().toISOString()} : p));
-    }
-
-
-    const data = { users, programs, bookings, attendance, progress, payments, adminLogs };
+    const data = { users, progress, payments, adminLogs, sessions, notifications };
     const handlers = {
-        impersonateUser: handleImpersonate,
-        addUser: handleAddUser,
-        updateUser: handleUpdateUser,
-        deleteUser: handleDeleteUser,
-        updateProgress: handleUpdateProgress,
+        impersonateUser: handleImpersonate, addUser: handleAddUser, updateUser: handleUpdateUser, deleteUser: handleDeleteUser, updateProgress: handleUpdateProgress, confirmBooking: handleConfirmBooking, openReminderModal: handleOpenReminderModal, dismissNotification: handleDismissNotification,
     };
 
-    if (!currentUser) {
-        return <LoginPage onLogin={handleLogin} error={loginError} />;
-    }
+    if (!currentUser) return <LoginPage onLogin={handleLogin} error={loginError} />;
 
     return (
-        <DashboardLayout
-            user={currentUser}
-            impersonatedUser={impersonatedUser}
-            onLogout={handleLogout}
-            onStopImpersonating={handleStopImpersonating}
-            data={data}
-            handlers={handlers}
-        />
+        <>
+            <ToastContainer toasts={toasts} removeToast={removeToast} />
+            <DashboardLayout user={currentUser} impersonatedUser={impersonatedUser} onLogout={handleLogout} onStopImpersonating={handleStopImpersonating} data={data} handlers={handlers} />
+            <ReminderModal isOpen={isReminderModalOpen} onClose={() => setIsReminderModalOpen(false)} onSave={handleSetReminder} session={sessionForReminder} />
+        </>
     );
 };
 
