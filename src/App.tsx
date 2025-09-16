@@ -1,36 +1,86 @@
-
-
 import React, { useState, useEffect, useRef, SetStateAction } from 'react';
 
 // --- SVG Icons ---
-const CalendarIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" aria-hidden="true" focusable="false"><path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0h18" /></svg>;
-const UserGroupIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" aria-hidden="true" focusable="false"><path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m-7.5-2.962c.566-.16-1.168.356-1.168.356m3.633.82-1.168-.356m1.168.356c-.566.16-1.533-.205-1.533-.205m2.7 2.062a5.987 5.987 0 0 1-1.533-.205m1.533.205a5.987 5.987 0 0 0-1.533.205m-2.7-2.062a5.987 5.987 0 0 0-1.533.205m1.533-.205L8.25 15.75M12 12a2.25 2.25 0 1 0 0-4.5 2.25 2.25 0 0 0 0 4.5Z" /><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 21v-1.5a2.25 2.25 0 0 1 2.25-2.25h12a2.25 2.25 0 0 1 2.25 2.25v1.5" /></svg>;
-const CheckBadgeIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" aria-hidden="true" focusable="false"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z" /></svg>;
-const ShieldCheckIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" aria-hidden="true" focusable="false"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0 1 12 2.944a11.955 11.955 0 0 1-8.618 3.04A12.02 12.02 0 0 0 3 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.062-.163-2.09-.465-3.065A12.015 12.015 0 0 0 17.618 5.984Z" /></svg>;
-const RocketLaunchIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" aria-hidden="true" focusable="false"><path strokeLinecap="round" strokeLinejoin="round" d="M15.59 14.37a6 6 0 0 1-5.84 7.38v-4.82m5.84-2.56a12.028 12.028 0 0 0-5.84 7.38m0-7.38c-3.15.52-5.84-1.28-5.84-4.28 0-1.92.93-3.66 2.34-4.72a9.01 9.01 0 0 1 4.72-2.34c2.99 0 4.8 2.69 4.28 5.84a6.003 6.003 0 0 1-7.38 5.84Z" /></svg>;
-const MapPinIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" aria-hidden="true" focusable="false"><path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" /></svg>;
-const PhoneIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" aria-hidden="true" focusable="false"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 6.75Z" /></svg>;
-const CloseIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" aria-hidden="true" focusable="false"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>;
-const CheckCircleIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" aria-hidden="true" focusable="false"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>;
-const WhatsAppIcon = () => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M16.6 14c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1-.2.2-.6.7-.8.9-.1.1-.3.2-.5.1-.3-.1-.9-.3-1.8-.9-.7-.5-1.1-1-1.3-1.5-.1-.2 0-.4.1-.5l.5-.5c.1 0 .2-.1.3-.2l.2-.3c.1-.1.1-.3 0-.4-.1-.1-.6-1.5-.8-2-.2-.5-.4-.4-.5-.4h-.5c-.2 0-.4.1-.6.3-.2.2-.8.8-.8 1.9 0 1.2.8 2.2 1 2.4.1.2 1.5 2.3 3.6 3.2.5.2 1 .3 1.3.4.5.1 1-.1 1.2-.2.3-.2.6-.8.8-1 .1-.2.1-.4 0-.5l-.3-.1zM12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm0 18c-4.4 0-8-3.6-8-8s3.6-8 8-8 8 3.6 8 8-3.6 8-8 8z"/></svg>;
-const FacebookIcon = () => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h-2v-2h2V7a2 2 0 0 1 2-2h2v2h-2v2h2v2h-2v6z"/></svg>;
-const InstagramIcon = () => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2zm0 14c-2.76 0-5-2.24-5-5s2.24-5 5-5s5 2.24 5 5s-2.24 5-5 5zm3-5c0 1.66-1.34 3-3 3s-3-1.34-3-3s1.34-3 3-3s3 1.34 3 3z"/></svg>;
-const DashboardIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" aria-hidden="true" focusable="false"><path strokeLinecap="round" strokeLinejoin="round" d="m2.25 12 .895 4.975A18.97 18.97 0 0 0 4.02 19.52a15.004 15.004 0 0 0 4.234 3.328A12 12 0 0 0 12 23.25a12 12 0 0 0 3.746-1.402 15.003 15.003 0 0 0 4.234-3.328c.36-.43.69-.877.995-1.345l.895-4.975M2.25 12a12.016 12.016 0 0 1 9.75-11.25 12.016 12.016 0 0 1 9.75 11.25" /><path strokeLinecap="round" strokeLinejoin="round" d="M12 2.25a12.023 12.023 0 0 1 3.75 2.063" /><path strokeLinecap="round" strokeLinejoin="round" d="M12 12v-2.25" /><path strokeLinecap="round" strokeLinejoin="round" d="m8.25 12-2.625 6" /><path strokeLinecap="round" strokeLinejoin="round" d="m15.75 12 2.625 6" /></svg>;
-const UsersIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" aria-hidden="true" focusable="false"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-2.063M15 19.128v-3.86a2.25 2.25 0 0 0-4.5 0v3.86m0 0a9.337 9.337 0 0 0-4.121-2.063 9.38 9.38 0 0 0-2.625.372M15 19.128v-3.86a2.25 2.25 0 0 0-4.5 0v3.86m4.5 0a9.337 9.337 0 0 0 4.121 2.063m0 0a9.38 9.38 0 0 0 2.625-.372M15 19.128a2.25 2.25 0 0 1-4.5 0M4.5 12a7.5 7.5 0 0 1 15 0v-3a7.5 7.5 0 0 0-15 0v3zM15 6.75a2.25 2.25 0 0 0-4.5 0" /></svg>;
-const CreditCardIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" aria-hidden="true" focusable="false"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h6m3-3.75l-3 3m0 0l-3-3m3 3V15m6-1.5h.008v.008H18V15Zm-12 0h.008v.008H6V15Zm6 0h.008v.008H12V15Zm6 0h.008v.008H18V15Zm-6 0h.008v.008H12V15Z" /></svg>;
-const ChartBarIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" aria-hidden="true" focusable="false"><path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" /></svg>;
-const LogoutIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" aria-hidden="true" focusable="false"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" /></svg>;
-const PencilIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" aria-hidden="true" focusable="false"><path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" /></svg>;
-const BellIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" aria-hidden="true" focusable="false"><path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" /></svg>;
-const EnvelopeIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" aria-hidden="true" focusable="false"><path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25-2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" /></svg>;
-const PaperAirplaneIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" aria-hidden="true" focusable="false"><path strokeLinecap="round" strokeLinejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" /></svg>;
-const TrashIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" aria-hidden="true" focusable="false"><path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.134-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.067-2.09 1.02-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg>;
-const ChevronLeftIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" aria-hidden="true" focusable="false"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" /></svg>;
-const ChevronRightIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" aria-hidden="true" focusable="false"><path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" /></svg>;
-const ClockIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>;
+const EyeIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639l4.43-7.532a1.012 1.012 0 0 1 1.638 0l4.43 7.532a1.012 1.012 0 0 1 0 .639l-4.43 7.532a1.012 1.012 0 0 1-1.638 0l-4.43-7.532Z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg>;
+const UserPlusIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Z" /><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 19.5a7.5 7.5 0 0 0 15 0h-15Z" /></svg>;
+const PencilIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" /></svg>;
+const TrashIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.134-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.067-2.09 1.02-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg>;
+const LogoutIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" /></svg>;
+const CloseIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>;
+const ExclamationTriangleIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" /></svg>;
+const ChartBarIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" /></svg>;
+const CalendarIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0h18" /></svg>;
+const DocumentTextIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" /></svg>;
+const UserGroupIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m-7.5-2.962c.566-.16-1.168.356-1.168.356m3.633.82-1.168-.356m1.168.356c-.566.16-1.533-.205-1.533-.205m2.7 2.062a5.987 5.987 0 0 1-1.533-.205m1.533.205a5.987 5.987 0 0 0-1.533.205m-2.7-2.062a5.987 5.987 0 0 0-1.533.205m1.533-.205L8.25 15.75M12 12a2.25 2.25 0 1 0 0-4.5 2.25 2.25 0 0 0 0 4.5Z" /><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 21v-1.5a2.25 2.25 0 0 1 2.25-2.25h12a2.25 2.25 0 0 1 2.25 2.25v1.5" /></svg>;
+const CreditCardIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h6m3-3.75l-3 3m0 0l-3-3m3 3V15m6-1.5h.008v.008H18V15Zm-12 0h.008v.008H6V15Zm6 0h.008v.008H12V15Zm6 0h.008v.008H18V15Zm-6 0h.008v.008H12V15Z" /></svg>;
+const ClipboardDocumentListIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 12 2.25a2.251 2.251 0 0 1 1.024.223M7.5 21h9a2.25 2.25 0 0 0 2.25-2.25v-13.5a2.25 2.25 0 0 0-2.25-2.25h-9a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21Z" /></svg>;
 
+// --- Type Definitions ---
+type Role = 'Admin' | 'Coach' | 'Athlete' | 'Parent';
 
-// --- Data & Hooks ---
+interface User {
+  user_id: number;
+  name: string;
+  email: string;
+  password_hash: string;
+  role: Role;
+  date_of_birth: string;
+  parent_id: number | null;
+  coach_id?: number;
+}
+
+interface Program {
+  program_id: number;
+  title: string;
+  description: string;
+  schedule: string;
+  coach_id: number;
+  price: number;
+}
+
+interface Booking {
+  booking_id: number;
+  user_id: number;
+  program_id: number;
+  status: 'pending' | 'confirmed' | 'cancelled';
+  booked_at: string;
+}
+
+interface Attendance {
+    attendance_id: number;
+    athlete_id: number;
+    program_id: number;
+    date: string;
+    status: 'present' | 'absent';
+}
+
+interface Progress {
+    progress_id: number;
+    athlete_id: number;
+    skill: string;
+    level: 'beginner' | 'intermediate' | 'advanced';
+    percentage: number; // Added for UI
+    updated_at: string;
+}
+
+interface Payment {
+    payment_id: number;
+    user_id: number; // Parent or Athlete
+    booking_id: number;
+    amount: number;
+    status: 'paid' | 'pending' | 'failed';
+    paid_at: string | null;
+}
+
+interface AdminLog {
+    log_id: number;
+    admin_id: number;
+    action: string;
+    target_id?: number;
+    timestamp: string;
+}
+
+// --- Data Simulation & Hooks ---
 const useLocalStorage = <T,>(key: string, initialValue: T): [T, (value: SetStateAction<T>) => void] => {
     const [storedValue, setStoredValue] = useState<T>(() => {
         try {
@@ -54,546 +104,147 @@ const useLocalStorage = <T,>(key: string, initialValue: T): [T, (value: SetState
     return [storedValue, setValue];
 };
 
-const initialUsers = [
-    { id: 1, name: 'Admin User', email: 'admin@funport.com', password: 'password123', role: 'Admin' },
-    { id: 2, name: 'Coach Sarah', email: 'sarah@funport.com', password: 'password123', role: 'Coach' },
-    { id: 3, name: 'John Doe', email: 'john@email.com', password: 'password123', role: 'Parent', children: [4] },
-    { id: 4, name: 'Leo Doe', email: 'leo@email.com', password: 'password123', role: 'Athlete', parentId: 3, coachId: 2 },
-    { id: 5, name: 'Jane Smith', email: 'jane@email.com', password: 'password123', role: 'Parent', children: [6] },
-    { id: 6, name: 'Mia Smith', email: 'mia@email.com', password: 'password123', role: 'Athlete', parentId: 5, coachId: 2 },
-    { id: 7, name: 'Coach Mike', email: 'mike@funport.com', password: 'password123', role: 'Coach' },
-    { id: 8, name: 'Anna Belle', email: 'anna@funport.com', password: 'password123', role: 'Athlete', parentId: null, coachId: 7 },
+const initialUsers: User[] = [
+    { user_id: 1, name: 'Admin User', email: 'admin@funport.com', password_hash: 'password123', role: 'Admin', date_of_birth: '1990-01-01', parent_id: null },
+    { user_id: 2, name: 'Coach Sarah', email: 'sarah@funport.com', password_hash: 'password123', role: 'Coach', date_of_birth: '1992-05-15', parent_id: null },
+    { user_id: 3, name: 'Coach Mike', email: 'mike@funport.com', password_hash: 'password123', role: 'Coach', date_of_birth: '1988-11-20', parent_id: null },
+    { user_id: 4, name: 'John Doe', email: 'john@email.com', password_hash: 'password123', role: 'Parent', date_of_birth: '1985-03-10', parent_id: null },
+    { user_id: 5, name: 'Leo Doe', email: 'leo@email.com', password_hash: 'password123', role: 'Athlete', date_of_birth: '2014-06-22', parent_id: 4, coach_id: 2 },
+    { user_id: 6, name: 'Jane Smith', email: 'jane@email.com', password_hash: 'password123', role: 'Parent', date_of_birth: '1987-09-05', parent_id: null },
+    { user_id: 7, name: 'Mia Smith', email: 'mia@email.com', password_hash: 'password123', role: 'Athlete', date_of_birth: '2015-02-18', parent_id: 6, coach_id: 2 },
+    { user_id: 8, name: 'Anna Belle', email: 'anna@funport.com', password_hash: 'password123', role: 'Athlete', date_of_birth: '2002-12-01', parent_id: null, coach_id: 3 },
 ];
 
-const initialAthletes = [
-    {
-        userId: 4,
-        name: 'Leo Doe',
-        progress: { 'Balance': 80, 'Gliding': 60, 'Stopping': 75, 'Speed': 50 }
-    },
-    {
-        userId: 6,
-        name: 'Mia Smith',
-        progress: { 'Balance': 90, 'Gliding': 85, 'Stopping': 80, 'Speed': 70 }
-    },
-    {
-        userId: 8,
-        name: 'Anna Belle',
-        progress: { 'Balance': 95, 'Gliding': 90, 'Stopping': 85, 'Speed': 88 }
-    }
+const initialPrograms: Program[] = [
+    { program_id: 1, title: 'Summer Weekly Program', description: 'Intensive training on weekdays.', schedule: 'Mon, Wed & Fri 3:30PM–6:00PM', coach_id: 2, price: 8000 },
+    { program_id: 2, title: 'Weekend Sessions', description: 'Flexible weekend training.', schedule: 'Sat & Sun 3:30PM–6:00PM', coach_id: 3, price: 6000 },
 ];
 
-const initialLogs = [
-    { id: 1, athleteId: 4, author: 'Coach Sarah', date: '2024-07-20', content: 'Leo worked on his T-stops today. Showing great improvement in control.' },
-    { id: 2, athleteId: 4, author: 'Leo Doe', date: '2024-07-21', content: 'Practiced skating backwards for 20 minutes. It was hard but fun!' },
-    { id: 3, athleteId: 6, author: 'Coach Sarah', date: '2024-07-22', content: 'Mia has mastered forward gliding. Next week, we will start on crossovers.' },
-    { id: 4, athleteId: 8, author: 'Coach Mike', date: '2024-08-01', content: 'Anna is preparing for the regional competition. Focus is on speed and endurance.' },
+const initialBookings: Booking[] = [
+    { booking_id: 1, user_id: 4, program_id: 1, status: 'confirmed', booked_at: '2024-07-01T10:00:00Z' },
+    { booking_id: 2, user_id: 6, program_id: 1, status: 'confirmed', booked_at: '2024-07-02T11:00:00Z' },
+    { booking_id: 3, user_id: 8, program_id: 2, status: 'pending', booked_at: '2024-07-20T14:00:00Z' },
 ];
 
-const initialSchedules = [
-    { id: 1, coachId: 2, date: '2024-08-12', time: '16:00', location: 'Main Rink', athleteIds: [4], title: 'Leo D. - Private Gliding', confirmedAthleteIds: [4] },
-    { id: 2, coachId: 2, date: '2024-08-12', time: '17:00', location: 'Main Rink', athleteIds: [6], title: 'Mia S. - Private Stops', confirmedAthleteIds: [] },
-    { id: 3, coachId: 2, date: '2024-08-14', time: '16:30', location: 'Practice Area', athleteIds: [4, 6], title: 'Group Session - Crossovers', confirmedAthleteIds: [4] },
-    { id: 4, coachId: 7, date: '2024-08-13', time: '15:30', location: 'Outdoor Track', athleteIds: [8], title: 'Anna B. - Advanced Speed', confirmedAthleteIds: [] },
-    { id: 5, coachId: 7, date: '2024-08-15', time: '16:00', location: 'Main Rink', athleteIds: [4, 6, 8], title: 'Group Session - All Levels', confirmedAthleteIds: [] },
-    { id: 6, coachId: 2, date: '2024-07-29', time: '16:00', location: 'Main Rink', athleteIds: [4], title: 'PAST: Leo D. - Balance Drills', confirmedAthleteIds: [4] }
+const initialAttendance: Attendance[] = [
+    { attendance_id: 1, athlete_id: 5, program_id: 1, date: '2024-07-15', status: 'present' },
+    { attendance_id: 2, athlete_id: 7, program_id: 1, date: '2024-07-15', status: 'present' },
+    { attendance_id: 3, athlete_id: 5, program_id: 1, date: '2024-07-17', status: 'absent' },
+    { attendance_id: 4, athlete_id: 7, program_id: 1, date: '2024-07-17', status: 'present' },
 ];
 
-const initialInvoices = [
-    { id: 1, userId: 4, description: 'August Training Fees - Leo Doe', amount: 8000, status: 'Due', dueDate: '2024-08-01' },
-    { id: 2, userId: 4, description: 'July Training Fees - Leo Doe', amount: 8000, status: 'Paid', dueDate: '2024-07-01' },
-    { id: 3, userId: 6, description: 'August Training Fees - Mia Smith', amount: 8000, status: 'Due', dueDate: '2024-08-01' },
-    { id: 4, userId: 8, description: 'August Training Fees - Anna Belle', amount: 10000, status: 'Due', dueDate: '2024-08-01' },
+const initialProgress: Progress[] = [
+    { progress_id: 1, athlete_id: 5, skill: 'Balance', level: 'intermediate', percentage: 80, updated_at: '2024-07-18T09:00:00Z' },
+    { progress_id: 2, athlete_id: 5, skill: 'Gliding', level: 'beginner', percentage: 60, updated_at: '2024-07-18T09:00:00Z' },
+    { progress_id: 3, athlete_id: 7, skill: 'Stopping', level: 'intermediate', percentage: 85, updated_at: '2024-07-18T09:00:00Z' },
+    { progress_id: 4, athlete_id: 8, skill: 'Speed', level: 'advanced', percentage: 90, updated_at: '2024-07-19T09:00:00Z' },
 ];
 
-const initialConversations = [
-    { id: 1, participantIds: [1, 2], lastMessageTimestamp: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString() },
-    { id: 2, participantIds: [2, 3], lastMessageTimestamp: new Date().toISOString() },
-    { id: 3, participantIds: [7, 8], lastMessageTimestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString() },
+const initialPayments: Payment[] = [
+    { payment_id: 1, user_id: 4, booking_id: 1, amount: 8000, status: 'paid', paid_at: '2024-07-01T10:05:00Z' },
+    { payment_id: 2, user_id: 6, booking_id: 2, amount: 8000, status: 'pending', paid_at: null },
+    { payment_id: 3, user_id: 8, booking_id: 3, amount: 6000, status: 'pending', paid_at: null },
 ];
 
-const initialMessages = [
-    { id: 1, conversationId: 1, senderId: 1, content: "Hi Sarah, can you please send me the updated roster for this week?", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), readBy: [1, 2] },
-    { id: 2, conversationId: 1, senderId: 2, content: "Of course, I'll send it over shortly.", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 23).toISOString(), readBy: [1, 2] },
-    { id: 3, conversationId: 2, senderId: 3, content: "Hello Coach Sarah, just wanted to confirm Leo's session time for Wednesday.", timestamp: new Date(Date.now() - 1000 * 60 * 10).toISOString(), readBy: [2, 3] },
-    { id: 4, conversationId: 2, senderId: 2, content: "Hi John! Yes, Leo is confirmed for 4:30 PM on Wednesday.", timestamp: new Date(Date.now() - 1000 * 60 * 9).toISOString(), readBy: [3] },
-    { id: 5, conversationId: 3, senderId: 8, content: "Hey Coach Mike, looking forward to our session tomorrow. Anything specific I should prepare?", timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString(), readBy: [8] },
-    { id: 6, conversationId: 3, senderId: 7, content: "Hi Anna! Just be warmed up and ready to work on explosive starts. See you then.", timestamp: new Date(Date.now() - 1000 * 60 * 28).toISOString(), readBy: [] },
+const initialAdminLogs: AdminLog[] = [
+    { log_id: 1, admin_id: 1, action: 'User account created', target_id: 8, timestamp: '2024-07-15T12:00:00Z' },
 ];
-
-
-const programs = [
-  { title: 'Summer Weekly Program', days: 'Mon, Wed & Fri', time: '3:30PM - 6:00PM', icon: CalendarIcon, price: 'KES 8,000/month' },
-  { title: 'Weekend Sessions', days: 'Sat & Sun', time: '3:30PM - 6:00PM', icon: UserGroupIcon, price: 'KES 6,000/month' },
-];
-
-const skills = [
-  { title: 'Personal Training', description: 'One-on-one coaching to accelerate your learning and master specific techniques.', icon: CheckBadgeIcon },
-  { title: 'Fundamental Skating Skills', description: 'Learn the basics from the ground up, including balance, posture, and forward motion.', icon: RocketLaunchIcon },
-  { title: 'Learn how to Glide', description: 'Develop smooth and effortless gliding techniques for a more graceful skating experience.', icon: RocketLaunchIcon },
-  { title: 'Stopping Practice', description: 'Master various stopping methods to ensure your safety and build confidence on wheels.', icon: ShieldCheckIcon },
-];
-
-// --- Type Definitions ---
-type User = (typeof initialUsers)[0];
-type Athlete = (typeof initialAthletes)[0];
-type Log = (typeof initialLogs)[0];
-type Schedule = (typeof initialSchedules)[0];
-type Invoice = (typeof initialInvoices)[0];
-type Conversation = (typeof initialConversations)[0];
-type Message = (typeof initialMessages)[0];
-type Reminder = {
-    id: number;
-    sessionId: number;
-    userId: number;
-    remindAt: string; // ISO string
-    sessionTitle: string;
-    sessionTime: string;
-    dismissed: boolean;
-};
-
-interface ActiveView {
-  name: string;
-  athleteId?: number;
-  conversationId?: number;
-}
-
 
 // --- Components ---
 
-const Notifications = ({ unreadMessagesCount, activeReminders, onNotificationClick, onDismissReminder }) => {
-    const [isOpen, setIsOpen] = useState(false);
-    const dropdownRef = useRef(null);
-    const totalUnread = unreadMessagesCount + activeReminders.length;
-
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-                setIsOpen(false);
-            }
-        };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
-
-    return (
-        <div className="notification-bell" ref={dropdownRef}>
-            <button onClick={() => setIsOpen(prev => !prev)} aria-label={`${totalUnread} unread notifications`}>
-                <BellIcon />
-                {totalUnread > 0 && <span className="notification-badge">{totalUnread}</span>}
-            </button>
-            {isOpen && (
-                <div className="notification-dropdown">
-                    <div className="notification-header">Notifications</div>
-                    <div className="notification-content">
-                        {totalUnread === 0 ? (
-                           <p className="no-notifications">No new notifications.</p>
-                        ) : (
-                            <>
-                                {activeReminders.map(reminder => (
-                                    <div key={reminder.id} className="notification-item reminder">
-                                        <div className="notification-icon"><ClockIcon /></div>
-                                        <div>
-                                            <p><strong>Reminder:</strong> {reminder.sessionTitle}</p>
-                                            <p className="time">{new Date(reminder.remindAt).toLocaleDateString()} at {reminder.sessionTime}</p>
-                                        </div>
-                                        <button onClick={() => onDismissReminder(reminder.id)} className="close-btn dismiss-btn" aria-label="Dismiss reminder"><CloseIcon/></button>
-                                    </div>
-                                ))}
-                                {unreadMessagesCount > 0 && (
-                                     <div className="notification-item message" onClick={(e) => { e.preventDefault(); onNotificationClick(); setIsOpen(false); }}>
-                                         <div className="notification-icon"><EnvelopeIcon /></div>
-                                         <p>You have {unreadMessagesCount} unread message{unreadMessagesCount > 1 ? 's' : ''}.</p>
-                                     </div>
-                                )}
-                            </>
-                        )}
-                    </div>
-                </div>
-            )}
-        </div>
-    );
-};
-
-
-const Header = ({ onBookNowClick, onLoginClick, user, onLogout, unreadMessagesCount, activeReminders, onNavigate, onDismissReminder }) => {
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 10);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  return (
-    <header className={`header ${scrolled ? 'scrolled' : ''}`}>
-      <div className="container">
-        <nav className="nav">
-          <a href="#" className="logo" onClick={(e) => { e.preventDefault(); if (user) onNavigate({ name: 'Dashboard' }); }}>
-            <span className="funpot">funpot </span>
-            <span className="skating">SKATING</span>
-          </a>
-          {!user ? (
-            <>
-              <ul className="nav-links">
-                <li><a href="#home">Home</a></li>
-                <li><a href="#programs">Programs</a></li>
-                <li><a href="#about">About</a></li>
-                <li><a href="#contact">Contact</a></li>
-              </ul>
-              <div className="header-actions">
-                <button onClick={onLoginClick} className="btn btn-secondary">Login</button>
-                <button onClick={onBookNowClick} className="btn btn-primary">Book Now</button>
-              </div>
-            </>
-          ) : (
-            <div className="header-actions">
-                <span className="user-role">Welcome, <strong>{user.name.split(' ')[0]}</strong>!</span>
-                 <Notifications 
-                    unreadMessagesCount={unreadMessagesCount} 
-                    activeReminders={activeReminders}
-                    onNotificationClick={() => onNavigate({name: 'Messages'})} 
-                    onDismissReminder={onDismissReminder}
-                />
-                <button onClick={onLogout} className="btn btn-secondary logout-btn" aria-label="Logout">
-                  <LogoutIcon />
-                </button>
-            </div>
-          )}
-        </nav>
-      </div>
-    </header>
-  );
-};
-
-const Hero = ({ onBookNowClick }) => (
-  <section id="home" className="hero">
-    <div className="container">
-      <h1 className="learn-text">Learn</h1>
-      <h2 className="skating-text">SKATING</h2>
-      <p>CONQUER YOUR FEAR, GAIN THE EXPERIENCE</p>
-      <button onClick={onBookNowClick} className="btn btn-primary">Book a Session</button>
-    </div>
-  </section>
-);
-
-const Programs = ({ onBookNowClick }) => (
-  <section id="programs" className="section">
-    <div className="container">
-      <div className="section-title">
-        <h2>Our Programs</h2>
-        <p>Choose the perfect schedule to kickstart your skating journey with our expert coaches.</p>
-      </div>
-      <div className="program-cards">
-        {programs.map((program) => {
-          const Icon = program.icon;
-          return (
-            <div key={program.title} className="program-card">
-              <div className="icon"><Icon /></div>
-              <h3>{program.title}</h3>
-              <p className="days">{program.days}</p>
-              <p className="time">{program.time}</p>
-              <button onClick={onBookNowClick} className="btn btn-secondary">Join Program</button>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  </section>
-);
-
-const Skills = () => (
-  <section id="about" className="section section-dark">
-    <div className="container">
-      <div className="section-title">
-        <h2>Become Stronger</h2>
-        <p>Our curriculum is designed to build your confidence and skills from beginner to pro.</p>
-      </div>
-      <div className="skills-list">
-        {skills.map((skill) => {
-          const Icon = skill.icon;
-          return (
-            <div key={skill.title} className="skill-item">
-              <div className="icon"><Icon /></div>
-              <div>
-                <h3>{skill.title}</h3>
-                <p>{skill.description}</p>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  </section>
-);
-
-const Location = () => (
-  <section id="contact" className="section">
-    <div className="container">
-      <div className="section-title">
-        <h2>Find Us & Get In Touch</h2>
-        <p>We're located at the beautiful Buntwani Waterfront. Come say hi or give us a call!</p>
-      </div>
-      <div className="location-content">
-        <div className="location-map">
-          <img src="https://images.unsplash.com/photo-1561331822-241b1198e329?q=80&w=2070&auto=format&fit=crop" alt="Map of Buntwani Waterfront, Malindi"/>
-        </div>
-        <div className="location-details">
-          <h3>Our Home Rink</h3>
-          <div className="contact-item">
-            <div className="icon"><MapPinIcon /></div>
-            <div className="details">
-              <span>Location</span>
-              <p>Buntwani Waterfront, Malindi</p>
-            </div>
-          </div>
-          <div className="contact-item">
-            <div className="icon"><PhoneIcon /></div>
-            <div className="details">
-              <span>Call or WhatsApp</span>
-              <p><a href="tel:+254780941396">+254 780 941 396</a></p>
-              <p><a href="tel:+254713715158">+254 713 715 158</a></p>
-            </div>
-          </div>
-          <div className="contact-item">
-            <div className="icon"><CalendarIcon /></div>
-            <div className="details">
-              <span>Open Hours</span>
-              <p>Mon, Wed, Fri, Sat & Sun: 3:30PM - 6:00PM</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-);
-
-const Equipment = () => (
-  <section className="equipment-banner">
-    <div className="container">
-      <p>All Skating Equipment is Available for Sale at The Club!</p>
-    </div>
-  </section>
-);
-
-const Footer = () => {
-  return (
-    <footer className="footer">
-      <div className="container">
-        <div className="footer-content">
-          <div>
-            <h3>Ready to Roll?</h3>
-            <p className="footer-subtitle">Join the Funport Skating Club today!</p>
-          </div>
-          <div className="footer-right-column">
-            <div className="footer-contacts">
-               <a href="tel:+254780941396">+254 780 941 396</a>
-               <a href="mailto:hello@funportskating.com">hello@funportskating.com</a>
-            </div>
-            <div className="social-links">
-              <a href="#" aria-label="WhatsApp"><WhatsAppIcon /></a>
-              <a href="#" aria-label="Facebook"><FacebookIcon /></a>
-              <a href="#" aria-label="Instagram"><InstagramIcon /></a>
-            </div>
-          </div>
-        </div>
-        <div className="footer-bottom">
-          <p>&copy; {new Date().getFullYear()} Funport Skating Club. All Rights Reserved.</p>
-        </div>
-      </div>
-    </footer>
-  );
-};
-
-const BookingModal = ({ isOpen, onClose }) => {
-  const [submitted, setSubmitted] = useState(false);
-  const modalContentRef = useRef(null);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setSubmitted(true);
-  };
-
-  const handleClose = () => {
-    onClose();
-    setTimeout(() => setSubmitted(false), 300);
-  }
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (modalContentRef.current && !modalContentRef.current.contains(event.target)) {
-        handleClose();
-      }
-    };
-    if (isOpen) document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isOpen]);
-
-
-  return (
-    <div className={`modal-overlay ${isOpen ? 'show' : ''}`}>
-      <div className="modal-content" ref={modalContentRef}>
-        {!submitted ? (
-          <>
-            <div className="modal-header">
-              <h2>Book Your Session</h2>
-              <button onClick={handleClose} className="close-btn" aria-label="Close"><CloseIcon /></button>
-            </div>
-            <form onSubmit={handleSubmit}>
-              <div className="form-group">
-                <label htmlFor="name">Full Name</label>
-                <input type="text" id="name" required />
-              </div>
-              <div className="form-group">
-                <label htmlFor="email">Email Address</label>
-                <input type="email" id="email" required />
-              </div>
-              <div className="form-group">
-                <label htmlFor="phone">Phone Number</label>
-                <input type="tel" id="phone" required />
-              </div>
-              <div className="form-group">
-                <label htmlFor="program">Choose a Program</label>
-                <select id="program" required>
-                  <option value="">Select a program...</option>
-                  <option value="weekly">Summer Weekly Program</option>
-                  <option value="weekend">Weekend Sessions</option>
-                </select>
-              </div>
-              <div className="form-actions">
-                <button type="submit" className="btn btn-primary">Submit Booking</button>
-              </div>
-            </form>
-          </>
-        ) : (
-          <div className="confirmation-message">
-            <div className="icon"><CheckCircleIcon/></div>
-            <h3>Thank You!</h3>
-            <p>Your booking request has been received. We will contact you shortly to confirm the details.</p>
-            <button onClick={handleClose} className="btn btn-primary">Done</button>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-const LoginFormModal = ({ isOpen, onClose, onLoginAttempt }) => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
-    const modalContentRef = useRef(null);
+const LoginPage = ({ onLogin, error }) => {
+    const [email, setEmail] = useState('admin@funport.com');
+    const [password, setPassword] = useState('password123');
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        setError('');
-        const loginError = onLoginAttempt(email, password);
-        if (loginError) {
-            setError(loginError);
-        } else {
-            setEmail('');
-            setPassword('');
-        }
+        onLogin(email, password);
     };
-    
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (modalContentRef.current && !modalContentRef.current.contains(event.target)) {
-                onClose();
-            }
-        };
-        if (isOpen) {
-            document.addEventListener('mousedown', handleClickOutside);
-            setError(''); // Reset error on open
-        }
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, [isOpen, onClose]);
-
-    if (!isOpen) return null;
 
     return (
-        <div className={`modal-overlay ${isOpen ? 'show' : ''}`}>
-            <div className="modal-content" ref={modalContentRef}>
-                <div className="modal-header">
-                    <h2>Club Portal Login</h2>
-                    <button onClick={onClose} className="close-btn" aria-label="Close"><CloseIcon /></button>
-                </div>
+        <div className="login-container">
+            <div className="login-box">
+                <h1 className="login-title">
+                    <span className="funpot">funpot </span>
+                    <span className="skating">SKATING</span>
+                </h1>
+                <p className="login-subtitle">Club Management Portal</p>
                 <form onSubmit={handleSubmit}>
                     {error && <p className="form-error">{error}</p>}
                     <div className="form-group">
-                        <label htmlFor="login-email">Email Address</label>
-                        <input 
-                            type="email" 
-                            id="login-email" 
-                            value={email} 
-                            onChange={(e) => setEmail(e.target.value)} 
-                            required 
-                        />
+                        <label htmlFor="email">Email</label>
+                        <input type="email" id="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
                     </div>
                     <div className="form-group">
-                        <label htmlFor="login-password">Password</label>
-                        <input 
-                            type="password" 
-                            id="login-password" 
-                            value={password} 
-                            onChange={(e) => setPassword(e.target.value)} 
-                            required 
-                        />
+                        <label htmlFor="password">Password</label>
+                        <input type="password" id="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
                     </div>
-                    <div className="form-actions">
-                        <button type="submit" className="btn btn-primary">Login</button>
-                    </div>
+                    <button type="submit" className="btn btn-primary btn-full">Login</button>
                 </form>
             </div>
         </div>
     );
 };
 
-
-const LandingPage = ({ onBookNowClick }) => (
-    <main>
-        <Hero onBookNowClick={onBookNowClick} />
-        <Programs onBookNowClick={onBookNowClick} />
-        <Skills />
-        <Location />
-        <Equipment />
-    </main>
-);
-
-// --- Dashboard Components ---
-
-const sidebarLinks = {
-  Admin: [
-    { name: 'Dashboard', icon: DashboardIcon, view: 'Dashboard' },
-    { name: 'User Management', icon: UsersIcon, view: 'User Management' },
-    { name: 'Payments', icon: CreditCardIcon, view: 'Payments' },
-    { name: 'Messages', icon: EnvelopeIcon, view: 'Messages' },
-  ],
-  Coach: [
-    { name: 'Dashboard', icon: DashboardIcon, view: 'Dashboard' },
-    { name: 'Calendar', icon: CalendarIcon, view: 'Calendar' },
-    { name: 'My Athletes', icon: UserGroupIcon, view: 'My Athletes' },
-    { name: 'Messages', icon: EnvelopeIcon, view: 'Messages' },
-  ],
-  Parent: [
-    { name: 'Dashboard', icon: DashboardIcon, view: 'Dashboard' },
-    { name: 'Schedule', icon: CalendarIcon, view: 'Schedule' },
-    { name: 'Payments', icon: CreditCardIcon, view: 'Payments' },
-    { name: 'Messages', icon: EnvelopeIcon, view: 'Messages' },
-  ],
-  Athlete: [
-    { name: 'My Progress', icon: ChartBarIcon, view: 'My Progress' },
-    { name: 'Schedule', icon: CalendarIcon, view: 'Schedule' },
-    { name: 'Personal Log', icon: CheckBadgeIcon, view: 'Personal Log' },
-    { name: 'Messages', icon: EnvelopeIcon, view: 'Messages' },
-  ],
+const Header = ({ user, impersonatedUser, onLogout, onStopImpersonating }) => {
+    const effectiveUser = impersonatedUser || user;
+    return (
+        <header className="dashboard-header-bar">
+            {impersonatedUser && (
+                <div className="impersonation-banner">
+                    <ExclamationTriangleIcon/>
+                    <p>Viewing as <strong>{impersonatedUser.name}</strong> ({impersonatedUser.role}).</p>
+                    <button onClick={onStopImpersonating} className="btn btn-secondary btn-sm">Return to Admin View</button>
+                </div>
+            )}
+            <div className="header-content">
+                <div className="header-left">
+                    <h2 className="header-title">
+                        {effectiveUser.role} Dashboard
+                    </h2>
+                </div>
+                <div className="header-right">
+                    <span>Welcome, <strong>{user.name}</strong></span>
+                    <button onClick={onLogout} className="btn-icon" aria-label="Logout">
+                        <LogoutIcon />
+                    </button>
+                </div>
+            </div>
+        </header>
+    );
 };
 
-const Sidebar = ({ userRole, activeView, onNavigate }) => {
-    const links = sidebarLinks[userRole] || [];
-
+const Sidebar = ({ user, onNavigate, activeView }) => {
+    const sidebarLinks = {
+      Admin: [
+        { name: 'Dashboard', icon: ChartBarIcon, view: 'AdminDashboard' },
+        { name: 'Users', icon: UserGroupIcon, view: 'UserManagement' },
+        { name: 'Programs', icon: CalendarIcon, view: 'ProgramManagement' },
+        { name: 'Payments', icon: CreditCardIcon, view: 'PaymentManagement' },
+        { name: 'Audit Log', icon: DocumentTextIcon, view: 'AdminLog' },
+      ],
+      Coach: [
+        { name: 'My Athletes', icon: UserGroupIcon, view: 'CoachDashboard' },
+        { name: 'Schedule', icon: CalendarIcon, view: 'CoachSchedule' },
+      ],
+      Parent: [
+        { name: 'My Children', icon: UserGroupIcon, view: 'ParentDashboard' },
+        { name: 'Payments', icon: CreditCardIcon, view: 'ParentPayments' },
+      ],
+      Athlete: [
+        { name: 'My Progress', icon: ChartBarIcon, view: 'AthleteDashboard' },
+        { name: 'Schedule', icon: CalendarIcon, view: 'AthleteSchedule' },
+      ],
+    };
+    
+    const links = sidebarLinks[user.role] || [];
+    
     return (
         <aside className="sidebar">
+            <div className="sidebar-header">
+                <span className="funpot">funpot </span>
+                <span className="skating">SKATING</span>
+            </div>
             <nav className="sidebar-nav">
                 <ul>
                     {links.map(link => {
@@ -601,9 +252,8 @@ const Sidebar = ({ userRole, activeView, onNavigate }) => {
                         return (
                             <li key={link.name}>
                                 <a href="#" 
-                                   onClick={(e) => { e.preventDefault(); onNavigate({name: link.view}); }}
-                                   className={activeView === link.view ? 'active' : ''}
-                                >
+                                   onClick={(e) => { e.preventDefault(); onNavigate(link.view); }}
+                                   className={activeView === link.view ? 'active' : ''}>
                                     <Icon />
                                     <span>{link.name}</span>
                                 </a>
@@ -613,69 +263,26 @@ const Sidebar = ({ userRole, activeView, onNavigate }) => {
                 </ul>
             </nav>
         </aside>
-    )
-}
-
-const DashboardHome = ({ user }) => (
-    <div>
-        <h1>Welcome back, {user.name.split(' ')[0]}!</h1>
-        <p>This is your central hub for managing your activities at Funport Skating Club.</p>
-        <p>Select an option from the sidebar to get started.</p>
-    </div>
-);
-
-const StatCard = ({ title, value, icon: Icon }) => (
-    <div className="stat-card">
-        <div className="stat-icon"><Icon /></div>
-        <div className="stat-content">
-            <p className="stat-value">{value}</p>
-            <p className="stat-title">{title}</p>
-        </div>
-    </div>
-);
-
-const AdminDashboard = ({ users, schedules, invoices }) => {
-    const totalUsers = users.length;
-    const totalAthletes = users.filter(u => u.role === 'Athlete').length;
-    
-    const upcomingSessions = schedules.filter(s => {
-        const sessionDate = new Date(s.date);
-        const today = new Date();
-        today.setHours(0,0,0,0);
-        const nextWeek = new Date();
-        nextWeek.setDate(today.getDate() + 7);
-        return sessionDate >= today && sessionDate <= nextWeek;
-    }).length;
-
-    const pendingPayments = invoices.filter(inv => inv.status === 'Due').length;
-
-    return (
-        <div>
-            <div className="dashboard-header"><h1>Admin Dashboard</h1></div>
-            <div className="stat-card-grid">
-                <StatCard title="Total Users" value={totalUsers} icon={UsersIcon} />
-                <StatCard title="Active Athletes" value={totalAthletes} icon={UserGroupIcon} />
-                <StatCard title="Upcoming Sessions (7 days)" value={upcomingSessions} icon={CalendarIcon} />
-                <StatCard title="Pending Payments" value={pendingPayments} icon={CreditCardIcon} />
-            </div>
-            {/* Additional admin components can be added here */}
-        </div>
     );
 };
 
-
+// --- Modals ---
 const UserFormModal = ({ isOpen, onClose, onSave, userToEdit, users }) => {
-    const [formData, setFormData] = useState({ name: '', email: '', role: 'Athlete', coachId: '' });
+    const [formData, setFormData] = useState({ name: '', email: '', role: 'Athlete', date_of_birth: '', parent_id: '', coach_id: '' });
     const modalContentRef = useRef(null);
 
     useEffect(() => {
         if (userToEdit) {
             setFormData({
-                ...userToEdit,
-                coachId: userToEdit.coachId || ''
+                name: userToEdit.name,
+                email: userToEdit.email,
+                role: userToEdit.role,
+                date_of_birth: userToEdit.date_of_birth,
+                parent_id: userToEdit.parent_id || '',
+                coach_id: userToEdit.coach_id || '',
             });
         } else {
-            setFormData({ name: '', email: '', role: 'Athlete', coachId: '' });
+            setFormData({ name: '', email: '', role: 'Athlete', date_of_birth: '', parent_id: '', coach_id: '' });
         }
     }, [userToEdit, isOpen]);
 
@@ -687,14 +294,11 @@ const UserFormModal = ({ isOpen, onClose, onSave, userToEdit, users }) => {
     const handleSubmit = (e) => {
         e.preventDefault();
         onSave(formData);
-        onClose();
     };
     
     useEffect(() => {
         const handleClickOutside = (event) => {
-            if (modalContentRef.current && !modalContentRef.current.contains(event.target)) {
-                onClose();
-            }
+            if (modalContentRef.current && !modalContentRef.current.contains(event.target)) onClose();
         };
         if (isOpen) document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -702,6 +306,7 @@ const UserFormModal = ({ isOpen, onClose, onSave, userToEdit, users }) => {
 
     if (!isOpen) return null;
     
+    const parents = users.filter(u => u.role === 'Parent');
     const coaches = users.filter(u => u.role === 'Coach');
 
     return (
@@ -709,39 +314,50 @@ const UserFormModal = ({ isOpen, onClose, onSave, userToEdit, users }) => {
             <div className="modal-content" ref={modalContentRef}>
                 <div className="modal-header">
                     <h2>{userToEdit ? 'Edit User' : 'Add New User'}</h2>
-                    <button onClick={onClose} className="close-btn" aria-label="Close"><CloseIcon /></button>
+                    <button onClick={onClose} className="close-btn"><CloseIcon /></button>
                 </div>
                 <form onSubmit={handleSubmit}>
                     <div className="form-group">
-                        <label htmlFor="name">Full Name</label>
-                        <input type="text" id="name" name="name" value={formData.name} onChange={handleChange} required />
+                        <label>Full Name</label>
+                        <input type="text" name="name" value={formData.name} onChange={handleChange} required />
                     </div>
                     <div className="form-group">
-                        <label htmlFor="email">Email Address</label>
-                        <input type="email" id="email" name="email" value={formData.email} onChange={handleChange} required />
+                        <label>Email Address</label>
+                        <input type="email" name="email" value={formData.email} onChange={handleChange} required />
                     </div>
                     <div className="form-group">
-                        <label htmlFor="role">Role</label>
-                        <select id="role" name="role" value={formData.role} onChange={handleChange} required>
-                            <option value="Athlete">Athlete</option>
-                            <option value="Parent">Parent</option>
-                            <option value="Coach">Coach</option>
+                        <label>Date of Birth</label>
+                        <input type="date" name="date_of_birth" value={formData.date_of_birth} onChange={handleChange} required />
+                    </div>
+                    <div className="form-group">
+                        <label>Role</label>
+                        <select name="role" value={formData.role} onChange={handleChange}>
                             <option value="Admin">Admin</option>
+                            <option value="Coach">Coach</option>
+                            <option value="Parent">Parent</option>
+                            <option value="Athlete">Athlete</option>
                         </select>
                     </div>
                     {formData.role === 'Athlete' && (
-                         <div className="form-group">
-                            <label htmlFor="coachId">Assign Coach</label>
-                            <select id="coachId" name="coachId" value={formData.coachId} onChange={handleChange}>
-                                <option value="">No Coach</option>
-                                {coaches.map(coach => (
-                                    <option key={coach.id} value={coach.id}>{coach.name}</option>
-                                ))}
-                            </select>
-                        </div>
+                        <>
+                            <div className="form-group">
+                                <label>Link to Parent</label>
+                                <select name="parent_id" value={formData.parent_id} onChange={handleChange}>
+                                    <option value="">No Parent</option>
+                                    {parents.map(p => <option key={p.user_id} value={p.user_id}>{p.name}</option>)}
+                                </select>
+                            </div>
+                             <div className="form-group">
+                                <label>Assign Coach</label>
+                                <select name="coach_id" value={formData.coach_id} onChange={handleChange}>
+                                    <option value="">No Coach</option>
+                                    {coaches.map(c => <option key={c.user_id} value={c.user_id}>{c.name}</option>)}
+                                </select>
+                            </div>
+                        </>
                     )}
                     <div className="form-actions">
-                        <button type="submit" className="btn btn-primary">Save User</button>
+                        <button type="submit" className="btn btn-primary">{userToEdit ? 'Save Changes' : 'Create User'}</button>
                     </div>
                 </form>
             </div>
@@ -749,33 +365,59 @@ const UserFormModal = ({ isOpen, onClose, onSave, userToEdit, users }) => {
     );
 };
 
-const UserManagement = ({ users, onAddUser, onEditUser }) => {
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [userToEdit, setUserToEdit] = useState(null);
+// --- Dashboard Views ---
 
-    const handleOpenModal = (user = null) => {
+const AdminDashboard = ({ users, programs, payments }) => {
+    const totalUsers = users.length;
+    const activeAthletes = users.filter(u => u.role === 'Athlete').length;
+    const pendingPayments = payments.filter(p => p.status === 'pending').reduce((sum, p) => sum + p.amount, 0);
+    const totalRevenue = payments.filter(p => p.status === 'paid').reduce((sum, p) => sum + p.amount, 0);
+
+    const StatCard = ({ title, value, icon: Icon }) => (
+        <div className="stat-card">
+            <div className="stat-icon"><Icon /></div>
+            <div className="stat-content">
+                <p className="stat-value">{value}</p>
+                <p className="stat-title">{title}</p>
+            </div>
+        </div>
+    );
+
+    return (
+        <div>
+            <div className="stat-card-grid">
+                <StatCard title="Total Users" value={totalUsers} icon={UserGroupIcon} />
+                <StatCard title="Active Athletes" value={activeAthletes} icon={UserGroupIcon} />
+                <StatCard title="Pending Payments" value={`KES ${pendingPayments.toLocaleString()}`} icon={CreditCardIcon} />
+                <StatCard title="Total Revenue" value={`KES ${totalRevenue.toLocaleString()}`} icon={CreditCardIcon} />
+            </div>
+        </div>
+    );
+}
+
+const UserManagement = ({ users, onImpersonate, onAdd, onEdit, onDelete }) => {
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [userToEdit, setUserToEdit] = useState<User | null>(null);
+
+    const handleOpenModal = (user: User | null = null) => {
         setUserToEdit(user);
         setIsModalOpen(true);
     };
 
-    const handleCloseModal = () => {
-        setUserToEdit(null);
-        setIsModalOpen(false);
-    };
-
-    const handleSave = (userData) => {
-        if (userData.id) {
-            onEditUser(userData);
+    const handleSave = (formData) => {
+        if (userToEdit) {
+            onEdit({ ...userToEdit, ...formData });
         } else {
-            onAddUser(userData);
+            onAdd(formData);
         }
+        setIsModalOpen(false);
     };
 
     return (
         <div>
-            <div className="dashboard-header">
+            <div className="view-header">
                 <h1>User Management</h1>
-                <button className="btn btn-primary" onClick={() => handleOpenModal()}>Add User</button>
+                <button className="btn btn-primary" onClick={() => handleOpenModal()}><UserPlusIcon/> Add User</button>
             </div>
             <div className="table-container">
                 <table>
@@ -789,1131 +431,329 @@ const UserManagement = ({ users, onAddUser, onEditUser }) => {
                     </thead>
                     <tbody>
                         {users.map(user => (
-                            <tr key={user.id}>
+                            <tr key={user.user_id}>
                                 <td>{user.name}</td>
                                 <td>{user.email}</td>
                                 <td><span className={`role-badge role-${user.role.toLowerCase()}`}>{user.role}</span></td>
-                                <td>
-                                    <button onClick={() => handleOpenModal(user)} className="btn-icon" aria-label="Edit user"><PencilIcon/></button>
+                                <td className="action-cell">
+                                    <button onClick={() => onImpersonate(user)} className="btn-icon" title="Impersonate"><EyeIcon/></button>
+                                    <button onClick={() => handleOpenModal(user)} className="btn-icon" title="Edit"><PencilIcon/></button>
+                                    <button onClick={() => onDelete(user.user_id)} className="btn-icon btn-danger" title="Delete"><TrashIcon/></button>
                                 </td>
                             </tr>
                         ))}
                     </tbody>
                 </table>
             </div>
-            {isModalOpen && <UserFormModal isOpen={isModalOpen} onClose={handleCloseModal} onSave={handleSave} userToEdit={userToEdit} users={users}/>}
+             <UserFormModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSave={handleSave} userToEdit={userToEdit} users={users}/>
         </div>
     );
 };
 
-const MyAthletes = ({ users, athletes, onSelectAthlete, currentUser }) => {
-    const myAthletes = users.filter(u => u.role === 'Athlete' && u.coachId === currentUser.id);
-
-    return (
-        <div>
-            <div className="dashboard-header"><h1>My Athletes</h1></div>
-            <div className="card-grid">
-                {myAthletes.map(athleteUser => {
-                    const athleteData = athletes.find(a => a.userId === athleteUser.id);
-                    return (
-                        <div key={athleteUser.id} className="card">
-                            <h3>{athleteUser.name}</h3>
-                            <p>Level: {athleteData?.progress?.Speed > 80 ? 'Advanced' : 'Beginner'}</p>
-                            <button className="btn btn-secondary" onClick={() => onSelectAthlete(athleteUser.id)}>View Profile</button>
-                        </div>
-                    )
-                })}
-            </div>
-        </div>
-    );
-};
-
-const AthleteProfile = ({ athleteId, users, athletes, logs, onAddLog }) => {
-    const [logContent, setLogContent] = useState('');
-    const athleteUser = users.find(u => u.id === athleteId);
-    const athleteData = athletes.find(a => a.userId === athleteId);
-    const athleteLogs = logs
-        .filter(l => l.athleteId === athleteId)
-        .sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
-    if (!athleteUser || !athleteData) return <div>Athlete not found.</div>;
-
-    const handleLogSubmit = (e) => {
-        e.preventDefault();
-        onAddLog({
-            athleteId: athleteId,
-            content: logContent,
-        });
-        setLogContent('');
-    };
-
-    return (
-        <div>
-            <div className="dashboard-header"><h1>{athleteUser.name}'s Profile</h1></div>
-            <div className="profile-layout">
-                <div className="card">
-                    <h3>Progress Overview</h3>
-                    {Object.entries(athleteData.progress).map(([skill, value]) => (
-                        <div key={skill} className="progress-item">
-                            <label>{skill}</label>
-                            <div className="progress-bar">
-                                <div className="progress-bar-fill" style={{ width: `${value}%` }}>{String(value)}%</div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-                <div className="card">
-                    <h3>Activity Log</h3>
-                    <form className="log-form" onSubmit={handleLogSubmit}>
-                        <div className="form-group">
-                            <textarea value={logContent} onChange={(e) => setLogContent(e.target.value)} placeholder="Add a new log entry..."></textarea>
-                        </div>
-                        <button className="btn btn-primary" type="submit">Add Log</button>
-                    </form>
-                    <div className="log-list">
-                        {athleteLogs.map(log => (
-                            <div key={log.id} className="log-entry">
-                                <p className="log-content">{log.content}</p>
-                                <p className="log-meta">By {log.author} on {new Date(log.date).toLocaleDateString()}</p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </div>
-        </div>
-    )
-};
-
-const MyProgress = ({ currentUser, users, athletes }) => {
-    const athleteUser = users.find(u => u.id === currentUser.id);
-    const athleteData = athletes.find(a => a.userId === currentUser.id);
-    
-    if (!athleteUser || !athleteData) return <div>Could not find athlete data.</div>;
-
-    return (
-        <div>
-            <div className="dashboard-header"><h1>My Progress</h1></div>
-            <div className="card">
-                <h3>Your Current Skill Levels</h3>
-                 {Object.entries(athleteData.progress).map(([skill, value]) => (
-                    <div key={skill} className="progress-item">
-                        <label>{skill}</label>
-                        <div className="progress-bar">
-                            <div className="progress-bar-fill" style={{ width: `${value}%` }}>{String(value)}%</div>
-                        </div>
-                    </div>
-                ))}
-            </div>
-        </div>
-    );
-};
-
-const PersonalLog = ({ currentUser, logs, onAddLog }) => {
-    const [logContent, setLogContent] = useState('');
-    const userLogs = logs
-        .filter(l => l.athleteId === currentUser.id)
-        .sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-        
-    const handleLogSubmit = (e) => {
-        e.preventDefault();
-        onAddLog({
-            athleteId: currentUser.id,
-            content: logContent,
-        });
-        setLogContent('');
-    };
-
-    return (
-         <div>
-            <div className="dashboard-header"><h1>Personal Log</h1></div>
-            <div className="card">
-                <h3>Your Training Diary</h3>
-                <form className="log-form" onSubmit={handleLogSubmit}>
-                    <div className="form-group">
-                        <textarea value={logContent} onChange={(e) => setLogContent(e.target.value)} placeholder="What did you work on today?"></textarea>
-                    </div>
-                    <button className="btn btn-primary" type="submit">Add Entry</button>
-                </form>
-                <div className="log-list">
-                    {userLogs.map(log => (
-                        <div key={log.id} className="log-entry">
-                            <p className="log-content">{log.content}</p>
-                            <p className="log-meta">By {log.author} on {new Date(log.date).toLocaleDateString()}</p>
-                        </div>
-                    ))}
-                </div>
-            </div>
-        </div>
-    );
-};
-
-const Schedule = ({ schedules, users, currentUser, onConfirmBooking, onAddReminder, reminders }) => {
-    let relevantSchedules = [];
-    const userAthleteIds = [];
-
-    if (currentUser.role === 'Parent' && currentUser.children) {
-        userAthleteIds.push(...currentUser.children);
-    } else if (currentUser.role === 'Athlete') {
-        userAthleteIds.push(currentUser.id);
-    }
-
-    if (userAthleteIds.length > 0) {
-        relevantSchedules = schedules.filter(s => s.athleteIds.some(id => userAthleteIds.includes(id)));
-    }
-    
-    relevantSchedules.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-
-    const groupedSchedules = relevantSchedules.reduce((acc, schedule) => {
-        const date = new Date(schedule.date).toDateString();
-        if (!acc[date]) {
-            acc[date] = [];
-        }
-        acc[date].push(schedule);
-        return acc;
-    }, {});
-    
-    const reminderOptions = [
-        { label: '15 minutes before', value: 15 },
-        { label: '1 hour before', value: 60 },
-        { label: '1 day before', value: 1440 },
-    ];
-
-    return (
-        <div>
-            <div className="dashboard-header"><h1>My Schedule</h1></div>
-             {Object.keys(groupedSchedules).length === 0 ? (
-                <div className="card"><p>You have no upcoming sessions.</p></div>
-            ) : (
-                <div className="schedule-container">
-                    {Object.entries(groupedSchedules).map(([date, sessions]) => (
-                        <div key={date} className="card schedule-group">
-                            <h3 className="schedule-date">{new Date(date).toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}</h3>
-                            {sessions.map((session) => {
-                                const athletesInSession = users.filter(u => session.athleteIds.includes(u.id));
-                                const athletesToConfirm = currentUser.role === 'Parent' ? athletesInSession.filter(a => currentUser.children.includes(a.id)) : [currentUser];
-                                const isAllConfirmed = athletesToConfirm.every(a => session.confirmedAthleteIds.includes(a.id));
-                                const hasReminder = reminders.some(r => r.sessionId === session.id && r.userId === currentUser.id);
-
-                                return (
-                                <div key={session.id} className="session-card">
-                                    <h4>{session.time} - {session.title}</h4>
-                                    <div className="session-location"><MapPinIcon /> {session.location}</div>
-                                    <div className="session-actions">
-                                        {isAllConfirmed ? (
-                                            <span className="confirmed-badge"><CheckCircleIcon /> Confirmed</span>
-                                        ) : (
-                                            <button onClick={() => onConfirmBooking(session.id)} className="btn btn-secondary confirm-btn">Confirm Booking</button>
-                                        )}
-                                        <div className="reminder-dropdown-wrapper">
-                                            <button className={`btn-icon ${hasReminder ? 'active' : ''}`} aria-label="Set Reminder"><BellIcon /></button>
-                                            <div className="reminder-dropdown">
-                                                {hasReminder ? <p className="reminder-set">Reminder is set.</p> : <p>Set reminder:</p>}
-                                                <ul>
-                                                {reminderOptions.map(opt => (
-                                                    <li key={opt.value}>
-                                                        <button onClick={() => onAddReminder(session.id, opt.value)}>{opt.label}</button>
-                                                    </li>
-                                                ))}
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            )})}
-                        </div>
-                    ))}
-                </div>
-            )}
-        </div>
-    );
-};
-
-
-const PaymentModal = ({ invoice, onConfirm, onClose }) => {
-    const [step, setStep] = useState(1); // 1: choice, 2: confirmation
-
-    const handleConfirm = () => {
-        onConfirm();
-        setStep(2);
-    }
+const CoachDashboard = ({ coach, users, progress, onUpdateProgress }) => {
+    const myAthletes = users.filter(u => u.role === 'Athlete' && u.coach_id === coach.user_id);
     
     return (
-        <div className="modal-overlay show">
-            <div className="modal-content">
-                {step === 1 ? (
-                    <>
-                        <div className="modal-header">
-                            <h2>Pay Invoice</h2>
-                            <button onClick={onClose} className="close-btn" aria-label="Close"><CloseIcon /></button>
-                        </div>
-                        <div className="payment-details">
-                            <p><strong>Description:</strong> {invoice.description}</p>
-                            <p><strong>Amount:</strong> KES {invoice.amount.toLocaleString()}</p>
-                            <div className="payment-actions">
-                                <p>Choose a payment method:</p>
-                                <div className="login-options">
-                                    <button onClick={handleConfirm} className="btn btn-primary">Pay with M-Pesa</button>
-                                    <button onClick={handleConfirm} className="btn btn-secondary">Pay with Card</button>
-                                </div>
-                            </div>
-                        </div>
-                    </>
-                ) : (
-                    <div className="confirmation-message">
-                        <div className="icon"><CheckCircleIcon/></div>
-                        <h3>Payment Successful!</h3>
-                        <p>Thank you for your payment. Your records have been updated.</p>
-                        <button onClick={onClose} className="btn btn-primary">Done</button>
-                    </div>
-                )}
-            </div>
-        </div>
-    );
-};
-
-const Payments = ({ currentUser, users, invoices, onPayInvoice }) => {
-    const [invoiceToPay, setInvoiceToPay] = useState<Invoice | null>(null);
-
-    const handleOpenPayModal = (invoice: Invoice) => setInvoiceToPay(invoice);
-    const handleClosePayModal = () => setInvoiceToPay(null);
-
-    const handlePay = () => {
-        if (invoiceToPay) {
-            onPayInvoice(invoiceToPay.id);
-            // Modal will show confirmation and then close itself
-        }
-    };
-    
-    let userInvoices: Invoice[] = [];
-    if (currentUser.role === 'Admin') {
-        userInvoices = invoices;
-    } else if (currentUser.role === 'Parent' && currentUser.children) {
-        const childIds = currentUser.children;
-        userInvoices = (invoices as Invoice[]).filter(inv => childIds.includes(inv.userId));
-    } else if (currentUser.role === 'Athlete') {
-        userInvoices = invoices.filter(inv => inv.userId === currentUser.id);
-    }
-
-
-    return (
         <div>
-            <div className="dashboard-header"><h1>Payments</h1></div>
+            <div className="view-header"><h1>My Athletes</h1></div>
             <div className="table-container">
-                 <table>
+                <table>
                     <thead>
                         <tr>
-                            <th>Description</th>
-                            <th>Amount (KES)</th>
-                            <th>Status</th>
-                            <th>Due Date</th>
-                            <th>Action</th>
+                            <th>Athlete</th>
+                            <th>Skill</th>
+                            <th>Progress</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {userInvoices.map(invoice => (
-                            <tr key={invoice.id}>
-                                <td>{invoice.description}</td>
-                                <td>{invoice.amount.toLocaleString()}</td>
-                                <td><span className={`status-badge status-${invoice.status.toLowerCase()}`}>{invoice.status}</span></td>
-                                <td>{new Date(invoice.dueDate).toLocaleDateString()}</td>
-                                <td>
-                                    {invoice.status === 'Due' && (
-                                        <button className="btn btn-primary" onClick={() => handleOpenPayModal(invoice)}>Pay Now</button>
-                                    )}
-                                </td>
-                            </tr>
-                        ))}
+                        {myAthletes.map(athlete => {
+                            const athleteProgress = progress.filter(p => p.athlete_id === athlete.user_id);
+                            return athleteProgress.map((p, index) => (
+                                <tr key={p.progress_id}>
+                                    {index === 0 && <td rowSpan={athleteProgress.length}>{athlete.name}</td>}
+                                    <td>{p.skill}</td>
+                                    <td>
+                                        <div className="progress-bar-table">
+                                            <div className="progress-bar-fill" style={{ width: `${p.percentage}%` }}>{p.percentage}%</div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <input 
+                                            type="range" 
+                                            min="0" 
+                                            max="100" 
+                                            value={p.percentage} 
+                                            onChange={(e) => onUpdateProgress(p.progress_id, parseInt(e.target.value))}
+                                        />
+                                    </td>
+                                </tr>
+                            ))
+                        })}
                     </tbody>
                 </table>
             </div>
-            {invoiceToPay && <PaymentModal invoice={invoiceToPay} onConfirm={handlePay} onClose={handleClosePayModal} />}
+        </div>
+    )
+};
+
+const ProgressDisplay = ({ title, progressItems }) => (
+     <div className="card customer-card">
+        <h3>{title}</h3>
+        <div className="progress-grid">
+            {progressItems.map(p => (
+                <div key={p.progress_id} className="progress-item">
+                    <label>{p.skill} <span className="progress-level">({p.level})</span></label>
+                    <div className="progress-bar">
+                        <div className="progress-bar-fill" style={{ width: `${p.percentage}%` }}>{p.percentage}%</div>
+                    </div>
+                </div>
+            ))}
+        </div>
+    </div>
+);
+
+
+const AthleteDashboard = ({ athlete, progress }) => {
+    const myProgress = progress.filter(p => p.athlete_id === athlete.user_id);
+    return (
+        <div>
+             <div className="view-header"><h1>My Progress</h1></div>
+             <ProgressDisplay title="Your Skill Development" progressItems={myProgress} />
+        </div>
+    )
+};
+
+const ParentDashboard = ({ parent, users, progress }) => {
+    const children = users.filter(u => u.parent_id === parent.user_id);
+    return (
+        <div>
+            <div className="view-header"><h1>My Children's Progress</h1></div>
+            <div className="customer-dashboard-layout">
+            {children.map(child => {
+                const childProgress = progress.filter(p => p.athlete_id === child.user_id);
+                return <ProgressDisplay key={child.user_id} title={`${child.name}'s Skills`} progressItems={childProgress} />
+            })}
+            </div>
         </div>
     )
 }
 
-const NewConversationModal = ({ isOpen, onClose, users, currentUser, onCreateConversation }) => {
-    const [recipientId, setRecipientId] = useState('');
-    const [message, setMessage] = useState('');
-    const modalContentRef = useRef(null);
-    
-    const possibleRecipients = users.filter(u => u.id !== currentUser.id);
-
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        if (recipientId && message) {
-            onCreateConversation(Number(recipientId), message);
-            onClose();
-            // Reset form
-            setRecipientId('');
-            setMessage('');
-        }
-    };
-
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (modalContentRef.current && !modalContentRef.current.contains(event.target)) {
-                onClose();
-            }
-        };
-        if (isOpen) document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, [isOpen, onClose]);
-
-    if (!isOpen) return null;
-
-    return (
-        <div className="modal-overlay show">
-            <div className="modal-content" ref={modalContentRef}>
-                <div className="modal-header">
-                    <h2>New Message</h2>
-                    <button onClick={onClose} className="close-btn" aria-label="Close"><CloseIcon /></button>
-                </div>
-                <form onSubmit={handleSubmit}>
-                    <div className="form-group">
-                        <label htmlFor="recipient">To:</label>
-                        <select id="recipient" value={recipientId} onChange={(e) => setRecipientId(e.target.value)} required>
-                            <option value="">Select a user...</option>
-                            {possibleRecipients.map(user => (
-                                <option key={user.id} value={user.id}>{user.name} ({user.role})</option>
-                            ))}
-                        </select>
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="message">Message:</label>
-                        <textarea id="message" value={message} onChange={(e) => setMessage(e.target.value)} required />
-                    </div>
-                    <div className="form-actions">
-                        <button type="submit" className="btn btn-primary">Send</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    );
-};
-
-
-const Messaging = ({ currentUser, users, conversations, messages, onSendMessage, onMarkAsRead, onCreateConversation, onNavigate, activeConversationId: initialActiveConvoId }) => {
-    const [activeConversationId, setActiveConversationId] = useState<number | null>(initialActiveConvoId || null);
-    const [newMessage, setNewMessage] = useState('');
-    const [isNewConvoModalOpen, setIsNewConvoModalOpen] = useState(false);
-    const messagesEndRef = useRef<HTMLDivElement>(null);
-    
-    useEffect(() => {
-        if(initialActiveConvoId) {
-            setActiveConversationId(initialActiveConvoId);
-            onMarkAsRead(initialActiveConvoId);
-        }
-    }, [initialActiveConvoId, onMarkAsRead]);
-
-    useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [messages, activeConversationId]);
-    
-    const myConversations = (conversations as typeof initialConversations)
-        .filter(c => c.participantIds.includes(currentUser.id))
-        .sort((a,b) => new Date(b.lastMessageTimestamp).getTime() - new Date(a.lastMessageTimestamp).getTime());
-
-    const activeConversation = myConversations.find(c => c.id === activeConversationId);
-    const conversationMessages = activeConversation ? (messages as typeof initialMessages)
-        .filter(m => m.conversationId === activeConversation.id)
-        .sort((a,b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()) : [];
-
-    const handleSendMessage = (e) => {
-        e.preventDefault();
-        if (newMessage.trim() && activeConversationId) {
-            onSendMessage(activeConversationId, newMessage);
-            setNewMessage('');
-        }
-    };
-    
-    const handleConversationSelect = (convoId: number) => {
-        setActiveConversationId(convoId);
-        onMarkAsRead(convoId);
-        onNavigate({ name: 'Messages', conversationId: convoId });
-    };
-
-    const getLastMessage = (convoId: number): Message | { content: string } => {
-        const convoMessages = (messages as typeof initialMessages)
-            .filter(m => m.conversationId === convoId)
-            .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-        return convoMessages[0] || { content: 'No messages yet' };
-    };
-
-    const isUnread = (convo: Conversation) => {
-        const lastMsg = getLastMessage(convo.id) as Message;
-        return lastMsg.id && !lastMsg.readBy.includes(currentUser.id);
-    };
-
-    return (
-        <div>
-            <div className="dashboard-header">
-                <h1>Messages</h1>
-                <button className="btn btn-primary" onClick={() => setIsNewConvoModalOpen(true)}>New Message</button>
-            </div>
-            <div className="messaging-layout card">
-                <div className="conversation-list">
-                    {myConversations.map(convo => {
-                        const otherParticipant = users.find(u => u.id !== currentUser.id && convo.participantIds.includes(u.id));
-                        if (!otherParticipant) return null;
-                        
-                        const unread = isUnread(convo);
-
+const PaymentManagement = ({ payments, users }) => (
+    <div>
+        <div className="view-header"><h1>Payment Management</h1></div>
+        <div className="table-container">
+            <table>
+                <thead>
+                    <tr><th>User</th><th>Amount (KES)</th><th>Status</th><th>Date</th></tr>
+                </thead>
+                <tbody>
+                    {payments.map(p => {
+                        const user = users.find(u => u.user_id === p.user_id);
                         return (
-                            <div key={convo.id} 
-                                 className={`conversation-item ${activeConversationId === convo.id ? 'active' : ''} ${unread ? 'unread' : ''}`}
-                                 onClick={() => handleConversationSelect(convo.id)}>
-                                {unread && <div className="unread-indicator"></div>}
-                                <div className="avatar">{otherParticipant.name.charAt(0)}</div>
-                                <div className="convo-details">
-                                    <p className="participant-name">{otherParticipant.name}</p>
-                                    <p className="last-message">{(getLastMessage(convo.id) as Message).content}</p>
-                                </div>
-                            </div>
-                        )
+                            <tr key={p.payment_id}>
+                                <td>{user ? user.name : 'Unknown User'}</td>
+                                <td>{p.amount.toLocaleString()}</td>
+                                <td><span className={`status-badge status-${p.status}`}>{p.status}</span></td>
+                                <td>{p.paid_at ? new Date(p.paid_at).toLocaleDateString() : 'N/A'}</td>
+                            </tr>
+                        );
                     })}
-                </div>
-                <div className="chat-window">
-                    {activeConversation ? (
-                        <>
-                            <div className="chat-header">
-                                <h3>{users.find(u => u.id === activeConversation.participantIds.find(id => id !== currentUser.id))?.name}</h3>
-                            </div>
-                            <div className="chat-messages" ref={messagesEndRef}>
-                                {conversationMessages.map(msg => (
-                                    <div key={msg.id} className={`message-bubble ${msg.senderId === currentUser.id ? 'sent' : 'received'}`}>
-                                        {msg.content}
-                                        <span className="message-timestamp">{new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                                    </div>
-                                ))}
-                            </div>
-                            <form className="chat-input-form" onSubmit={handleSendMessage}>
-                                <input type="text" value={newMessage} onChange={e => setNewMessage(e.target.value)} placeholder="Type a message..."/>
-                                <button type="submit" className="btn btn-primary btn-icon"><PaperAirplaneIcon /></button>
-                            </form>
-                        </>
-                    ) : (
-                        <div className="no-chat-selected">
-                            <EnvelopeIcon/>
-                            <h3>Select a conversation</h3>
-                            <p>Choose from an existing conversation on the left, or start a new one.</p>
-                        </div>
-                    )}
-                </div>
-            </div>
-            <NewConversationModal 
-                isOpen={isNewConvoModalOpen} 
-                onClose={() => setIsNewConvoModalOpen(false)} 
-                users={users} 
-                currentUser={currentUser} 
-                onCreateConversation={onCreateConversation} 
-            />
+                </tbody>
+            </table>
         </div>
-    )
-};
+    </div>
+);
 
-const athleteColors = ['#4F46E5', '#D97706', '#059669', '#DB2777', '#6D28D9', '#0891B2'];
-const getAthleteColor = (id: number) => athleteColors[id % athleteColors.length];
-
-const CalendarView = ({ currentUser, users, schedules, onAdd, onUpdate, onDelete }) => {
-    const [viewMode, setViewMode] = useState<'month' | 'week' | 'day'>('month');
-    const [currentDate, setCurrentDate] = useState(new Date());
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedSession, setSelectedSession] = useState<Schedule | null>(null);
-    const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-
-    const changeDate = (offset: number) => {
-        setCurrentDate(prev => {
-            const newDate = new Date(prev);
-            if (viewMode === 'month') newDate.setMonth(prev.getMonth() + offset);
-            else if (viewMode === 'week') newDate.setDate(prev.getDate() + (offset * 7));
-            else newDate.setDate(prev.getDate() + offset);
-            return newDate;
-        });
-    };
-
-    const handleDayClick = (dayDate: Date) => {
-        setSelectedDate(dayDate);
-        setSelectedSession(null);
-        setIsModalOpen(true);
-    };
-
-    const handleSessionClick = (session: Schedule) => {
-        setSelectedSession(session);
-        setSelectedDate(null);
-        setIsModalOpen(true);
-    };
-
-    const renderHeader = () => {
-        let title = '';
-        if (viewMode === 'month') title = currentDate.toLocaleString('default', { month: 'long', year: 'numeric' });
-        else if (viewMode === 'week') {
-            const startOfWeek = new Date(currentDate);
-            startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
-            const endOfWeek = new Date(startOfWeek);
-            endOfWeek.setDate(startOfWeek.getDate() + 6);
-            title = `${startOfWeek.toLocaleDateString()} - ${endOfWeek.toLocaleDateString()}`;
-        } else {
-            title = currentDate.toLocaleDateString('default', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-        }
-        return (
-             <div className="calendar-header">
-                <div className="calendar-nav">
-                    <button onClick={() => changeDate(-1)} className="btn-icon"><ChevronLeftIcon /></button>
-                    <button onClick={() => setCurrentDate(new Date())} className="btn btn-secondary today-btn">Today</button>
-                    <button onClick={() => changeDate(1)} className="btn-icon"><ChevronRightIcon /></button>
-                </div>
-                <h2>{title}</h2>
-                <div className="calendar-view-switcher">
-                    <button onClick={() => setViewMode('month')} className={viewMode === 'month' ? 'active' : ''}>Month</button>
-                    <button onClick={() => setViewMode('week')} className={viewMode === 'week' ? 'active' : ''}>Week</button>
-                    <button onClick={() => setViewMode('day')} className={viewMode === 'day' ? 'active' : ''}>Day</button>
-                </div>
-            </div>
-        )
-    }
-
-    const renderMonthView = () => {
-        const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-        const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
-        const startDay = startOfMonth.getDay();
-        const daysInMonth = endOfMonth.getDate();
-        const days = [];
-        for (let i = 0; i < startDay; i++) {
-            days.push(<div key={`empty-${i}`} className="calendar-day empty"></div>);
-        }
-        for (let day = 1; day <= daysInMonth; day++) {
-            const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
-            const dateStr = date.toISOString().split('T')[0];
-            const daySessions = schedules.filter(s => s.date === dateStr);
-            days.push(
-                <div key={day} className="calendar-day" onClick={() => handleDayClick(date)}>
-                    <div className="day-number">{day}</div>
-                    <div className="sessions-container">
-                        {daySessions.map(session => (
-                             <div key={session.id} className="session-event" onClick={(e) => { e.stopPropagation(); handleSessionClick(session); }} style={{ backgroundColor: session.title.toLowerCase().includes('group') ? 'var(--group-session-color)' : getAthleteColor(session.athleteIds[0])}}>
-                                <span className="session-time">{session.time}</span> {session.title}
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            );
-        }
-        return (
-            <div className="calendar-grid-month">
-                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => <div key={d} className="calendar-day-header">{d}</div>)}
-                {days}
-            </div>
-        );
-    };
-
-    const renderWeekView = () => {
-        const startOfWeek = new Date(currentDate);
-        startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
-        const days = [];
-        for (let i = 0; i < 7; i++) {
-            const day = new Date(startOfWeek);
-            day.setDate(startOfWeek.getDate() + i);
-            const dateStr = day.toISOString().split('T')[0];
-            const daySessions = schedules.filter(s => s.date === dateStr);
-            days.push(
-                <div key={i} className="week-day-column">
-                    <div className="week-day-header">{day.toLocaleString('default', { weekday: 'short' })} {day.getDate()}</div>
-                    <div className="sessions-container-week">
-                        {daySessions.map(session => (
-                            <div key={session.id} className="session-event-week" onClick={(e) => { e.stopPropagation(); handleSessionClick(session); }} style={{ backgroundColor: session.title.toLowerCase().includes('group') ? 'var(--group-session-color)' : getAthleteColor(session.athleteIds[0])}}>
-                                <p className="session-title">{session.title}</p>
-                                <p className="session-time">{session.time}</p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            );
-        }
-        return <div className="calendar-grid-week">{days}</div>;
-    };
-    
-    const renderDayView = () => {
-        const dateStr = currentDate.toISOString().split('T')[0];
-        const daySessions = schedules.filter(s => s.date === dateStr);
-        return (
-            <div className="calendar-grid-day">
-                 {daySessions.sort((a,b) => a.time.localeCompare(b.time)).map(session => (
-                    <div key={session.id} className="session-event-day" onClick={() => handleSessionClick(session)}>
-                        <div className="session-day-time">{session.time}</div>
-                        <div className="session-day-details" style={{ borderLeftColor: session.title.toLowerCase().includes('group') ? 'var(--group-session-color)' : getAthleteColor(session.athleteIds[0])}}>
-                           <p className="session-title">{session.title}</p>
-                           <p className="session-location"><MapPinIcon/> {session.location}</p>
-                           <p className="session-attendees"><UserGroupIcon/> {users.filter(u => session.athleteIds.includes(u.id)).map(u => u.name.split(' ')[0]).join(', ')}</p>
-                        </div>
-                    </div>
-                 ))}
-            </div>
-        )
-    };
-    
-    return (
-        <div>
-            <div className="dashboard-header">
-                <h1>My Calendar</h1>
-                <button className="btn btn-primary" onClick={() => { setSelectedDate(new Date()); setSelectedSession(null); setIsModalOpen(true); }}>New Session</button>
-            </div>
-            <div className="calendar-container card">
-                {renderHeader()}
-                {viewMode === 'month' && renderMonthView()}
-                {viewMode === 'week' && renderWeekView()}
-                {viewMode === 'day' && renderDayView()}
-            </div>
-            {isModalOpen && (
-                <SessionModal 
-                    isOpen={isModalOpen}
-                    onClose={() => setIsModalOpen(false)}
-                    sessionToEdit={selectedSession}
-                    selectedDate={selectedDate}
-                    onSave={selectedSession ? onUpdate : onAdd}
-                    onDelete={onDelete}
-                    users={users}
-                    currentUser={currentUser}
-                />
-            )}
+const AdminLogView = ({ logs, users }) => (
+    <div>
+        <div className="view-header"><h1>Admin Audit Log</h1></div>
+        <div className="table-container">
+            <table>
+                <thead>
+                    <tr><th>Admin</th><th>Action</th><th>Target ID</th><th>Timestamp</th></tr>
+                </thead>
+                <tbody>
+                    {logs.map(log => {
+                        const admin = users.find(u => u.user_id === log.admin_id);
+                        return (
+                            <tr key={log.log_id}>
+                                <td>{admin ? admin.name : 'Unknown Admin'}</td>
+                                <td>{log.action}</td>
+                                <td>{log.target_id || 'N/A'}</td>
+                                <td>{new Date(log.timestamp).toLocaleString()}</td>
+                            </tr>
+                        );
+                    })}
+                </tbody>
+            </table>
         </div>
-    );
-};
+    </div>
+);
 
 
-// Fix: Define an interface for the session form data to ensure type safety for all properties.
-interface SessionFormData {
-    id?: number;
-    coachId?: number;
-    title: string;
-    date: string;
-    time: string;
-    location: string;
-    athleteIds: number[];
-}
+const DashboardLayout = ({ user, impersonatedUser, onLogout, onStopImpersonating, data, handlers }) => {
+    const [activeView, setActiveView] = useState('');
 
-const SessionModal = ({ isOpen, onClose, sessionToEdit, selectedDate, onSave, onDelete, users, currentUser }) => {
-    // Fix: Use the SessionFormData interface for the state to prevent type inference issues.
-    const [formData, setFormData] = useState<SessionFormData>({
-        title: '',
-        date: '',
-        time: '',
-        location: 'Main Rink',
-        athleteIds: []
-    });
-    const modalContentRef = useRef(null);
+    const effectiveUser = impersonatedUser || user;
 
     useEffect(() => {
-        if (sessionToEdit) {
-            setFormData({ ...sessionToEdit, athleteIds: sessionToEdit.athleteIds || [] });
-        } else if (selectedDate) {
-            setFormData({
-                title: '',
-                date: selectedDate.toISOString().split('T')[0],
-                time: '16:00',
-                location: 'Main Rink',
-                athleteIds: []
-            });
-        }
-    }, [sessionToEdit, selectedDate, isOpen]);
+        // Set default view on user change
+        const defaultViews = {
+            Admin: 'AdminDashboard',
+            Coach: 'CoachDashboard',
+            Parent: 'ParentDashboard',
+            Athlete: 'AthleteDashboard',
+        };
+        setActiveView(defaultViews[effectiveUser.role] || '');
+    }, [effectiveUser]);
 
-    // Fix: Add types for event handlers to ensure type safety on event targets.
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
-    };
-
-    // Fix: Add types for event handlers to ensure type safety on event targets.
-    const handleAthleteChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const selectedIds = Array.from(e.target.selectedOptions, option => Number(option.value));
-        setFormData(prev => ({ ...prev, athleteIds: selectedIds }));
-    };
-
-    // Fix: Add types for event handlers to ensure type safety on event targets.
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        const dataToSave = {
-            ...formData,
-            id: sessionToEdit ? sessionToEdit.id : undefined,
-            coachId: currentUser.id,
-        }
-        onSave(dataToSave);
-        onClose();
-    };
-
-    const handleDelete = () => {
-        if (sessionToEdit && window.confirm('Are you sure you want to delete this session?')) {
-            // FIX: Corrected typo from sessionTo-edit.id to sessionToEdit.id
-            onDelete(sessionToEdit.id);
-            onClose();
-        }
-    };
-    
-    const coachAthletes = users.filter(u => u.role === 'Athlete' && u.coachId === currentUser.id);
-
-    return (
-        <div className="modal-overlay show">
-            <div className="modal-content" ref={modalContentRef}>
-                <div className="modal-header">
-                    <h2>{sessionToEdit ? 'Edit Session' : 'New Session'}</h2>
-                    <button onClick={onClose} className="close-btn" aria-label="Close"><CloseIcon /></button>
-                </div>
-                <form onSubmit={handleSubmit}>
-                    <div className="form-group">
-                        <label htmlFor="title">Title</label>
-                        <input type="text" id="title" name="title" value={formData.title} onChange={handleChange} required placeholder="e.g., Group Practice, Leo Private"/>
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="date">Date</label>
-                        <input type="date" id="date" name="date" value={formData.date} onChange={handleChange} required />
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="time">Time</label>
-                        <input type="time" id="time" name="time" value={formData.time} onChange={handleChange} required />
-                    </div>
-                     <div className="form-group">
-                        <label htmlFor="location">Location</label>
-                        <select id="location" name="location" value={formData.location} onChange={handleChange}>
-                            <option>Main Rink</option>
-                            <option>Practice Area</option>
-                            <option>Outdoor Track</option>
-                        </select>
-                    </div>
-                     <div className="form-group">
-                        <label htmlFor="athleteIds">Athletes</label>
-                        {/* Fix: Correctly handle mapping athleteIds to strings for the select value.
-                            The previous expression caused a type error because `formData.athleteIds` was being inferred as `unknown`.
-                            Using `(formData.athleteIds || [])` ensures we always have an array to map over. */}
-                        <select id="athleteIds" name="athleteIds" multiple value={(formData.athleteIds || []).map(String)} onChange={handleAthleteChange} className="multi-select">
-                            {coachAthletes.map(athlete => (
-                                <option key={athlete.id} value={athlete.id}>{athlete.name}</option>
-                            ))}
-                        </select>
-                    </div>
-                    <div className="form-actions">
-                         {sessionToEdit && (
-                            <button type="button" className="btn-icon delete-btn" onClick={handleDelete} aria-label="Delete session"><TrashIcon /></button>
-                        )}
-                        <div style={{ flexGrow: 1 }}></div>
-                        <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
-                        <button type="submit" className="btn btn-primary">Save Session</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    );
-};
-
-const Dashboard = ({ currentUser, users, athletes, logs, schedules, invoices, conversations, messages, activeView, onNavigate, reminders, ...handlers }) => {
-    
     const renderContent = () => {
-        switch (activeView.name) {
-            case 'Dashboard':
-                if (currentUser.role === 'Admin') {
-                    return <AdminDashboard users={users} schedules={schedules} invoices={invoices} />;
-                }
-                if (currentUser.role === 'Coach') {
-                    // Redirect coach to their calendar by default
-                     return <CalendarView currentUser={currentUser} users={users} schedules={schedules} onAdd={handlers.onAddSchedule} onUpdate={handlers.onUpdateSchedule} onDelete={handlers.onDeleteSchedule} />;
-                }
-                return <DashboardHome user={currentUser} />;
-            case 'User Management':
-                return <UserManagement users={users} onAddUser={handlers.onAddUser} onEditUser={handlers.onEditUser} />;
-            case 'My Athletes':
-                return <MyAthletes users={users} athletes={athletes} onSelectAthlete={handlers.onSelectAthlete} currentUser={currentUser} />;
-            case 'Athlete Profile':
-                return <AthleteProfile athleteId={activeView.athleteId} users={users} athletes={athletes} logs={logs} onAddLog={handlers.onAddLog} />;
-            case 'My Progress':
-                return <MyProgress currentUser={currentUser} users={users} athletes={athletes} />;
-            case 'Personal Log':
-                return <PersonalLog currentUser={currentUser} logs={logs} onAddLog={handlers.onAddLog} />;
-            case 'Calendar': // For coaches
-                return <CalendarView currentUser={currentUser} users={users} schedules={schedules} onAdd={handlers.onAddSchedule} onUpdate={handlers.onUpdateSchedule} onDelete={handlers.onDeleteSchedule} />;
-            case 'Schedule': // For athletes/parents
-                return <Schedule schedules={schedules} users={users} currentUser={currentUser} onConfirmBooking={handlers.onConfirmBooking} onAddReminder={handlers.onAddReminder} reminders={reminders}/>;
-            case 'Payments':
-                return <Payments currentUser={currentUser} users={users} invoices={invoices} onPayInvoice={handlers.onPayInvoice} />;
-            case 'Messages':
-                return <Messaging 
-                            currentUser={currentUser} 
-                            users={users} 
-                            conversations={conversations} 
-                            messages={messages} 
-                            onSendMessage={handlers.onSendMessage} 
-                            onMarkAsRead={handlers.onMarkAsRead}
-                            onCreateConversation={handlers.onCreateConversation}
-                            onNavigate={onNavigate}
-                            activeConversationId={activeView.conversationId}
-                       />;
+        switch (activeView) {
+            case 'AdminDashboard':
+                return <AdminDashboard users={data.users} programs={data.programs} payments={data.payments}/>
+            case 'UserManagement':
+                return <UserManagement users={data.users} onImpersonate={handlers.impersonateUser} onAdd={handlers.addUser} onEdit={handlers.updateUser} onDelete={handlers.deleteUser} />;
+            case 'CoachDashboard':
+                return <CoachDashboard coach={effectiveUser} users={data.users} progress={data.progress} onUpdateProgress={handlers.updateProgress}/>;
+            case 'ParentDashboard':
+                return <ParentDashboard parent={effectiveUser} users={data.users} progress={data.progress} />;
+            case 'AthleteDashboard':
+                return <AthleteDashboard athlete={effectiveUser} progress={data.progress} />;
+            case 'PaymentManagement':
+                 return <PaymentManagement payments={data.payments} users={data.users} />;
+            case 'AdminLog':
+                 return <AdminLogView logs={data.adminLogs} users={data.users} />;
             default:
-                return <DashboardHome user={currentUser} />;
+                return <div>Select a view from the sidebar.</div>;
         }
     };
-    
+
     return (
         <div className="dashboard-layout">
-            <Sidebar userRole={currentUser.role} activeView={activeView.name} onNavigate={onNavigate} />
-            <main className="dashboard-content">
-                <div className="container">
+            <Sidebar user={effectiveUser} onNavigate={setActiveView} activeView={activeView} />
+            <div className="main-content">
+                <Header user={user} impersonatedUser={impersonatedUser} onLogout={onLogout} onStopImpersonating={onStopImpersonating} />
+                <main className="dashboard-content-area">
                     {renderContent()}
-                </div>
-            </main>
+                </main>
+            </div>
         </div>
     );
 }
 
-
 const App = () => {
-    const [isBookingModalOpen, setBookingModalOpen] = useState(false);
-    const [isLoginModalOpen, setLoginModalOpen] = useState(false);
     const [currentUser, setCurrentUser] = useLocalStorage<User | null>('currentUser', null);
-    const [users, setUsers] = useLocalStorage<User[]>('users', initialUsers);
-    const [athletes, setAthletes] = useLocalStorage<Athlete[]>('athletes', initialAthletes);
-    const [logs, setLogs] = useLocalStorage<Log[]>('logs', initialLogs);
-    const [schedules, setSchedules] = useLocalStorage<Schedule[]>('schedules', initialSchedules);
-    const [invoices, setInvoices] = useLocalStorage<Invoice[]>('invoices', initialInvoices);
-    const [conversations, setConversations] = useLocalStorage<Conversation[]>('conversations', initialConversations);
-    const [messages, setMessages] = useLocalStorage<Message[]>('messages', initialMessages);
-    const [reminders, setReminders] = useLocalStorage<Reminder[]>('reminders', []);
+    const [impersonatedUser, setImpersonatedUser] = useLocalStorage<User | null>('impersonatedUser', null);
+    const [loginError, setLoginError] = useState('');
 
+    const [users, setUsers] = useLocalStorage<User[]>('fsc_users', initialUsers);
+    const [programs, setPrograms] = useLocalStorage<Program[]>('fsc_programs', initialPrograms);
+    const [bookings, setBookings] = useLocalStorage<Booking[]>('fsc_bookings', initialBookings);
+    const [attendance, setAttendance] = useLocalStorage<Attendance[]>('fsc_attendance', initialAttendance);
+    const [progress, setProgress] = useLocalStorage<Progress[]>('fsc_progress', initialProgress);
+    const [payments, setPayments] = useLocalStorage<Payment[]>('fsc_payments', initialPayments);
+    const [adminLogs, setAdminLogs] = useLocalStorage<AdminLog[]>('fsc_adminLogs', initialAdminLogs);
 
-    const [activeView, setActiveView] = useState<ActiveView>({ name: 'Dashboard' });
-    
-    useEffect(() => {
-        if (currentUser) {
-            let defaultView = sidebarLinks[currentUser.role]?.[0]?.view || 'Dashboard';
-            // Redirect coach to calendar by default
-            if (currentUser.role === 'Coach') {
-                defaultView = 'Calendar';
-            }
-            setActiveView({name: defaultView});
-        } else {
-            // Reset to a non-view when logged out
-             setActiveView({name: ''});
+    const addAdminLog = (action: string, target_id?: number) => {
+        if (currentUser && currentUser.role === 'Admin') {
+            const newLog: AdminLog = {
+                log_id: Date.now(),
+                admin_id: currentUser.user_id,
+                action,
+                target_id,
+                timestamp: new Date().toISOString(),
+            };
+            setAdminLogs(prev => [newLog, ...prev]);
         }
-    }, [currentUser]);
-
-    const handleLoginAttempt = (email, password) => {
-        const user = users.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password === password);
+    };
+    
+    const handleLogin = (email, password) => {
+        const user = users.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password_hash === password);
         if (user) {
             setCurrentUser(user);
-            setLoginModalOpen(false);
-            return null; // Success
+            setLoginError('');
+            addAdminLog('User login');
+        } else {
+            setLoginError("Invalid email or password.");
         }
-        return "Invalid email or password."; // Error message
     };
 
     const handleLogout = () => {
+        addAdminLog('User logout');
         setCurrentUser(null);
+        setImpersonatedUser(null);
+    };
+
+    const handleImpersonate = (userToImpersonate: User) => {
+        if (currentUser && currentUser.role === 'Admin') {
+            addAdminLog('Impersonated user', userToImpersonate.user_id);
+            setImpersonatedUser(userToImpersonate);
+        }
+    };
+
+    const handleStopImpersonating = () => {
+        if(impersonatedUser) {
+           addAdminLog('Stopped impersonating user', impersonatedUser.user_id);
+           setImpersonatedUser(null);
+        }
     };
     
-    const handleNavigate = (view: ActiveView) => {
-        setActiveView(view);
-    };
-
-    const handleSelectAthlete = (athleteId: number) => {
-        setActiveView({ name: 'Athlete Profile', athleteId });
-    };
-
-    const handleAddUser = (userData) => {
-        const newUser = { ...userData, id: Math.max(...users.map(u => u.id)) + 1, password: 'password123' };
+    // --- CRUD Handlers ---
+    const handleAddUser = (formData) => {
+        const newUser: User = {
+            user_id: Date.now(),
+            name: formData.name,
+            email: formData.email,
+            password_hash: 'password123', // Default password
+            role: formData.role,
+            date_of_birth: formData.date_of_birth,
+            parent_id: formData.parent_id ? Number(formData.parent_id) : null,
+            coach_id: formData.coach_id ? Number(formData.coach_id) : undefined,
+        };
         setUsers(prev => [...prev, newUser]);
-    };
-    
-    const handleEditUser = (userData) => {
-        setUsers(prev => prev.map(u => u.id === userData.id ? { ...u, ...userData } : u));
-    };
-    
-    const handleAddLog = (logData) => {
-        const newLog = { 
-            ...logData, 
-            id: Math.max(...logs.map(l => l.id), 0) + 1,
-            author: currentUser.name,
-            date: new Date().toISOString().split('T')[0]
-        };
-        setLogs(prev => [...prev, newLog]);
+        addAdminLog('Created user', newUser.user_id);
     };
 
-    const handlePayInvoice = (invoiceId: number) => {
-        setInvoices(prev => prev.map(inv => inv.id === invoiceId ? { ...inv, status: 'Paid' } : inv));
-    };
-    
-    const handleAddSchedule = (scheduleData) => {
-        const newSchedule = { ...scheduleData, id: Math.max(...schedules.map(s => s.id), 0) + 1, confirmedAthleteIds: [] };
-        setSchedules(prev => [...prev, newSchedule]);
+    const handleUpdateUser = (updatedUser: User) => {
+        setUsers(prev => prev.map(u => u.user_id === updatedUser.user_id ? updatedUser : u));
+        addAdminLog('Updated user', updatedUser.user_id);
     };
 
-    const handleUpdateSchedule = (scheduleData) => {
-        setSchedules(prev => prev.map(s => s.id === scheduleData.id ? {...s, ...scheduleData} : s));
-    };
-
-    const handleDeleteSchedule = (scheduleId) => {
-        setSchedules(prev => prev.filter(s => s.id !== scheduleId));
-    };
-
-
-    const handleSendMessage = (conversationId: number, content: string) => {
-        const newMessage: Message = {
-            id: Math.max(...messages.map(m => m.id), 0) + 1,
-            conversationId,
-            senderId: currentUser.id,
-            content,
-            timestamp: new Date().toISOString(),
-            readBy: [currentUser.id]
-        };
-        setMessages(prev => [...prev, newMessage]);
-        setConversations(prev => prev.map(c => c.id === conversationId ? {...c, lastMessageTimestamp: newMessage.timestamp } : c));
-    };
-
-    const handleMarkConversationAsRead = (conversationId: number) => {
-        setMessages(prev => prev.map(msg => 
-            msg.conversationId === conversationId && !msg.readBy.includes(currentUser.id)
-                ? { ...msg, readBy: [...msg.readBy, currentUser.id] }
-                : msg
-        ));
-    };
-
-    const handleCreateConversation = (recipientId: number, firstMessage: string) => {
-        const existingConvo = conversations.find(c =>
-            c.participantIds.includes(currentUser.id) && c.participantIds.includes(recipientId)
-        );
-
-        if (existingConvo) {
-            handleSendMessage(existingConvo.id, firstMessage);
-            setActiveView({ name: 'Messages', conversationId: existingConvo.id });
-            return;
-        }
-
-        const newConversationId = Math.max(...conversations.map(c => c.id), 0) + 1;
-        const newConversation: Conversation = {
-            id: newConversationId,
-            participantIds: [currentUser.id, recipientId],
-            lastMessageTimestamp: new Date().toISOString()
-        };
-        setConversations(prev => [...prev, newConversation]);
-        handleSendMessage(newConversationId, firstMessage);
-        setActiveView({ name: 'Messages', conversationId: newConversationId });
-    };
-
-    const handleConfirmBooking = (sessionId: number) => {
-        const session = schedules.find(s => s.id === sessionId);
-        if (!session || !currentUser) return;
-
-        let athleteIdsToConfirm: number[] = [];
-        let confirmerName: string = currentUser.name;
-
-        if (currentUser.role === 'Athlete') {
-            athleteIdsToConfirm.push(currentUser.id);
-        } else if (currentUser.role === 'Parent' && currentUser.children) {
-            athleteIdsToConfirm = currentUser.children.filter(childId => session.athleteIds.includes(childId));
-            confirmerName = `${currentUser.name} (Parent)`;
-        }
-
-        if (athleteIdsToConfirm.length > 0) {
-            setSchedules(prev => prev.map(s => s.id === sessionId ? { ...s, confirmedAthleteIds: [...new Set([...s.confirmedAthleteIds, ...athleteIdsToConfirm])] } : s));
-
-            const coach = users.find(u => u.id === session.coachId);
-            if (coach) {
-                const athletesConfirmed = users.filter(u => athleteIdsToConfirm.includes(u.id)).map(u => u.name).join(', ');
-                const message = `${athletesConfirmed} confirmed for "${session.title}" on ${session.date}.`;
-                handleCreateConversation(coach.id, message);
-            }
+    const handleDeleteUser = (userId: number) => {
+        if (window.confirm("Are you sure you want to delete this user? This action cannot be undone.")) {
+            setUsers(prev => prev.filter(u => u.user_id !== userId));
+            addAdminLog('Deleted user', userId);
         }
     };
     
-    const handleAddReminder = (sessionId: number, minutesBefore: number) => {
-        const session = schedules.find(s => s.id === sessionId);
-        if (!session || !currentUser) return;
+    const handleUpdateProgress = (progressId: number, newPercentage: number) => {
+        setProgress(prev => prev.map(p => p.progress_id === progressId ? {...p, percentage: newPercentage, updated_at: new Date().toISOString()} : p));
+    }
 
-        const sessionDateTime = new Date(`${session.date}T${session.time}`);
-        const remindAtTime = new Date(sessionDateTime.getTime() - minutesBefore * 60000);
 
-        const newReminder: Reminder = {
-            id: Date.now(),
-            sessionId,
-            userId: currentUser.id,
-            remindAt: remindAtTime.toISOString(),
-            sessionTitle: session.title,
-            sessionTime: session.time,
-            dismissed: false,
-        };
-        // Remove existing reminder for same session/user before adding new one
-        setReminders(prev => [...prev.filter(r => !(r.sessionId === sessionId && r.userId === currentUser.id)), newReminder]);
-    };
-    
-    const handleDismissReminder = (reminderId: number) => {
-        setReminders(prev => prev.map(r => r.id === reminderId ? { ...r, dismissed: true } : r));
+    const data = { users, programs, bookings, attendance, progress, payments, adminLogs };
+    const handlers = {
+        impersonateUser: handleImpersonate,
+        addUser: handleAddUser,
+        updateUser: handleUpdateUser,
+        deleteUser: handleDeleteUser,
+        updateProgress: handleUpdateProgress,
     };
 
-
-    const unreadMessagesCount = currentUser ? conversations
-        .filter(c => c.participantIds.includes(currentUser.id))
-        .filter(c => {
-            const lastMsg = messages
-                .filter(m => m.conversationId === c.id)
-                .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())[0];
-            return lastMsg && !lastMsg.readBy.includes(currentUser.id);
-        }).length : 0;
-        
-    const activeReminders = currentUser ? reminders.filter(r => r.userId === currentUser.id && !r.dismissed && new Date(r.remindAt) < new Date()) : [];
-
-    const dashboardHandlers = {
-        onAddUser: handleAddUser,
-        onEditUser: handleEditUser,
-        onSelectAthlete: handleSelectAthlete,
-        onAddLog: handleAddLog,
-        onPayInvoice: handlePayInvoice,
-        onAddSchedule: handleAddSchedule,
-        onUpdateSchedule: handleUpdateSchedule,
-        onDeleteSchedule: handleDeleteSchedule,
-        onSendMessage: handleSendMessage,
-        onMarkAsRead: handleMarkConversationAsRead,
-        onCreateConversation: handleCreateConversation,
-        onConfirmBooking: handleConfirmBooking,
-        onAddReminder: handleAddReminder,
-    };
+    if (!currentUser) {
+        return <LoginPage onLogin={handleLogin} error={loginError} />;
+    }
 
     return (
-        <>
-            <Header 
-                onBookNowClick={() => setBookingModalOpen(true)} 
-                onLoginClick={() => setLoginModalOpen(true)}
-                user={currentUser}
-                onLogout={handleLogout}
-                unreadMessagesCount={unreadMessagesCount}
-                activeReminders={activeReminders}
-                onNavigate={handleNavigate}
-                onDismissReminder={handleDismissReminder}
-            />
-            
-            {currentUser ? (
-                <Dashboard 
-                    currentUser={currentUser} 
-                    users={users}
-                    athletes={athletes}
-                    logs={logs}
-                    schedules={schedules}
-                    invoices={invoices}
-                    conversations={conversations}
-                    messages={messages}
-                    onNavigate={handleNavigate}
-                    activeView={activeView}
-                    reminders={reminders}
-                    {...dashboardHandlers}
-                />
-            ) : (
-                <>
-                    <LandingPage onBookNowClick={() => setBookingModalOpen(true)} />
-                    <Footer />
-                </>
-            )}
-            
-            <BookingModal isOpen={isBookingModalOpen} onClose={() => setBookingModalOpen(false)} />
-            <LoginFormModal 
-                isOpen={isLoginModalOpen} 
-                onClose={() => setLoginModalOpen(false)}
-                onLoginAttempt={handleLoginAttempt}
-            />
-        </>
+        <DashboardLayout
+            user={currentUser}
+            impersonatedUser={impersonatedUser}
+            onLogout={handleLogout}
+            onStopImpersonating={handleStopImpersonating}
+            data={data}
+            handlers={handlers}
+        />
     );
 };
 
