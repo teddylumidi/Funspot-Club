@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef, SetStateAction, useMemo, FC } from 'react';
+
+import React, { useState, useEffect, useMemo, FC, SetStateAction } from 'react';
 
 // --- SVG Icons (existing icons are kept for modals, tables, etc.) ---
 const EyeIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639l4.43-7.532a1.012 1.012 0 0 1 1.638 0l4.43 7.532a1.012 1.012 0 0 1 0 .639l-4.43 7.532a1.012 1.012 0 0 1-1.638 0l-4.43-7.532Z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg>;
@@ -15,13 +16,16 @@ const UserGroupIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h
 const CreditCardIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h6m3-3.75l-3 3m0 0l-3-3m3 3V15m6-1.5h.008v.008H18V15Zm-12 0h.008v.008H6V15Zm6 0h.008v.008H12V15Zm6 0h.008v.008H18V15Zm-6 0h.008v.008H12V15Z" /></svg>;
 const FunnelIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 0 1-.659 1.591l-5.432 5.432a2.25 2.25 0 0 0-.659 1.591v2.927a2.25 2.25 0 0 1-1.244 2.013L9.75 21v-6.572a2.25 2.25 0 0 0-.659-1.591L3.659 7.409A2.25 2.25 0 0 1 3 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0 1 12 3Z" /></svg>;
 const ChartPieIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6a7.5 7.5 0 1 0 7.5 7.5h-7.5V6Z" /><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0 0 13.5 3v7.5Z" /></svg>;
+const PlusIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>;
+const BookOpenIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" /></svg>;
+
 
 // --- Type Definitions ---
 type Role = 'Admin' | 'Coach' | 'Athlete' | 'Parent';
 type SkillLevel = 'Beginner' | 'Intermediate' | 'Advanced' | 'All Levels';
 type PaymentStatus = 'paid' | 'pending' | 'failed';
 
-interface User { user_id: number; name: string; email: string; password_hash: string; role: Role; date_of_birth: string; parent_id: number | null; coach_id?: number; }
+interface User { user_id: number; name: string; email: string; password_hash: string; role: Role; date_of_birth: string; parent_id: number | null; coach_id?: number | null; }
 interface Program { program_id: number; title: string; description: string; schedule: string; coach_id: number; price: number; duration: string; skillLevel: SkillLevel; }
 interface Session { session_id: number; program_id: number; date: string; time: string; title: string; coach_id: number; athlete_ids: number[]; confirmed_athlete_ids: number[]; }
 interface Payment { payment_id: number; user_id: number; program_id: number; amount: number; status: PaymentStatus; paid_at: string | null; }
@@ -44,20 +48,23 @@ const initialUsers: User[] = [
 const initialPrograms: Program[] = [
     { program_id: 1, title: 'Summer Weekly Program', description: 'Intensive training on weekdays.', schedule: 'Mon, Wed & Fri 3:30PM–6:00PM', coach_id: 2, price: 8000, duration: '8 Weeks', skillLevel: 'Intermediate' }, { program_id: 2, title: 'Weekend Sessions', description: 'Flexible weekend training.', schedule: 'Sat & Sun 3:30PM–6:00PM', coach_id: 3, price: 6000, duration: 'Ongoing', skillLevel: 'All Levels' }, { program_id: 3, title: 'Beginner Basics', description: 'Learn to skate from scratch.', schedule: 'Tue & Thu 4:00PM–5:00PM', coach_id: 2, price: 5000, duration: '6 Weeks', skillLevel: 'Beginner' }, { program_id: 4, title: 'Advanced Figure Skating', description: 'Competitive level training.', schedule: 'Mon - Fri 6:00AM-8:00AM', coach_id: 3, price: 12000, duration: '12 Weeks', skillLevel: 'Advanced' },
 ];
+const initialSessions: Session[] = [
+    { session_id: 1, program_id: 1, date: '2024-07-29', time: '3:30PM-6:00PM', title: 'Summer Program - Week 1', coach_id: 2, athlete_ids: [5, 7], confirmed_athlete_ids: [5] },
+    { session_id: 2, program_id: 2, date: '2024-08-03', time: '3:30PM-6:00PM', title: 'Weekend Session', coach_id: 3, athlete_ids: [8], confirmed_athlete_ids: [8] },
+    { session_id: 3, program_id: 1, date: '2024-08-05', time: '3:30PM-6:00PM', title: 'Summer Program - Week 2', coach_id: 2, athlete_ids: [], confirmed_athlete_ids: [] },
+    { session_id: 4, program_id: 3, date: '2024-08-06', time: '4:00PM-5:00PM', title: 'Beginner Basics - Week 1', coach_id: 2, athlete_ids: [], confirmed_athlete_ids: [] },
+];
 const initialPayments: Payment[] = [
-    { payment_id: 1, user_id: 4, program_id: 1, amount: 8000, status: 'paid', paid_at: '2024-07-01T10:05:00Z' }, { payment_id: 2, user_id: 6, program_id: 1, amount: 8000, status: 'pending', paid_at: null }, { payment_id: 3, user_id: 8, program_id: 2, amount: 6000, status: 'failed', paid_at: null }, { payment_id: 4, user_id: 4, program_id: 3, amount: 5000, status: 'paid', paid_at: '2024-06-15T10:05:00Z' },
+    { payment_id: 1, user_id: 5, program_id: 1, amount: 8000, status: 'paid', paid_at: '2024-07-01T10:05:00Z' }, { payment_id: 2, user_id: 7, program_id: 1, amount: 8000, status: 'pending', paid_at: null }, { payment_id: 3, user_id: 8, program_id: 2, amount: 6000, status: 'failed', paid_at: null }, { payment_id: 4, user_id: 5, program_id: 3, amount: 5000, status: 'paid', paid_at: '2024-06-15T10:05:00Z' },
 ];
 const initialProgress: Progress[] = [
     { progress_id: 1, athlete_id: 5, skill: 'Balance', percentage: 80, updated_at: '2024-07-18T09:00:00Z' }, { progress_id: 2, athlete_id: 5, skill: 'Gliding', percentage: 60, updated_at: '2024-07-18T09:00:00Z' }, { progress_id: 3, athlete_id: 7, skill: 'Stopping', percentage: 85, updated_at: '2024-07-18T09:00:00Z' }, { progress_id: 4, athlete_id: 8, skill: 'Spins', percentage: 90, updated_at: '2024-07-19T09:00:00Z' },
 ];
 
-// --- Tooltip State ---
-interface Tooltip { visible: boolean; content: string; x: number; y: number; }
-const [tooltip, setTooltip] = useState<Tooltip>({ visible: false, content: '', x: 0, y: 0 });
-const showTooltip = (content: string, event: React.MouseEvent) => {
-    setTooltip({ visible: true, content, x: event.clientX, y: event.clientY });
-};
-const hideTooltip = () => setTooltip(prev => ({ ...prev, visible: false }));
+interface TooltipState { visible: boolean; content: string; x: number; y: number; }
+type ShowTooltipFn = (content: string, event: React.MouseEvent) => void;
+type HideTooltipFn = () => void;
+type ModalState = { type: null | string; data?: any; };
 
 // --- Reusable Components ---
 const StatCard: FC<{ title: string; value: string; subValue?: string }> = ({ title, value, subValue }) => (
@@ -68,7 +75,7 @@ const StatCard: FC<{ title: string; value: string; subValue?: string }> = ({ tit
     </div>
 );
 
-const PieChart: FC<{ data: { label: string; value: number }[] }> = ({ data }) => {
+const PieChart: FC<{ data: { label: string; value: number }[]; showTooltip: ShowTooltipFn; hideTooltip: HideTooltipFn; }> = ({ data, showTooltip, hideTooltip }) => {
     const total = data.reduce((acc, item) => acc + item.value, 0);
     let cumulative = 0;
     const radius = 80;
@@ -78,6 +85,7 @@ const PieChart: FC<{ data: { label: string; value: number }[] }> = ({ data }) =>
         <div className="pie-chart-container">
             <svg className="pie-chart" width="200" height="200" viewBox="-100 -100 200 200">
                 {data.map((item, index) => {
+                    if (total === 0) return null;
                     const percentage = (item.value / total) * 100;
                     const strokeDasharray = `${(percentage / 100) * circumference} ${circumference}`;
                     const strokeDashoffset = (-cumulative / 100) * circumference;
@@ -102,11 +110,11 @@ const PieChart: FC<{ data: { label: string; value: number }[] }> = ({ data }) =>
     );
 };
 
-const BarChart: FC<{ data: { label: string; value: number }[] }> = ({ data }) => {
+const BarChart: FC<{ data: { label: string; value: number }[]; showTooltip: ShowTooltipFn; hideTooltip: HideTooltipFn; }> = ({ data, showTooltip, hideTooltip }) => {
     const maxValue = Math.max(...data.map(d => d.value), 0);
     const chartWidth = 300;
     const chartHeight = 150;
-    const barWidth = chartWidth / data.length;
+    const barWidth = data.length > 0 ? chartWidth / data.length : 0;
 
     return (
         <div className="bar-chart-container">
@@ -118,7 +126,6 @@ const BarChart: FC<{ data: { label: string; value: number }[] }> = ({ data }) =>
                     const barHeight = maxValue > 0 ? (item.value / maxValue) * chartHeight : 0;
                     const x = 40 + index * barWidth;
                     const y = chartHeight - barHeight;
-                    const percentage = (item.value / maxValue * 100).toFixed(1);
                     return (
                         <g key={index}>
                             <rect
@@ -134,54 +141,65 @@ const BarChart: FC<{ data: { label: string; value: number }[] }> = ({ data }) =>
                     );
                 })}
                  <text x="15" y={chartHeight / 2} textAnchor="middle" transform={`rotate(-90 15,${chartHeight/2})`}>Value</text>
-                 <text x="25" y="10" textAnchor="end">{maxValue}</text>
-                 <text x="25" y={chartHeight} textAnchor="end">0</text>
+                 <text x="35" y="10" textAnchor="end">{maxValue}</text>
+                 <text x="35" y={chartHeight} textAnchor="end">0</text>
             </svg>
         </div>
     );
 };
 
-const Tooltip: FC<{ tooltip: Tooltip }> = ({ tooltip }) => {
+const Tooltip: FC<{ tooltip: TooltipState }> = ({ tooltip }) => {
     if (!tooltip.visible) return null;
     return (
         <div
             className="chart-tooltip"
-            style={{ left: tooltip.x, top: tooltip.y - 10 }}
+            style={{ left: tooltip.x, top: tooltip.y, transform: 'translate(-50%, -120%)' }}
             dangerouslySetInnerHTML={{ __html: tooltip.content }}
         />
     );
 };
 
+const Modal: FC<{ title: string; onClose: () => void; children: React.ReactNode; }> = ({ title, onClose, children }) => (
+    <div className="modal-backdrop">
+        <div className="modal-content">
+            <div className="modal-header">
+                <h3>{title}</h3>
+                <button onClick={onClose} className="btn-icon"><CloseIcon /></button>
+            </div>
+            <div className="modal-body">{children}</div>
+        </div>
+    </div>
+);
+
 
 // --- Dashboards ---
-const AdminDashboard: FC<{ users: User[], programs: Program[], payments: Payment[] }> = ({ users, programs, payments }) => {
-    const [filters, setFilters] = useState({ role: 'All', skillLevel: 'All', paymentStatus: 'All', dateRange: 'All' });
+const AdminDashboard: FC<{ users: User[], programs: Program[], payments: Payment[], showTooltip: ShowTooltipFn, hideTooltip: HideTooltipFn }> = ({ users, programs, payments, showTooltip, hideTooltip }) => {
+    const [filters, setFilters] = useState({ role: 'All', skillLevel: 'All Levels', paymentStatus: 'All' });
     
-    const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
+    const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         setFilters(prev => ({ ...prev, [e.target.name]: e.target.value }));
     };
 
     const filteredUsers = useMemo(() => users.filter(u => filters.role === 'All' || u.role === filters.role), [users, filters.role]);
-    const filteredPrograms = useMemo(() => programs.filter(p => filters.skillLevel === 'All' || p.skillLevel === filters.skillLevel), [programs, filters.skillLevel]);
+    const filteredPrograms = useMemo(() => programs.filter(p => filters.skillLevel === 'All Levels' || p.skillLevel === filters.skillLevel), [programs, filters.skillLevel]);
     const filteredPayments = useMemo(() => payments.filter(p => filters.paymentStatus === 'All' || p.status === filters.paymentStatus), [payments, filters.paymentStatus]);
     
     const totalRevenue = useMemo(() => filteredPayments.filter(p => p.status === 'paid').reduce((sum, p) => sum + p.amount, 0), [filteredPayments]);
     
     const userRoleData = useMemo(() => {
-        const counts = filteredUsers.reduce((acc, user) => {
+        const counts = filteredUsers.reduce((acc: Record<string, number>, user) => {
             acc[user.role] = (acc[user.role] || 0) + 1;
             return acc;
-        }, {} as Record<Role, number>);
+        }, {});
         return Object.entries(counts).map(([label, value]) => ({ label, value }));
     }, [filteredUsers]);
 
     const athleteEnrollmentData = useMemo(() => {
-        const athleteCounts = filteredPrograms.map(program => {
-            const count = filteredUsers.filter(u => u.role === 'Athlete' && programs.find(p => p.program_id === u.coach_id)?.program_id === program.program_id).length;
-            return { label: program.title.split(' ')[0], value: count };
+        return filteredPrograms.map(program => {
+            const enrollments = payments.filter(p => p.program_id === program.program_id && (p.status === 'paid' || p.status === 'pending')).length;
+            return { label: program.title.split(' ').slice(0, 2).join(' '), value: enrollments };
         });
-        return athleteCounts;
-    }, [filteredUsers, filteredPrograms]);
+    }, [payments, filteredPrograms]);
     
 
     return (
@@ -221,17 +239,17 @@ const AdminDashboard: FC<{ users: User[], programs: Program[], payments: Payment
                 <div className="stats-grid">
                     <StatCard title="Total Users" value={filteredUsers.length.toString()} />
                     <StatCard title="Total Programs" value={filteredPrograms.length.toString()} />
-                    <StatCard title="Total Revenue" value={`$${(totalRevenue / 1000).toFixed(1)}k`} />
+                    <StatCard title="Total Revenue" value={`$${(totalRevenue / 1).toFixed(2)}`} />
                     <StatCard title="Pending Payments" value={filteredPayments.filter(p => p.status === 'pending').length.toString()} />
                 </div>
                 <div className="charts-grid">
                     <div className="chart-card">
                         <h3>User Role Distribution</h3>
-                        <PieChart data={userRoleData} />
+                        <PieChart data={userRoleData} showTooltip={showTooltip} hideTooltip={hideTooltip} />
                     </div>
                     <div className="chart-card">
                         <h3>Athlete Enrollment per Program</h3>
-                        <BarChart data={athleteEnrollmentData} />
+                        <BarChart data={athleteEnrollmentData} showTooltip={showTooltip} hideTooltip={hideTooltip} />
                     </div>
                 </div>
             </main>
@@ -239,7 +257,7 @@ const AdminDashboard: FC<{ users: User[], programs: Program[], payments: Payment
     );
 };
 
-const CoachDashboard: FC<{ currentUser: User; users: User[]; progress: Progress[] }> = ({ currentUser, users, progress }) => {
+const CoachDashboard: FC<{ currentUser: User; users: User[]; progress: Progress[]; showTooltip: ShowTooltipFn; hideTooltip: HideTooltipFn; }> = ({ currentUser, users, progress, showTooltip, hideTooltip }) => {
     const assignedAthletes = users.filter(u => u.role === 'Athlete' && u.coach_id === currentUser.user_id);
     const avgProgress = useMemo(() => {
         const coachProgress = progress.filter(p => assignedAthletes.some(a => a.user_id === p.athlete_id));
@@ -264,14 +282,14 @@ const CoachDashboard: FC<{ currentUser: User; users: User[]; progress: Progress[
             <div className="charts-grid" style={{ marginTop: '24px' }}>
                 <div className="chart-card">
                     <h3>Athlete Progress Overview</h3>
-                    <BarChart data={athleteProgressData} />
+                    <BarChart data={athleteProgressData} showTooltip={showTooltip} hideTooltip={hideTooltip} />
                 </div>
             </div>
         </div>
     );
 };
 
-const ParentDashboard: FC<{ currentUser: User; users: User[]; progress: Progress[] }> = ({ currentUser, users, progress }) => {
+const ParentDashboard: FC<{ currentUser: User; users: User[]; progress: Progress[]; showTooltip: ShowTooltipFn; hideTooltip: HideTooltipFn; }> = ({ currentUser, users, progress, showTooltip, hideTooltip }) => {
     const children = users.filter(u => u.role === 'Athlete' && u.parent_id === currentUser.user_id);
     return (
         <div>
@@ -280,7 +298,7 @@ const ParentDashboard: FC<{ currentUser: User; users: User[]; progress: Progress
                 return (
                     <div key={child.user_id} className="card" style={{ marginBottom: '24px' }}>
                         <h3>{child.name}'s Progress</h3>
-                        <BarChart data={childProgress.map(p => ({ label: p.skill, value: p.percentage }))} />
+                        <BarChart data={childProgress.map(p => ({ label: p.skill, value: p.percentage }))} showTooltip={showTooltip} hideTooltip={hideTooltip} />
                     </div>
                 );
             })}
@@ -288,22 +306,166 @@ const ParentDashboard: FC<{ currentUser: User; users: User[]; progress: Progress
     );
 };
 
-const AthleteDashboard: FC<{ currentUser: User; progress: Progress[] }> = ({ currentUser, progress }) => {
+const AthleteDashboard: FC<{ currentUser: User; progress: Progress[]; showTooltip: ShowTooltipFn; hideTooltip: HideTooltipFn; }> = ({ currentUser, progress, showTooltip, hideTooltip }) => {
     const athleteProgress = progress.filter(p => p.athlete_id === currentUser.user_id);
     return (
         <div className="card">
             <h3>My Progress</h3>
-            <BarChart data={athleteProgress.map(p => ({ label: p.skill, value: p.percentage }))} />
+            <BarChart data={athleteProgress.map(p => ({ label: p.skill, value: p.percentage }))} showTooltip={showTooltip} hideTooltip={hideTooltip} />
         </div>
     );
 };
 
-// Placeholder Management Views
-const UserManagement = () => <div className="card">User Management Content</div>;
-const ProgramManagement = () => <div className="card">Program Management Content</div>;
+// --- Management Views ---
+const UserManagement: FC<{ users: User[], onImpersonate: (user: User) => void, onEdit: (user: User) => void, onDelete: (user: User) => void, onAdd: () => void }> = ({ users, onImpersonate, onEdit, onDelete, onAdd }) => (
+    <div className="card">
+        <div className="card-header">
+            <h3>User Management</h3>
+            <button className="btn btn-primary" onClick={onAdd}><UserPlusIcon/> Add User</button>
+        </div>
+        <div className="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>DOB</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {users.map(user => (
+                        <tr key={user.user_id}>
+                            <td>{user.name}</td>
+                            <td>{user.email}</td>
+                            <td><span className={`role-badge role-${user.role.toLowerCase()}`}>{user.role}</span></td>
+                            <td>{user.date_of_birth}</td>
+                            <td>
+                                <div className="action-buttons">
+                                    <button onClick={() => onImpersonate(user)} className="btn-icon" title="Impersonate"><EyeIcon/></button>
+                                    <button onClick={() => onEdit(user)} className="btn-icon" title="Edit"><PencilIcon/></button>
+                                    <button onClick={() => onDelete(user)} className="btn-icon btn-icon-danger" title="Delete"><TrashIcon/></button>
+                                </div>
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+    </div>
+);
+
+const ProgramManagement: FC<{ programs: Program[], users: User[], onEdit: (p: Program) => void, onDelete: (p: Program) => void, onAdd: () => void }> = ({ programs, users, onEdit, onDelete, onAdd }) => {
+    const getCoachName = (id: number) => users.find(u => u.user_id === id)?.name || 'Unknown';
+    return (
+    <div className="card">
+        <div className="card-header">
+            <h3>Program Management</h3>
+            <button className="btn btn-primary" onClick={onAdd}><PlusIcon/> Add Program</button>
+        </div>
+        <div className="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Coach</th>
+                        <th>Schedule</th>
+                        <th>Price</th>
+                        <th>Skill Level</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {programs.map(p => (
+                        <tr key={p.program_id}>
+                            <td>{p.title}</td>
+                            <td>{getCoachName(p.coach_id)}</td>
+                            <td>{p.schedule}</td>
+                            <td>${p.price}</td>
+                            <td><span className={`skill-badge skill-${p.skillLevel.split(' ')[0].toLowerCase()}`}>{p.skillLevel}</span></td>
+                            <td>
+                                <div className="action-buttons">
+                                    <button onClick={() => onEdit(p)} className="btn-icon" title="Edit"><PencilIcon/></button>
+                                    <button onClick={() => onDelete(p)} className="btn-icon btn-icon-danger" title="Delete"><TrashIcon/></button>
+                                </div>
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+    </div>
+)};
+
 const PaymentManagement = () => <div className="card">Payment Management Content</div>;
-const ScheduleView = () => <div className="card">Schedule Content</div>;
-const ProgressView = () => <div className="card">Progress Content</div>;
+
+const BrowseProgramsView: FC<{ programs: Program[], currentUser: User, payments: Payment[], onBook: (program: Program) => void, users: User[] }> = ({ programs, currentUser, payments, onBook, users }) => {
+    const isEnrolled = (programId: number) => {
+        if(currentUser.role === 'Parent') {
+            const children = users.filter(u => u.parent_id === currentUser.user_id);
+            return children.some(child => payments.some(p => p.program_id === programId && p.user_id === child.user_id));
+        }
+        return payments.some(p => p.program_id === programId && p.user_id === currentUser.user_id);
+    }
+    const getCoachName = (id: number) => users.find(u => u.user_id === id)?.name || 'Unknown';
+    return(
+    <div className="program-booking-grid">
+        {programs.map(p => (
+            <div key={p.program_id} className="card program-card">
+                <h3>{p.title}</h3>
+                <p className="program-card-coach">with {getCoachName(p.coach_id)}</p>
+                <p>{p.description}</p>
+                <div className="program-card-details">
+                    <span><strong>Schedule:</strong> {p.schedule}</span>
+                    <span><strong>Duration:</strong> {p.duration}</span>
+                    <span><strong>Level:</strong> <span className={`skill-badge skill-${p.skillLevel.split(' ')[0].toLowerCase()}`}>{p.skillLevel}</span></span>
+                </div>
+                <div className="program-card-footer">
+                    <span className="program-card-price">${p.price}</span>
+                    <button className="btn btn-primary" onClick={() => onBook(p)} disabled={isEnrolled(p.program_id)}>
+                        {isEnrolled(p.program_id) ? 'Enrolled' : 'Book Now'}
+                    </button>
+                </div>
+            </div>
+        ))}
+    </div>
+)};
+
+const ScheduleView: FC<{ sessions: Session[], programs: Program[], users: User[], onSessionClick: (session: Session) => void }> = ({ sessions, programs, users, onSessionClick }) => {
+    const getProgramTitle = (id: number) => programs.find(p => p.program_id === id)?.title || 'Unknown Program';
+    const getCoachName = (id: number) => users.find(u => u.user_id === id)?.name || 'Unknown Coach';
+    
+    const groupedSessions = sessions.reduce((acc, session) => {
+        const date = new Date(session.date).toDateString();
+        if (!acc[date]) acc[date] = [];
+        acc[date].push(session);
+        return acc;
+    }, {} as Record<string, Session[]>);
+
+    return (
+        <div className="schedule-container">
+            {Object.entries(groupedSessions).sort(([dateA], [dateB]) => new Date(dateA).getTime() - new Date(dateB).getTime()).map(([date, dateSessions]) => (
+                <div key={date}>
+                    <h3 className="schedule-date-header">{date}</h3>
+                    <div className="schedule-list">
+                        {dateSessions.map(session => (
+                            <div key={session.session_id} className="schedule-item card" onClick={() => onSessionClick(session)}>
+                                <div className="schedule-item-time">{session.time}</div>
+                                <div className="schedule-item-details">
+                                    <h4>{getProgramTitle(session.program_id)}</h4>
+                                    <p>{session.title}</p>
+                                    <p>Coach: {getCoachName(session.coach_id)}</p>
+                                </div>
+                                <div className="schedule-item-attendees">{session.athlete_ids.length} Registered</div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
+}
 
 // --- Main App Component ---
 const App = () => {
@@ -311,83 +473,87 @@ const App = () => {
     const [impersonatedUser, setImpersonatedUser] = useState<User | null>(null);
     const [users, setUsers] = useLocalStorage<User[]>('users', initialUsers);
     const [programs, setPrograms] = useLocalStorage<Program[]>('programs', initialPrograms);
+    const [sessions, setSessions] = useLocalStorage<Session[]>('sessions', initialSessions);
     const [payments, setPayments] = useLocalStorage<Payment[]>('payments', initialPayments);
     const [progress, setProgress] = useLocalStorage<Progress[]>('progress', initialProgress);
 
     const [view, setView] = useState('Dashboard');
     const [error, setError] = useState('');
+    const [tooltip, setTooltip] = useState<TooltipState>({ visible: false, content: '', x: 0, y: 0 });
+    const [modal, setModal] = useState<ModalState>({ type: null });
+
+    const showTooltip: ShowTooltipFn = (content, event) => setTooltip({ visible: true, content, x: event.clientX, y: event.clientY });
+    const hideTooltip: HideTooltipFn = () => setTooltip(prev => ({ ...prev, visible: false }));
 
     const displayUser = impersonatedUser || currentUser;
 
     const handleLogin = (email: string, pass: string) => {
         const user = users.find(u => u.email === email && u.password_hash === pass);
-        if (user) {
-            setCurrentUser(user);
-            setError('');
-        } else {
-            setError('Invalid email or password.');
-        }
+        if (user) { setCurrentUser(user); setError(''); } else { setError('Invalid email or password.'); }
     };
+    const handleLogout = () => { setCurrentUser(null); setImpersonatedUser(null); setView('Dashboard'); };
+    const handleImpersonate = (user: User) => { if (currentUser?.role === 'Admin') { setImpersonatedUser(user); setView('Dashboard'); } };
+    const stopImpersonating = () => { setImpersonatedUser(null); setView('Dashboard'); };
 
-    const handleLogout = () => {
-        setCurrentUser(null);
-        setImpersonatedUser(null);
-        setView('Dashboard');
+    // --- CRUD Handlers ---
+    const handleSaveUser = (user: User) => {
+        setUsers(prev => user.user_id ? prev.map(u => u.user_id === user.user_id ? user : u) : [...prev, { ...user, user_id: Date.now() }]);
+        setModal({type: null});
     };
-
-    const handleImpersonate = (user: User) => {
-        if (currentUser?.role === 'Admin') {
-            setImpersonatedUser(user);
-            setView('Dashboard');
+    const handleDeleteUser = (user: User) => {
+        setUsers(prev => prev.filter(u => u.user_id !== user.user_id));
+        setModal({type: null});
+    };
+     const handleSaveProgram = (program: Program) => {
+        setPrograms(prev => program.program_id ? prev.map(p => p.program_id === program.program_id ? program : p) : [...prev, { ...program, program_id: Date.now() }]);
+        setModal({type: null});
+    };
+    const handleDeleteProgram = (program: Program) => {
+        setPrograms(prev => prev.filter(p => p.program_id !== program.program_id));
+        setModal({type: null});
+    };
+    const handleBookProgram = (program: Program) => {
+        if (!displayUser) return;
+        // Simple booking logic, for parent, books for first child
+        let bookingUser = displayUser;
+        if(displayUser.role === 'Parent'){
+            const child = users.find(u => u.parent_id === displayUser.user_id);
+            if(child) bookingUser = child;
         }
+
+        const newPayment: Payment = { payment_id: Date.now(), user_id: bookingUser.user_id, program_id: program.program_id, amount: program.price, status: 'pending', paid_at: null };
+        setPayments(prev => [...prev, newPayment]);
+        alert(`${program.title} booked! Please complete the payment.`);
     };
-    
-    const stopImpersonating = () => {
-        setImpersonatedUser(null);
-        setView('Dashboard');
-    };
+    const handleSessionRegister = (sessionId: number, athleteId: number, register: boolean) => {
+        setSessions(prev => prev.map(s => s.session_id === sessionId ? { ...s, athlete_ids: register ? [...s.athlete_ids, athleteId] : s.athlete_ids.filter(id => id !== athleteId) } : s));
+    }
 
     if (!currentUser) {
         return <LoginPage onLogin={handleLogin} error={error} />;
     }
 
     const navigationLinks = {
-        Admin: [
-            { name: 'Dashboard', icon: ChartPieIcon },
-            { name: 'Users', icon: UserGroupIcon },
-            { name: 'Programs', icon: DocumentTextIcon },
-            { name: 'Payments', icon: CreditCardIcon }
-        ],
-        Coach: [
-            { name: 'Dashboard', icon: ChartPieIcon },
-            { name: 'My Athletes', icon: UserGroupIcon },
-            { name: 'Schedule', icon: CalendarIcon }
-        ],
-        Parent: [
-            { name: 'Dashboard', icon: ChartPieIcon },
-            { name: 'My Children', icon: UserGroupIcon },
-            { name: 'Schedule', icon: CalendarIcon },
-            { name: 'Payments', icon: CreditCardIcon }
-        ],
-        Athlete: [
-            { name: 'Dashboard', icon: ChartPieIcon },
-            { name: 'My Progress', icon: ChartBarIcon },
-            { name: 'Schedule', icon: CalendarIcon }
-        ],
+        Admin: [ { name: 'Dashboard', icon: ChartPieIcon }, { name: 'Users', icon: UserGroupIcon }, { name: 'Programs', icon: DocumentTextIcon }, { name: 'Payments', icon: CreditCardIcon } ],
+        Coach: [ { name: 'Dashboard', icon: ChartPieIcon }, { name: 'My Athletes', icon: UserGroupIcon }, { name: 'Schedule', icon: CalendarIcon } ],
+        Parent: [ { name: 'Dashboard', icon: ChartPieIcon }, { name: 'Browse Programs', icon: BookOpenIcon}, { name: 'My Children', icon: UserGroupIcon }, { name: 'Schedule', icon: CalendarIcon }, { name: 'Payments', icon: CreditCardIcon } ],
+        Athlete: [ { name: 'Dashboard', icon: ChartPieIcon }, { name: 'Browse Programs', icon: BookOpenIcon}, { name: 'My Progress', icon: ChartBarIcon }, { name: 'Schedule', icon: CalendarIcon } ],
     };
 
     const renderView = () => {
         switch (view) {
             case 'Dashboard':
-                if (displayUser?.role === 'Admin') return <AdminDashboard users={users} programs={programs} payments={payments} />;
-                if (displayUser?.role === 'Coach') return <CoachDashboard currentUser={displayUser} users={users} progress={progress} />;
-                if (displayUser?.role === 'Parent') return <ParentDashboard currentUser={displayUser} users={users} progress={progress} />;
-                if (displayUser?.role === 'Athlete') return <AthleteDashboard currentUser={displayUser} progress={progress} />;
+                if (displayUser?.role === 'Admin') return <AdminDashboard users={users} programs={programs} payments={payments} showTooltip={showTooltip} hideTooltip={hideTooltip} />;
+                if (displayUser?.role === 'Coach') return <CoachDashboard currentUser={displayUser} users={users} progress={progress} showTooltip={showTooltip} hideTooltip={hideTooltip} />;
+                if (displayUser?.role === 'Parent') return <ParentDashboard currentUser={displayUser} users={users} progress={progress} showTooltip={showTooltip} hideTooltip={hideTooltip} />;
+                if (displayUser?.role === 'Athlete') return <AthleteDashboard currentUser={displayUser} progress={progress} showTooltip={showTooltip} hideTooltip={hideTooltip} />;
                 return null;
-            case 'Users': return <UserManagement />;
-            case 'Programs': return <ProgramManagement />;
+            case 'Users': return <UserManagement users={users} onImpersonate={handleImpersonate} onEdit={(u) => setModal({type: 'edit-user', data: u})} onDelete={(u) => setModal({type: 'delete-user', data: u})} onAdd={() => setModal({type: 'add-user'})} />;
+            case 'Programs': return <ProgramManagement programs={programs} users={users} onEdit={(p) => setModal({type: 'edit-program', data: p})} onDelete={(p) => setModal({type: 'delete-program', data: p})} onAdd={() => setModal({type: 'add-program'})} />;
             case 'Payments': return <PaymentManagement />;
-            case 'Schedule': case 'My Athletes': case 'My Children': case 'My Progress': return <ScheduleView />;
+            case 'Browse Programs': return <BrowseProgramsView programs={programs} currentUser={displayUser!} payments={payments} users={users} onBook={handleBookProgram} />;
+            case 'Schedule': case 'My Athletes': case 'My Children': return <ScheduleView sessions={sessions} programs={programs} users={users} onSessionClick={(s) => setModal({type: 'session-details', data: s})} />;
+            case 'My Progress': return <AthleteDashboard currentUser={displayUser!} progress={progress} showTooltip={showTooltip} hideTooltip={hideTooltip} />;
             default: return <div>Not Found</div>;
         }
     };
@@ -438,6 +604,17 @@ const App = () => {
                     </div>
                 </main>
             </div>
+            {modal.type === 'session-details' && modal.data && <SessionDetailsModal session={modal.data} users={users} programs={programs} currentUser={displayUser!} onRegister={handleSessionRegister} onClose={() => setModal({ type: null })} />}
+            {(modal.type === 'add-user' || modal.type === 'edit-user') && <UserFormModal user={modal.data} users={users} onSave={handleSaveUser} onClose={() => setModal({ type: null })} />}
+            {(modal.type === 'add-program' || modal.type === 'edit-program') && <ProgramFormModal program={modal.data} users={users} onSave={handleSaveProgram} onClose={() => setModal({ type: null })} />}
+            {(modal.type === 'delete-user' || modal.type === 'delete-program') && (
+                <ConfirmationModal
+                    title={`Delete ${modal.type.includes('user') ? 'User' : 'Program'}`}
+                    message={`Are you sure you want to delete ${modal.data.name || modal.data.title}? This action cannot be undone.`}
+                    onConfirm={() => modal.type === 'delete-user' ? handleDeleteUser(modal.data) : handleDeleteProgram(modal.data)}
+                    onCancel={() => setModal({ type: null })}
+                />
+            )}
         </>
     );
 };
@@ -472,5 +649,176 @@ const LoginPage: FC<{ onLogin: (email: string, pass: string) => void, error: str
         </div>
     );
 };
+
+const ConfirmationModal: FC<{ title: string, message: string, onConfirm: () => void, onCancel: () => void }> = ({ title, message, onConfirm, onCancel }) => (
+    <Modal title={title} onClose={onCancel}>
+        <p>{message}</p>
+        <div className="modal-actions">
+            <button className="btn btn-secondary" onClick={onCancel}>Cancel</button>
+            <button className="btn btn-danger" onClick={onConfirm}>Confirm Delete</button>
+        </div>
+    </Modal>
+);
+
+const UserFormModal: FC<{ user?: User, users: User[], onSave: (user: User) => void, onClose: () => void }> = ({ user, users, onSave, onClose }) => {
+    const [formData, setFormData] = useState<Omit<User, 'user_id' | 'password_hash'> & {user_id?: number} >(
+        user || { name: '', email: '', role: 'Athlete', date_of_birth: '', parent_id: null, coach_id: null }
+    );
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: name === 'parent_id' || name === 'coach_id' ? (value ? Number(value) : null) : value }));
+    }
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        onSave({ ...formData, password_hash: 'password123', user_id: formData.user_id || 0}); // Add password hashing in real app
+    }
+    const coaches = users.filter(u => u.role === 'Coach');
+    const parents = users.filter(u => u.role === 'Parent');
+    
+    return (
+        <Modal title={user ? "Edit User" : "Add User"} onClose={onClose}>
+            <form onSubmit={handleSubmit}>
+                <div className="form-grid">
+                    <div className="form-group">
+                        <label>Name</label>
+                        <input name="name" value={formData.name} onChange={handleChange} required/>
+                    </div>
+                    <div className="form-group">
+                        <label>Email</label>
+                        <input name="email" type="email" value={formData.email} onChange={handleChange} required/>
+                    </div>
+                     <div className="form-group">
+                        <label>Date of Birth</label>
+                        <input name="date_of_birth" type="date" value={formData.date_of_birth} onChange={handleChange} required/>
+                    </div>
+                    <div className="form-group">
+                        <label>Role</label>
+                        <select name="role" value={formData.role} onChange={handleChange}>
+                            <option>Admin</option><option>Coach</option><option>Parent</option><option>Athlete</option>
+                        </select>
+                    </div>
+                    {formData.role === 'Athlete' && <>
+                        <div className="form-group">
+                            <label>Parent</label>
+                            <select name="parent_id" value={formData.parent_id || ''} onChange={handleChange}>
+                                <option value="">None</option>
+                                {parents.map(p => <option key={p.user_id} value={p.user_id}>{p.name}</option>)}
+                            </select>
+                        </div>
+                        <div className="form-group">
+                            <label>Coach</label>
+                            <select name="coach_id" value={formData.coach_id || ''} onChange={handleChange}>
+                                <option value="">None</option>
+                                {coaches.map(c => <option key={c.user_id} value={c.user_id}>{c.name}</option>)}
+                            </select>
+                        </div>
+                    </>}
+                </div>
+                <div className="modal-actions">
+                    <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
+                    <button type="submit" className="btn btn-primary">Save User</button>
+                </div>
+            </form>
+        </Modal>
+    )
+}
+
+const ProgramFormModal: FC<{ program?: Program, users: User[], onSave: (p: Program) => void, onClose: () => void }> = ({ program, users, onSave, onClose }) => {
+    const [formData, setFormData] = useState<Omit<Program, 'program_id'> & { program_id?: number }>(
+        program || { title: '', description: '', schedule: '', coach_id: 0, price: 0, duration: '', skillLevel: 'All Levels' }
+    );
+     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: name === 'coach_id' || name === 'price' ? Number(value) : value }));
+    }
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if(!formData.coach_id) { alert('Please select a coach.'); return; }
+        onSave({ ...formData, program_id: formData.program_id || 0});
+    }
+    const coaches = users.filter(u => u.role === 'Coach');
+
+    return (
+        <Modal title={program ? "Edit Program" : "Add Program"} onClose={onClose}>
+            <form onSubmit={handleSubmit}>
+                <div className="form-group">
+                    <label>Title</label>
+                    <input name="title" value={formData.title} onChange={handleChange} required/>
+                </div>
+                <div className="form-group">
+                    <label>Description</label>
+                    <textarea name="description" value={formData.description} onChange={handleChange} rows={3} required />
+                </div>
+                 <div className="form-grid">
+                    <div className="form-group">
+                        <label>Schedule</label>
+                        <input name="schedule" value={formData.schedule} onChange={handleChange} required/>
+                    </div>
+                     <div className="form-group">
+                        <label>Duration</label>
+                        <input name="duration" value={formData.duration} onChange={handleChange} required/>
+                    </div>
+                    <div className="form-group">
+                        <label>Price ($)</label>
+                        <input name="price" type="number" value={formData.price} onChange={handleChange} required/>
+                    </div>
+                    <div className="form-group">
+                        <label>Coach</label>
+                        <select name="coach_id" value={formData.coach_id} onChange={handleChange} required>
+                            <option value={0} disabled>Select a coach</option>
+                            {coaches.map(c => <option key={c.user_id} value={c.user_id}>{c.name}</option>)}
+                        </select>
+                    </div>
+                    <div className="form-group">
+                        <label>Skill Level</label>
+                        <select name="skillLevel" value={formData.skillLevel} onChange={handleChange}>
+                            <option>All Levels</option><option>Beginner</option><option>Intermediate</option><option>Advanced</option>
+                        </select>
+                    </div>
+                </div>
+                <div className="modal-actions">
+                    <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
+                    <button type="submit" className="btn btn-primary">Save Program</button>
+                </div>
+            </form>
+        </Modal>
+    )
+}
+
+const SessionDetailsModal: FC<{ session: Session, users: User[], programs: Program[], currentUser: User, onRegister: (sessionId: number, athleteId: number, register: boolean) => void, onClose: () => void }> = ({ session, users, programs, currentUser, onRegister, onClose }) => {
+    const program = programs.find(p => p.program_id === session.program_id);
+    const coach = users.find(u => u.user_id === session.coach_id);
+    const registeredAthletes = users.filter(u => session.athlete_ids.includes(u.user_id));
+    
+    const children = currentUser.role === 'Parent' ? users.filter(u => u.parent_id === currentUser.user_id) : [];
+
+    return (
+        <Modal title={`Session Details: ${program?.title}`} onClose={onClose}>
+            <p><strong>Date:</strong> {new Date(session.date).toDateString()}</p>
+            <p><strong>Time:</strong> {session.time}</p>
+            <p><strong>Coach:</strong> {coach?.name}</p>
+            <hr style={{margin: '16px 0'}}/>
+
+            <h4>Registered Athletes ({registeredAthletes.length})</h4>
+            <ul className="attendee-list">
+                {registeredAthletes.length > 0 ? registeredAthletes.map(a => <li key={a.user_id}>{a.name}</li>) : <li>No athletes registered yet.</li>}
+            </ul>
+
+            <div className="modal-actions">
+                {currentUser.role === 'Athlete' && (
+                    !session.athlete_ids.includes(currentUser.user_id) ?
+                    <button className="btn btn-primary" onClick={() => onRegister(session.session_id, currentUser.user_id, true)}>Register</button> :
+                    <button className="btn btn-danger" onClick={() => onRegister(session.session_id, currentUser.user_id, false)}>Unregister</button>
+                )}
+                {currentUser.role === 'Parent' && children.map(child => (
+                     !session.athlete_ids.includes(child.user_id) ?
+                    <button key={child.user_id} className="btn btn-primary" onClick={() => onRegister(session.session_id, child.user_id, true)}>Register {child.name}</button> :
+                    <button key={child.user_id} className="btn btn-danger" onClick={() => onRegister(session.session_id, child.user_id, false)}>Unregister {child.name}</button>
+                ))}
+                 <button className="btn btn-secondary" onClick={onClose}>Close</button>
+            </div>
+        </Modal>
+    );
+}
 
 export default App;
