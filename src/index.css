@@ -1,3 +1,4 @@
+
 :root {
   --font-heading: 'Rajdhani', sans-serif;
   --font-body: 'Fira Code', monospace;
@@ -116,7 +117,7 @@ svg { width: 1.25rem; height: 1.25rem; }
 .terminal { background-color: #010409; padding: 16px; font-family: var(--font-body); font-size: 0.9rem; height: 200px; overflow-y: auto; border: 1px solid var(--border-color); }
 .terminal pre { white-space: pre-wrap; word-wrap: break-word; }
 .terminal div:last-child { color: var(--green); }
-.alert-feed { display: flex; flex-direction: column; gap: 12px; height: 200px; overflow-y: auto; }
+.alert-feed { display: flex; flex-direction: column; gap: 12px; height: 200px; overflow-y: auto; padding-right: 8px; }
 .alert { display: flex; align-items: flex-start; gap: 8px; font-size: 0.85rem; border-left: 2px solid; padding-left: 8px; }
 .alert.critical { border-color: var(--red); }
 .alert.warning { border-color: var(--yellow); }
@@ -143,15 +144,20 @@ tbody tr:hover { background-color: var(--border-color); }
 .action-buttons { display: flex; gap: 8px; }
 .table-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; margin-right: 12px; border: 1px solid var(--border-color); }
 .user-name-cell { display: flex; align-items: center; }
-.role-badge, .skill-badge { padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: 500; color: #fff; text-transform: capitalize; }
+.role-badge, .skill-badge { padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: 500; color: #fff; text-transform: capitalize; display: inline-block; }
 .role-admin { background-color: var(--purple); } .role-coach { background-color: var(--red); } .role-parent { background-color: #2563EB; } .role-athlete { background-color: var(--yellow); color: #000; }
+.skill-beginner { background-color: #16A34A; } .skill-intermediate { background-color: #CA8A04; } .skill-advanced { background-color: #C2410C; } .skill-all { background-color: #6B7280; }
 
 /* Modal Styles */
 .modal-backdrop { position: fixed; inset: 0; background-color: rgba(13, 17, 23, 0.8); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-.modal-content { background-color: var(--bg-widget); padding: 24px; border-radius: 4px; width: 90%; max-width: 500px; border: 1px solid var(--border-color); }
+.modal-content { background-color: var(--bg-widget); padding: 24px; border-radius: 4px; width: 90%; border: 1px solid var(--border-color); }
+.modal-sm { max-width: 400px; } .modal-md { max-width: 600px; } .modal-lg { max-width: 800px; }
 .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
 .modal-body { max-height: 70vh; overflow-y: auto; }
 .modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 20px; }
+.form-grid .form-group:nth-child(3), .form-grid .form-group:nth-child(4) { grid-column: span 2; }
+
 
 /* Toast Notifications */
 .toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 12px; }
@@ -164,14 +170,33 @@ tbody tr:hover { background-color: var(--border-color); }
 .toast-close-btn svg { width: 16px; height: 16px; }
 @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
+/* Profile View */
+.profile-view { display: flex; flex-direction: column; gap: 24px; }
+.profile-header { display: flex; align-items: center; gap: 24px; }
+.profile-avatar { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 4px solid var(--green); }
+.profile-info h1 { font-size: 2rem; margin-bottom: 8px; }
+.profile-info .role-badge { margin-bottom: 12px; }
+.profile-email { color: var(--text-secondary); margin-bottom: 8px; }
+.profile-bio { font-style: italic; max-width: 60ch; }
+.profile-section { }
+.profile-section h3 { margin-bottom: 16px; color: var(--green); border-bottom: 1px solid var(--border-color); padding-bottom: 8px; }
+.user-list { display: flex; flex-direction: column; gap: 12px; }
+.user-list-item { display: flex; align-items: center; gap: 12px; background-color: var(--bg-main); padding: 8px; border-radius: 4px; }
+.user-list-item img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+.program-list-item { background-color: var(--bg-main); padding: 12px; border-radius: 4px; border-left: 3px solid var(--green); margin-bottom: 12px; }
+.program-list-item h4 { color: var(--text-primary); }
+.program-list-item p { color: var(--text-secondary); font-size: 0.9rem; }
+.program-list-item .skill-badge { margin-top: 8px; }
+
 /* Responsive */
 @media (max-width: 768px) {
   .dashboard-layout { flex-direction: column; }
   .sidebar { width: 100%; height: auto; border-right: none; border-bottom: 1px solid var(--border-color); }
   .sidebar-nav { display: none; /* Mobile nav would need a different approach */ }
   .sidebar-footer { display: none; }
-  .dashboard-grid, .threats-grid, .charts-grid { grid-template-columns: 1fr; }
-  .widget-span-1, .widget-span-2, .widget-span-3 { grid-column: span 1; }
+  .dashboard-grid, .threats-grid, .charts-grid, .form-grid { grid-template-columns: 1fr; }
+  .widget-span-1, .widget-span-2, .widget-span-3, .form-grid .form-group { grid-column: span 1; }
+  .profile-header { flex-direction: column; text-align: center; }
   table { display: block; width: 100%; }
   thead { display: none; }
   tr { display: block; margin-bottom: 16px; border: 1px solid var(--border-color); border-radius: 8px; padding: 8px; }
