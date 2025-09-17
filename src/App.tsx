@@ -124,7 +124,7 @@ const initialUsers: User[] = [
 
 const initialPrograms: Program[] = [
   { id: 'prog_01', title: 'Beginner Skating', description: 'Learn fundamentals: balance, gliding, stopping.', coach_id: 'user_02', price_cents: 15000, currency: 'KES', duration_minutes: 90, skill_level: 'Beginner', capacity: 12, enrolled_count: 8, location_type: 'Outdoor', active: true, schedule: [{ day: 'Mon', time: '15:30' }, { day: 'Wed', time: '15:30' }] },
-  { id: 'prog_02', title: 'Intermediate Tricks', description: 'Master ollies, shuvits, and grinds.', coach_id: 'user_02', price_cents: 20000, currency: 'KES', duration_minutes: 90, skill_level: 'Intermediate', capacity: 10, enrolled_count: 10, location_type: 'Outdoor', active: true, schedule: [{ day: 'Tue', time: '16:00' }, { day: 'Thu', time: '16:00' }] },
+  { id: 'prog_02', title: 'Intermediate Tricks', description: 'Master ollies, shuvits, and grinds.', coach_id: 'user_02', price_cents: 20000, currency: 'KES', duration_minutes: 90, skill_level: 'Intermediate', capacity: 1, enrolled_count: 1, location_type: 'Outdoor', active: true, schedule: [{ day: 'Tue', time: '16:00' }, { day: 'Thu', time: '16:00' }] },
   { id: 'prog_03', title: 'Indoor Chess Club', description: 'Strategic thinking for all ages.', coach_id: 'user_02', price_cents: 10000, currency: 'KES', duration_minutes: 60, skill_level: 'All', capacity: 20, enrolled_count: 18, location_type: 'Indoor', active: true, schedule: [{ day: 'Fri', time: '17:00' }] }
 ];
 
@@ -623,7 +623,8 @@ const UserManagementWidget: FC<{
   onDelete: (userId: string) => void;
   onAdd: () => void;
   onImpersonate: (user: User) => void;
-}> = ({ users, onEdit, onDelete, onAdd, onImpersonate }) => {
+  currentUser: User;
+}> = ({ users, onEdit, onDelete, onAdd, onImpersonate, currentUser }) => {
   const [filter, setFilter] = useState<Role | 'All'>('All');
 
   const filteredUsers = useMemo(() => {
@@ -632,7 +633,7 @@ const UserManagementWidget: FC<{
   }, [filter, users]);
 
   return (
-    <div className="widget widget-span-3">
+    <div className="widget widget-col-span-2 widget-row-span-2">
       <div className="widget-header">
         <h3>User Management</h3>
         <div className="widget-controls">
@@ -653,21 +654,27 @@ const UserManagementWidget: FC<{
             <tr><th>User</th><th>Role</th><th>Created On</th><th>Contact</th><th>Actions</th></tr>
           </thead>
           <tbody>
-            {filteredUsers.map(user => (
-              <tr key={user.id}>
-                <td data-label="User"><div className="user-name-cell"><img src={user.photo_url} alt={user.name} className="table-avatar" /><span>{user.name}</span></div></td>
-                <td data-label="Role"><RoleBadge role={user.role} /></td>
-                <td data-label="Created On">{user.created_at}</td>
-                <td data-label="Contact">{user.email}</td>
-                <td data-label="Actions">
-                  <div className="action-buttons">
-                    <button className="btn-icon" onClick={() => onImpersonate(user)} aria-label={`Impersonate ${user.name}`} title="Impersonate User"><EyeIcon /></button>
-                    <button className="btn-icon" onClick={() => onEdit(user)} aria-label={`Edit ${user.name}`} title="Edit User"><PencilIcon /></button>
-                    <button className="btn-icon" onClick={() => onDelete(user.id)} aria-label={`Delete ${user.name}`} title="Delete User"><TrashIcon /></button>
-                  </div>
-                </td>
-              </tr>
-            ))}
+            {filteredUsers.map(user => {
+                const isTargetAdmin = user.role === 'Admin';
+                const isManagerActioningAdmin = currentUser.role === 'Manager' && isTargetAdmin;
+                const isSelf = currentUser.id === user.id;
+
+                return (
+                  <tr key={user.id}>
+                    <td data-label="User"><div className="user-name-cell"><img src={user.photo_url} alt={user.name} className="table-avatar" /><span>{user.name}</span></div></td>
+                    <td data-label="Role"><RoleBadge role={user.role} /></td>
+                    <td data-label="Created On">{user.created_at}</td>
+                    <td data-label="Contact">{user.email}</td>
+                    <td data-label="Actions">
+                      <div className="action-buttons">
+                        <button className="btn-icon" disabled={isSelf} onClick={() => onImpersonate(user)} aria-label={`Impersonate ${user.name}`} title={isSelf ? "Cannot impersonate yourself" : "Impersonate User"}><EyeIcon /></button>
+                        <button className="btn-icon" disabled={isManagerActioningAdmin} onClick={() => onEdit(user)} aria-label={`Edit ${user.name}`} title={isManagerActioningAdmin ? "Managers cannot edit Admins" : "Edit User"}><PencilIcon /></button>
+                        <button className="btn-icon" disabled={isManagerActioningAdmin || isSelf} onClick={() => onDelete(user.id)} aria-label={`Delete ${user.name}`} title={isManagerActioningAdmin ? "Managers cannot delete Admins" : (isSelf ? "Cannot delete yourself" : "Delete User")}><TrashIcon /></button>
+                      </div>
+                    </td>
+                  </tr>
+                )
+            })}
           </tbody>
         </table>
       </div>
@@ -713,7 +720,7 @@ const ProgramManagementWidget: FC<{
   }
 
   return (
-    <div className="widget widget-span-3">
+    <div className="widget widget-col-span-2 widget-row-span-2">
       <div className="widget-header">
         <h3>Available Programs</h3>
         {canManage && <button className="btn btn-primary btn-sm" onClick={onAddProgram}><PlusCircleIcon/> Add Program</button>}
@@ -759,13 +766,13 @@ const TransactionLogWidget: FC<{ transactions: Transaction[], users: User[], pro
     const getProgramName = (id: string) => programs.find(p => p.id === id)?.title || 'N/A';
 
     return (
-        <div className="widget widget-span-3">
+        <div className="widget widget-col-span-2">
             <div className="widget-header"><h3>Transaction Log</h3></div>
             <div className="table-container">
                 <table>
                     <thead><tr><th>Date</th><th>User</th><th>Program</th><th>Amount</th><th>Method</th><th>Status</th></tr></thead>
                     <tbody>
-                        {transactions.map(t => (
+                        {transactions.slice().reverse().map(t => (
                             <tr key={t.id}>
                                 <td data-label="Date">{t.created_at}</td>
                                 <td data-label="User">{getUserName(t.userId)}</td>
@@ -807,7 +814,7 @@ const AnalyticsWidget: FC<{users: User[], transactions: Transaction[], programs:
     const maxRevenue = Math.max(...weeklyRevenue, 1);
 
     return (
-        <div className="widget widget-span-3">
+        <div className="widget widget-col-span-2">
             <div className="widget-header"><h3>Club Analytics</h3></div>
             <div className="analytics-grid">
                 <div className="stat-card chart-card">
@@ -925,7 +932,7 @@ const EventsCalendarWidget: FC<{ events: ClubEvent[], onDayClick: (day: number, 
     }
 
     return (
-        <div className="widget widget-span-1">
+        <div className="widget">
             <div className="widget-header"><h3>{monthName} {year}</h3></div>
             <div className="calendar-grid">
                 <div className="calendar-header">Mon</div>
@@ -950,7 +957,7 @@ const AthleteProgressWidget: FC<{ reports: TrainingReport[], athlete: User }> = 
     const maxScore = 100;
 
     return (
-        <div className="widget widget-span-2">
+        <div className="widget widget-col-span-2">
             <div className="widget-header"><h3>Progress: {athlete.name}</h3></div>
             <div className="progress-chart">
                 {athleteReports.map(report => (
@@ -986,7 +993,7 @@ const ParentPaymentsWidget: FC<{ transactions: Transaction[], parent: User, user
     }, [transactions, childrenIds]);
 
     return (
-        <div className="widget widget-span-2">
+        <div className="widget widget-col-span-2">
             <div className="widget-header"><h3>Family Payments Overview</h3></div>
             <div className="payments-overview-grid">
                 <div className="stat-card">
@@ -1004,7 +1011,7 @@ const ParentPaymentsWidget: FC<{ transactions: Transaction[], parent: User, user
 
 const AthleteProfileWidget: FC<{ athlete: User }> = ({ athlete }) => {
     return (
-        <div className="widget widget-span-1 athlete-profile-widget">
+        <div className="widget widget-col-span-1 athlete-profile-widget">
             <img src={athlete.photo_url} alt={athlete.name} />
             <h4>{athlete.name}</h4>
             {athlete.skill_level && <SkillBadge level={athlete.skill_level} />}
@@ -1014,7 +1021,7 @@ const AthleteProfileWidget: FC<{ athlete: User }> = ({ athlete }) => {
 
 const ActivityManagementWidget: FC<{ activities: Activity[], onAdd: () => void, onEdit: (activity: Activity) => void, onDelete: (id: string) => void }> = ({ activities, onAdd, onEdit, onDelete }) => {
     return (
-        <div className="widget widget-span-3">
+        <div className="widget">
             <div className="widget-header">
                 <h3>Club Activities</h3>
                 <button className="btn btn-primary btn-sm" onClick={onAdd}><PlusCircleIcon/> Add Activity</button>
@@ -1041,7 +1048,7 @@ const ActionLogWidget: FC<{ logs: ActionLog[], users: User[] }> = ({ logs, users
     const getUserName = (id: string) => users.find(u => u.id === id)?.name || id;
     
     return (
-        <div className="widget widget-span-3">
+        <div className="widget widget-col-span-2">
             <div className="widget-header"><h3>User Action Log</h3></div>
             <div className="table-container">
                 <table>
@@ -1072,7 +1079,7 @@ const CoachReportsWidget: FC<{
     const getAthleteName = (id: string) => users.find(u => u.id === id)?.name || 'N/A';
     
     return (
-        <div className="widget widget-span-3">
+        <div className="widget widget-col-span-4">
             <div className="widget-header"><h3>Pending Training Reports</h3></div>
             {pendingReports.length > 0 ? (
                 <div className="table-container">
@@ -1205,14 +1212,33 @@ export const App: FC = () => {
     addToast(`User ${user.id === userToEdit?.id ? 'updated' : 'created'} successfully!`, 'success');
   };
 
-  const handleEditUser = (user: User) => { setUserToEdit(user); setIsUserModalOpen(true); };
+  const handleEditUser = (user: User) => { 
+    if (effectiveUser?.role === 'Manager' && user.role === 'Admin') {
+        addToast("Managers are not permitted to edit Admin accounts.", 'error');
+        return;
+    }
+    setUserToEdit(user); 
+    setIsUserModalOpen(true); 
+  };
   const handleAddUser = () => { setUserToEdit(null); setIsUserModalOpen(true); };
 
   const handleDeleteUser = (userId: string) => {
+    const userToDelete = users.find(u => u.id === userId);
+    if (!userToDelete) return;
+
+    if (userId === currentUser?.id) {
+        addToast("You cannot delete your own account.", 'error');
+        return;
+    }
+
+    if (currentUser?.role === 'Manager' && userToDelete.role === 'Admin') {
+        addToast("Managers are not permitted to delete Admin accounts.", 'error');
+        return;
+    }
+
     if (window.confirm('Are you sure you want to delete this user? This cannot be undone.')) {
-      const userToDelete = users.find(u => u.id === userId);
       setUsers(prev => prev.filter(u => u.id !== userId));
-      if (userToDelete) addLog(effectiveUser!.id, `Deleted user: ${userToDelete.name}`);
+      addLog(effectiveUser!.id, `Deleted user: ${userToDelete.name}`);
       addToast('User deleted successfully.', 'success');
     }
   };
@@ -1223,20 +1249,23 @@ export const App: FC = () => {
 
   const handleSaveProgram = (program: Program) => {
     let promotedUserId: string | undefined;
+    
     setPrograms(prev => {
         const oldProgram = prev.find(p => p.id === program.id);
-        const newList = prev.map(p => p.id === program.id ? program : p);
 
-        if (oldProgram) {
-            const spotsOpened = (program.capacity - program.enrolled_count) - (oldProgram.capacity - oldProgram.enrolled_count);
+        if (oldProgram) { // This is an update
+            const spotsOpened = program.capacity - oldProgram.capacity;
             if (spotsOpened > 0) {
                 const waitlist = waitlists[program.id];
                 if (waitlist && waitlist.length > 0) {
+                    // This side-effect is safe because React runs the updater synchronously
                     promotedUserId = waitlist[0];
                 }
             }
+            return prev.map(p => p.id === program.id ? program : p);
+        } else { // This is an add - FIX: was missing
+            return [...prev, program];
         }
-        return newList;
     });
 
     if (promotedUserId) {
@@ -1246,28 +1275,34 @@ export const App: FC = () => {
         }
         setWaitlists(prev => {
             const newWaitlists = { ...prev };
-            newWaitlists[program.id] = (newWaitlists[program.id] || []).slice(1);
-            if (newWaitlists[program.id].length === 0) delete newWaitlists[program.id];
+            const newProgramWaitlist = (newWaitlists[program.id] || []).slice(1);
+            if (newProgramWaitlist.length === 0) {
+                delete newWaitlists[program.id];
+            } else {
+                newWaitlists[program.id] = newProgramWaitlist;
+            }
             return newWaitlists;
         });
     }
-
-    addToast('Program saved successfully!', 'success');
-    addLog(effectiveUser!.id, `Saved program: ${program.title}`);
+    
+    const actionText = programToEdit ? 'updated' : 'created';
+    addToast(`Program ${actionText} successfully!`, 'success');
+    addLog(effectiveUser!.id, `${actionText.charAt(0).toUpperCase() + actionText.slice(1)} program: ${program.title}`);
   };
   
   const handleBookProgram = (program: Program) => { setIsProgramDetailsModalOpen(false); setProgramToPay(program); setIsPaymentModalOpen(true); };
 
   const handleRequestWaitlist = (program: Program) => {
+    if (!effectiveUser) return;
     setWaitlists(prev => {
         const list = prev[program.id] || [];
-        if (list.includes(effectiveUser!.id)) {
+        if (list.includes(effectiveUser.id)) {
             addToast("You are already on the waitlist.", 'info');
             return prev;
         }
-        const newList = [...list, effectiveUser!.id];
+        const newList = [...list, effectiveUser.id];
         addToast(`Successfully joined waitlist for ${program.title}. You are position #${newList.length}.`, 'success');
-        addLog(effectiveUser!.id, `Joined waitlist for ${program.title}`);
+        addLog(effectiveUser.id, `Joined waitlist for ${program.title}`);
         return { ...prev, [program.id]: newList };
     });
     setIsProgramDetailsModalOpen(false);
@@ -1339,7 +1374,7 @@ export const App: FC = () => {
   
   // --- RENDER LOGIC ---
 
-  if (!currentUser) {
+  if (!currentUser || !effectiveUser) {
     return (
       <div className="login-container">
         <div className="login-box">
@@ -1372,10 +1407,8 @@ export const App: FC = () => {
         <EventDetailsModal isOpen={isEventModalOpen} onClose={() => setIsEventModalOpen(false)} events={selectedEvents} />
 
       <aside className="sidebar">
-        <div className="sidebar-content">
-          <div className="sidebar-header">
-            <h3><SkateIcon /> FUNSPOT</h3>
-          </div>
+        <div className="sidebar-header">
+          <h3><SkateIcon /> FUNSPOT</h3>
         </div>
       </aside>
 
@@ -1415,21 +1448,25 @@ export const App: FC = () => {
           <div className="dashboard-grid">
             {isAdminOrManager && <>
                 <AnalyticsWidget users={users} transactions={transactions} programs={programs}/>
-                <UserManagementWidget users={users} onImpersonate={handleImpersonate} onEdit={handleEditUser} onDelete={handleDeleteUser} onAdd={handleAddUser} />
+                <EventsCalendarWidget events={mockEvents} onDayClick={handleDayClick}/>
                 <ActivityManagementWidget activities={activities} onAdd={() => {setActivityToEdit(null); setIsActivityModalOpen(true)}} onEdit={(act) => {setActivityToEdit(act); setIsActivityModalOpen(true)}} onDelete={handleDeleteActivity} />
-                <ActionLogWidget logs={actionLogs} users={users} />
+                <UserManagementWidget users={users} onImpersonate={handleImpersonate} onEdit={handleEditUser} onDelete={handleDeleteUser} onAdd={handleAddUser} currentUser={currentUser} />
+                <ProgramManagementWidget programs={programs} users={users} onViewDetails={handleViewProgramDetails} onEditProgram={handleEditProgram} onAddProgram={handleAddProgram} currentUser={effectiveUser}/>
                 <TransactionLogWidget transactions={transactions} users={users} programs={programs} />
+                <ActionLogWidget logs={actionLogs} users={users} />
             </>}
 
             {effectiveUser.role === 'Coach' && <>
                 <CoachReportsWidget reports={trainingReports} onApprove={handleApproveReport} coach={effectiveUser} users={users} />
+                <EventsCalendarWidget events={mockEvents} onDayClick={handleDayClick}/>
+                <ProgramManagementWidget programs={programs} users={users} onViewDetails={handleViewProgramDetails} onEditProgram={handleEditProgram} onAddProgram={handleAddProgram} currentUser={effectiveUser}/>
             </>}
             
-            <EventsCalendarWidget events={mockEvents} onDayClick={handleDayClick}/>
-
             {effectiveUser.role === 'Athlete' && <>
                 <AthleteProfileWidget athlete={effectiveUser} />
                 <AthleteProgressWidget reports={trainingReports} athlete={effectiveUser} />
+                <EventsCalendarWidget events={mockEvents} onDayClick={handleDayClick}/>
+                <ProgramManagementWidget programs={programs} users={users} onViewDetails={handleViewProgramDetails} onEditProgram={handleEditProgram} onAddProgram={handleAddProgram} currentUser={effectiveUser}/>
             </>}
             
             {effectiveUser.role === 'Parent' && <>
@@ -1440,9 +1477,9 @@ export const App: FC = () => {
                         <AthleteProgressWidget reports={trainingReports} athlete={child} />
                     </React.Fragment>
                 ))}
+                <EventsCalendarWidget events={mockEvents} onDayClick={handleDayClick}/>
+                <ProgramManagementWidget programs={programs} users={users} onViewDetails={handleViewProgramDetails} onEditProgram={handleEditProgram} onAddProgram={handleAddProgram} currentUser={effectiveUser}/>
             </>}
-
-            <ProgramManagementWidget programs={programs} users={users} onViewDetails={handleViewProgramDetails} onEditProgram={handleEditProgram} onAddProgram={handleAddProgram} currentUser={effectiveUser}/>
           </div>
         </main>
       </div>
