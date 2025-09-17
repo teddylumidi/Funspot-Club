@@ -1213,7 +1213,7 @@ export const App: FC = () => {
   };
 
   const handleEditUser = (user: User) => { 
-    if (effectiveUser?.role === 'Manager' && user.role === 'Admin') {
+    if (currentUser?.role === 'Manager' && user.role === 'Admin') {
         addToast("Managers are not permitted to edit Admin accounts.", 'error');
         return;
     }
