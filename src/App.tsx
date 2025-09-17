@@ -78,6 +78,13 @@ interface TrainingReport {
     notes: string;
 }
 
+interface Activity {
+    id: string;
+    name: string;
+    type: 'Indoor' | 'Outdoor';
+    description: string;
+}
+
 // --- SVG ICONS ---
 const EyeIcon: FC = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639l4.43-7.532a1.012 1.012 0 0 1 1.638 0l4.43 7.532a1.012 1.012 0 0 1 0 .639l-4.43 7.532a1.012 1.012 0 0 1-1.638 0l-4.43-7.532Z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg>;
 const UserPlusIcon: FC = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Z" /><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 19.5a7.5 7.5 0 0 0 15 0h-15Z" /></svg>;
@@ -90,6 +97,7 @@ const BellIcon: FC = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" v
 const CreditCardIcon: FC = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 21Z" /></svg>;
 const PhoneIcon: FC = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z" /></svg>;
 const CheckCircleIcon: FC = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>;
+const PlusCircleIcon: FC = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>;
 
 
 // --- MOCK DATA ---
@@ -104,12 +112,18 @@ const initialUsers: User[] = [
 const initialPrograms: Program[] = [
   { id: 'prog_01', title: 'Beginner Skating', description: 'Learn fundamentals: balance, gliding, stopping.', coach_id: 'user_02', price_cents: 15000, currency: 'KES', duration_minutes: 90, skill_level: 'Beginner', capacity: 12, enrolled_count: 8, location_type: 'Outdoor', active: true, schedule: [{ day: 'Mon', time: '15:30' }, { day: 'Wed', time: '15:30' }] },
   { id: 'prog_02', title: 'Intermediate Tricks', description: 'Master ollies, shuvits, and grinds.', coach_id: 'user_02', price_cents: 20000, currency: 'KES', duration_minutes: 90, skill_level: 'Intermediate', capacity: 10, enrolled_count: 10, location_type: 'Outdoor', active: true, schedule: [{ day: 'Tue', time: '16:00' }, { day: 'Thu', time: '16:00' }] },
-  { id: 'prog_03', title: 'Indoor Chess Club', description: 'Strategic thinking for all ages.', coach_id: 'user_02', price_cents: 10000, currency: 'KES', duration_minutes: 60, skill_level: 'All', capacity: 20, enrolled_count: 15, location_type: 'Indoor', active: true, schedule: [{ day: 'Fri', time: '17:00' }] }
+  { id: 'prog_03', title: 'Indoor Chess Club', description: 'Strategic thinking for all ages.', coach_id: 'user_02', price_cents: 10000, currency: 'KES', duration_minutes: 60, skill_level: 'All', capacity: 20, enrolled_count: 18, location_type: 'Indoor', active: true, schedule: [{ day: 'Fri', time: '17:00' }] }
 ];
 
 const initialNotifications: AppNotification[] = [
     { id: 1, message: 'Welcome to Funspot Club! Your dashboard is ready.', timestamp: '1 day ago', read: true, type: 'system' },
     { id: 2, message: 'Coach Davis posted new exam results for Intermediate Tricks.', timestamp: '2 days ago', read: false, type: 'exam' }
+];
+
+const initialActivities: Activity[] = [
+    { id: 'act_01', name: 'Skating', type: 'Outdoor', description: 'Roller and inline skating sessions for all levels.' },
+    { id: 'act_02', name: 'Chess', type: 'Indoor', description: 'Strategic board game club for developing critical thinking.' },
+    { id: 'act_03', name: 'Swimming', type: 'Outdoor', description: 'Lessons in our heated pool, from beginners to advanced swimmers.' },
 ];
 
 const mockEvents: ClubEvent[] = (() => {
@@ -392,6 +406,56 @@ const PaymentModal: FC<{
   );
 };
 
+const AddEditActivityModal: FC<{
+    isOpen: boolean;
+    onClose: () => void;
+    onSave: (activity: Activity) => void;
+    activityToEdit: Activity | null;
+}> = ({ isOpen, onClose, onSave, activityToEdit }) => {
+    const [formData, setFormData] = useState<Partial<Activity>>({});
+
+    useEffect(() => {
+        if (activityToEdit) {
+            setFormData(activityToEdit);
+        } else {
+            setFormData({
+                id: `act_${String(Date.now()).slice(-4)}`,
+            });
+        }
+    }, [activityToEdit, isOpen]);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        onSave(formData as Activity);
+        onClose();
+    };
+
+    return (
+        <Modal isOpen={isOpen} onClose={onClose} size="md">
+            <form onSubmit={handleSubmit}>
+                <div className="modal-header">
+                    <h3>{activityToEdit ? 'Edit Activity' : 'Add New Activity'}</h3>
+                    <button type="button" className="btn-icon" onClick={onClose}><XMarkIcon /></button>
+                </div>
+                <div className="modal-body">
+                    <div className="form-group"><label>Activity Name</label><input name="name" value={formData.name || ''} onChange={handleChange} required /></div>
+                    <div className="form-group"><label>Type</label><select name="type" value={formData.type || ''} onChange={handleChange} required><option value="">Select Type</option><option>Indoor</option><option>Outdoor</option></select></div>
+                    <div className="form-group"><label>Description</label><textarea name="description" value={formData.description || ''} onChange={handleChange} rows={3} required></textarea></div>
+                </div>
+                <div className="modal-actions">
+                    <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
+                    <button type="submit" className="btn btn-primary">Save Activity</button>
+                </div>
+            </form>
+        </Modal>
+    );
+};
+
 
 const UserManagementWidget: FC<{
   users: User[];
@@ -457,7 +521,7 @@ const ProgramManagementWidget: FC<{
   
   const getProgramItemClass = (p: Program) => {
     const percentage = p.capacity > 0 ? (p.enrolled_count / p.capacity) * 100 : 0;
-    if (percentage === 100) return 'program-list-item full';
+    if (percentage >= 100) return 'program-list-item full';
     if (percentage > 75) return 'program-list-item nearing-capacity';
     return 'program-list-item';
   }
@@ -514,7 +578,12 @@ const TransactionLogWidget: FC<{ transactions: Transaction[], users: User[], pro
 };
 
 const AnalyticsWidget: FC<{users: User[], transactions: Transaction[], programs: Program[]}> = ({ users, transactions, programs }) => {
-    const totalRevenue = transactions.reduce((sum, t) => sum + t.amount_cents, 0) / 100;
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    
+    const recentTransactions = transactions.filter(t => new Date(t.created_at) >= thirtyDaysAgo);
+    const totalRevenue = recentTransactions.reduce((sum, t) => sum + t.amount_cents, 0) / 100;
+    
     const totalEnrollments = programs.reduce((sum, p) => sum + p.enrolled_count, 0);
     const roleCounts = users.reduce((acc, user) => {
         acc[user.role] = (acc[user.role] || 0) + 1;
@@ -525,7 +594,7 @@ const AnalyticsWidget: FC<{users: User[], transactions: Transaction[], programs:
         <div className="widget widget-span-3">
             <div className="widget-header"><h3>Club Analytics</h3></div>
             <div className="analytics-grid">
-                <div className="stat-card"><h4>Total Revenue</h4><p>KES {totalRevenue.toLocaleString()}</p></div>
+                <div className="stat-card"><h4>Total Revenue (30d)</h4><p>KES {totalRevenue.toLocaleString()}</p></div>
                 <div className="stat-card"><h4>Total Enrollments</h4><p>{totalEnrollments}</p></div>
                 <div className="stat-card"><h4>Total Users</h4><p>{users.length}</p></div>
                 <div className="stat-card">
@@ -604,7 +673,7 @@ const EventsCalendarWidget: FC<{ events: ClubEvent[] }> = ({ events }) => {
     }, [events, date]);
 
     const calendarDays = [];
-    // Adjust for Sunday start
+    // Adjust for Monday start
     const startDay = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
     for (let i = 0; i < startDay; i++) {
         calendarDays.push(<div key={`empty-${i}`} className="calendar-day empty"></div>);
@@ -690,6 +759,37 @@ const AthleteProfileWidget: FC<{athlete: User}> = ({athlete}) => {
     )
 }
 
+const ActivityManagementWidget: FC<{
+    activities: Activity[];
+    onAdd: () => void;
+    onEdit: (activity: Activity) => void;
+    onDelete: (activityId: string) => void;
+}> = ({ activities, onAdd, onEdit, onDelete }) => {
+    return (
+        <div className="widget widget-span-3">
+            <div className="widget-header">
+                <h3>Club Activities</h3>
+                <button className="btn btn-primary btn-sm" onClick={onAdd}><PlusCircleIcon /> Add Activity</button>
+            </div>
+            <div className="activity-list">
+                {activities.map(activity => (
+                    <div key={activity.id} className="activity-list-item">
+                        <div className="activity-item-content">
+                            <h4>{activity.name} <span className={`activity-type-badge type-${activity.type.toLowerCase()}`}>{activity.type}</span></h4>
+                            <p>{activity.description}</p>
+                        </div>
+                        <div className="action-buttons">
+                            <button className="btn-icon" onClick={() => onEdit(activity)}><PencilIcon /></button>
+                            <button className="btn-icon" onClick={() => onDelete(activity.id)}><TrashIcon /></button>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+};
+
+
 // --- LOGIN & LAYOUT ---
 
 const LoginScreen: FC<{ onLogin: (user: User) => void }> = ({ onLogin }) => {
@@ -718,11 +818,15 @@ const Dashboard: FC<{
   transactions: Transaction[];
   events: ClubEvent[];
   trainingReports: TrainingReport[];
+  activities: Activity[];
   handleUserAdd: () => void;
   handleUserEdit: (user: User) => void;
   handleUserDelete: (userId: string) => void;
   handleProgramView: (program: Program) => void;
-}> = ({ currentUser, users, programs, transactions, events, trainingReports, handleUserAdd, handleUserEdit, handleUserDelete, handleProgramView }) => {
+  handleActivityAdd: () => void;
+  handleActivityEdit: (activity: Activity) => void;
+  handleActivityDelete: (activityId: string) => void;
+}> = ({ currentUser, users, programs, transactions, events, trainingReports, activities, handleUserAdd, handleUserEdit, handleUserDelete, handleProgramView, handleActivityAdd, handleActivityEdit, handleActivityDelete }) => {
     const isParent = currentUser.role === 'Parent';
     const isAthlete = currentUser.role === 'Athlete';
     const isCoach = currentUser.role === 'Coach';
@@ -739,6 +843,12 @@ const Dashboard: FC<{
                   onAdd={handleUserAdd}
                   onEdit={handleUserEdit}
                   onDelete={handleUserDelete}
+                />
+                 <ActivityManagementWidget
+                    activities={activities}
+                    onAdd={handleActivityAdd}
+                    onEdit={handleActivityEdit}
+                    onDelete={handleActivityDelete}
                 />
                 <TransactionLogWidget transactions={transactions} users={users} programs={programs}/>
               </>
@@ -771,12 +881,15 @@ export const App: FC = () => {
     const [programs, setPrograms] = useState<Program[]>(initialPrograms);
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [notifications, setNotifications] = useState<AppNotification[]>(initialNotifications);
+    const [activities, setActivities] = useState<Activity[]>(initialActivities);
 
     const [isUserModalOpen, setUserModalOpen] = useState(false);
     const [userToEdit, setUserToEdit] = useState<User | null>(null);
     const [isProgramModalOpen, setProgramModalOpen] = useState(false);
     const [selectedProgram, setSelectedProgram] = useState<Program | null>(null);
     const [isPaymentModalOpen, setPaymentModalOpen] = useState(false);
+    const [isActivityModalOpen, setActivityModalOpen] = useState(false);
+    const [activityToEdit, setActivityToEdit] = useState<Activity | null>(null);
     
     const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
@@ -889,6 +1002,35 @@ export const App: FC = () => {
     const handleMarkNotificationAsRead = (id: number) => {
         setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
     };
+    
+    const handleSaveActivity = (activity: Activity) => {
+        const exists = activities.some(a => a.id === activity.id);
+        if (exists) {
+            setActivities(activities.map(a => a.id === activity.id ? activity : a));
+            addToast('Activity updated successfully!', 'success');
+        } else {
+            setActivities([...activities, activity]);
+            addToast('Activity created successfully!', 'success');
+        }
+        setActivityModalOpen(false);
+    };
+
+    const handleAddActivityClick = () => {
+        setActivityToEdit(null);
+        setActivityModalOpen(true);
+    };
+
+    const handleEditActivityClick = (activity: Activity) => {
+        setActivityToEdit(activity);
+        setActivityModalOpen(true);
+    };
+
+    const handleDeleteActivity = (activityId: string) => {
+        if (window.confirm('Are you sure you want to delete this activity?')) {
+            setActivities(activities.filter(a => a.id !== activityId));
+            addToast('Activity deleted.', 'info');
+        }
+    };
 
     if (!currentUser) {
         return <LoginScreen onLogin={handleLogin} />;
@@ -945,10 +1087,14 @@ export const App: FC = () => {
                           transactions={transactions}
                           events={mockEvents}
                           trainingReports={mockTrainingReports}
+                          activities={activities}
                           handleUserAdd={handleAddUserClick}
                           handleUserEdit={handleEditUserClick}
                           handleUserDelete={handleDeleteUser}
                           handleProgramView={handleViewProgramDetails}
+                          handleActivityAdd={handleAddActivityClick}
+                          handleActivityEdit={handleEditActivityClick}
+                          handleActivityDelete={handleDeleteActivity}
                         />
                     </main>
                 </div>
@@ -977,6 +1123,13 @@ export const App: FC = () => {
               onClose={() => { setPaymentModalOpen(false); setSelectedProgram(null); }}
               program={selectedProgram}
               onConfirmPayment={handleConfirmPayment}
+            />
+            
+            <AddEditActivityModal
+                isOpen={isActivityModalOpen}
+                onClose={() => setActivityModalOpen(false)}
+                onSave={handleSaveActivity}
+                activityToEdit={activityToEdit}
             />
 
             <div className="toast-container">
