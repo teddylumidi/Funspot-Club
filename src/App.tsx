@@ -1344,7 +1344,7 @@ const Sidebar: FC<{
   return (
     <aside className="sidebar">
       <ClubLogo className="sidebar-logo" />
-      <nav className="sidebar-nav">
+      <nav className="sidebar-nav" role="navigation" aria-label="Main navigation">
         {navItems.map(
           item =>
             item.roles.includes(currentUser.role) && (
@@ -1355,6 +1355,15 @@ const Sidebar: FC<{
                 onClick={e => {
                   e.preventDefault();
                   setActiveView(item.id as View);
+                }}
+                aria-current={activeView === item.id ? 'page' : undefined}
+                role="button"
+                tabIndex={0}
+                onKeyDown={e => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setActiveView(item.id as View);
+                  }
                 }}
               >
                 <item.icon />
@@ -1420,6 +1429,9 @@ const Header: FC<HeaderProps> = ({
               placeholder="Search programs, users, events..."
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
+              aria-label="Search programs, users, and events"
+              role="searchbox"
+              aria-describedby="search-description"
             />
           </div>
           {searchResults && (
@@ -1552,12 +1564,13 @@ const LoginScreen: FC<{ users: User[]; onLogin: (user: User) => void }> = ({ use
         <ClubLogo className="auth-logo" />
         <h2>Welcome to Funspot Club</h2>
         <p>Please select your profile to log in.</p>
-        <div className="login-user-list">
+        <div className="login-user-list" role="group" aria-label="User selection">
           {users.map(user => (
             <button
               key={user.id}
               onClick={() => onLogin(user)}
               className="btn btn-secondary btn-full"
+              aria-label={`Login as ${user.name} (${user.role})`}
             >
               {user.name} ({user.role})
             </button>
@@ -2075,12 +2088,22 @@ const CalendarWidget: FC<{
         <h3>
           <CalendarDaysIcon /> Event Calendar
         </h3>
-        <div className="calendar-nav">
-          <button className="btn-icon" onClick={() => changeMonth(-1)}>
+        <div className="calendar-nav" role="toolbar" aria-label="Calendar navigation">
+          <button 
+            className="btn-icon" 
+            onClick={() => changeMonth(-1)}
+            aria-label="Previous month"
+          >
             <ChevronLeftIcon />
           </button>
-          <h4>{currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}</h4>
-          <button className="btn-icon" onClick={() => changeMonth(1)}>
+          <h4 aria-live="polite">
+            {currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
+          </h4>
+          <button 
+            className="btn-icon" 
+            onClick={() => changeMonth(1)}
+            aria-label="Next month"
+          >
             <ChevronRightIcon />
           </button>
         </div>
@@ -2125,8 +2148,18 @@ const Modal: FC<{ children: React.ReactNode; onClose: () => void; size?: 'sm' | 
   size = 'md',
 }) => {
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className={`modal-content modal-${size}`} onClick={e => e.stopPropagation()}>
+    <div 
+      className="modal-backdrop" 
+      onClick={onClose} 
+      role="dialog" 
+      aria-modal="true"
+      aria-labelledby="modal-title"
+    >
+      <div 
+        className={`modal-content modal-${size}`} 
+        onClick={e => e.stopPropagation()}
+        role="document"
+      >
         {children}
       </div>
     </div>
@@ -2167,7 +2200,7 @@ const ProgramDetailsModal: FC<{
   return (
     <Modal onClose={onClose}>
       <div className="modal-header">
-        <h2>{program.title}</h2>
+        <h2 id="modal-title">{program.title}</h2>
         <button onClick={onClose} className="btn-icon" aria-label="Close">
           <XMarkIcon />
         </button>
@@ -2245,7 +2278,7 @@ const SessionBookingModal: FC<{
   return (
     <Modal onClose={onClose} size="sm">
       <div className="modal-header">
-        <h2>Select a Session</h2>
+        <h2 id="modal-title">Select a Session</h2>
         <button onClick={onClose} className="btn-icon" aria-label="Close">
           <XMarkIcon />
         </button>
@@ -2293,7 +2326,7 @@ const PaymentModal: FC<{
   return (
     <Modal onClose={onClose} size="sm">
       <div className="modal-header">
-        <h2>Complete Booking</h2>
+        <h2 id="modal-title">Complete Booking</h2>
         <button onClick={onClose} className="btn-icon" aria-label="Close">
           <XMarkIcon />
         </button>
@@ -2409,7 +2442,7 @@ const UserFormModal: FC<{
     <Modal onClose={onClose} size="lg">
       <form onSubmit={handleSubmit}>
         <div className="modal-header">
-          <h2>{user ? 'Edit User' : 'Create User'}</h2>
+          <h2 id="modal-title">{user ? 'Edit User' : 'Create User'}</h2>
           <button onClick={onClose} className="btn-icon" aria-label="Close">
             <XMarkIcon />
           </button>
