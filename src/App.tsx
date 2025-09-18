@@ -227,9 +227,12 @@ const AddEditUserModal: FC<{
   userToEdit: User | null;
   users: User[];
   addToast: (message: string, type: ToastMessage['type']) => void;
-}> = ({ isOpen, onClose, onSave, userToEdit, users, addToast }) => {
+  currentUser: User | null;
+}> = ({ isOpen, onClose, onSave, userToEdit, users, addToast, currentUser }) => {
   const [formData, setFormData] = useState<Partial<User>>({});
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  
+  const isSelfEdit = useMemo(() => currentUser?.id === userToEdit?.id, [currentUser, userToEdit]);
 
   useEffect(() => {
     if (userToEdit) {
@@ -297,7 +300,7 @@ const AddEditUserModal: FC<{
     <Modal isOpen={isOpen} onClose={onClose} size="lg">
       <form onSubmit={handleSubmit}>
         <div className="modal-header">
-          <h3>{userToEdit ? 'Edit User Profile' : 'Add New User'}</h3>
+          <h3>{isSelfEdit ? 'Edit My Profile' : (userToEdit ? 'Edit User Profile' : 'Add New User')}</h3>
           <button type="button" className="btn-icon" onClick={onClose}><XMarkIcon /></button>
         </div>
         <div className="modal-body">
@@ -307,7 +310,9 @@ const AddEditUserModal: FC<{
           </div>
           <div className="form-grid">
              <div className="form-group"><label>Date of Birth</label><input type="date" name="dob" value={formData.dob || ''} onChange={handleChange} required /></div>
-            <div className="form-group"><label>Role</label><select name="role" value={formData.role || ''} onChange={handleChange} required><option value="">Select Role</option><option>Admin</option><option>Manager</option><option>Coach</option><option>Parent</option><option>Athlete</option></select></div>
+             {!isSelfEdit && (
+                <div className="form-group"><label>Role</label><select name="role" value={formData.role || ''} onChange={handleChange} required><option value="">Select Role</option><option>Admin</option><option>Manager</option><option>Coach</option><option>Parent</option><option>Athlete</option></select></div>
+             )}
           </div>
           {!userToEdit && (
             <div className="form-group">
@@ -317,8 +322,12 @@ const AddEditUserModal: FC<{
           )}
           {formData.role === 'Athlete' && (
             <div className="form-grid">
-              <div className="form-group"><label>Parent/Guardian</label><select name="parent_id" value={formData.parent_id || ''} onChange={handleChange}><option value="">Assign Parent</option>{parentOptions.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}</select></div>
-              <div className="form-group"><label>Coach</label><select name="coach_id" value={formData.coach_id || ''} onChange={handleChange}><option value="">Assign Coach</option>{coachOptions.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select></div>
+              {!isSelfEdit && (
+                <>
+                  <div className="form-group"><label>Parent/Guardian</label><select name="parent_id" value={formData.parent_id || ''} onChange={handleChange}><option value="">Assign Parent</option>{parentOptions.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}</select></div>
+                  <div className="form-group"><label>Coach</label><select name="coach_id" value={formData.coach_id || ''} onChange={handleChange}><option value="">Assign Coach</option>{coachOptions.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select></div>
+                </>
+              )}
               <div className="form-group"><label>Skill Level</label><select name="skill_level" value={formData.skill_level || ''} onChange={handleChange}><option value="">Select Level</option><option>Beginner</option><option>Intermediate</option><option>Advanced</option></select></div>
             </div>
           )}
@@ -1033,14 +1042,20 @@ const EventsCalendarWidget: FC<{ events: ClubEvent[], onDayClick: (day: number, 
         calendarDays.push(<div key={`empty-${i}`} className="calendar-day empty"></div>);
     }
     for (let day = 1; day <= daysInMonth; day++) {
-        const isEventDay = eventsByDay.has(day);
+        const eventsOnDay = eventsByDay.get(day);
+        const eventCount = eventsOnDay?.length || 0;
         calendarDays.push(
             <div 
                 key={day} 
-                className={`calendar-day ${isEventDay ? 'event-day' : ''}`}
-                onClick={isEventDay ? () => onDayClick(day, date.getFullYear(), date.getMonth()) : undefined}
+                className={`calendar-day ${eventCount > 0 ? 'event-day' : ''}`}
+                onClick={eventCount > 0 ? () => onDayClick(day, date.getFullYear(), date.getMonth()) : undefined}
             >
-                {day}
+                <span>{day}</span>
+                 {eventCount > 0 && (
+                    <div className="event-dots">
+                        {Array.from({ length: Math.min(eventCount, 3) }).map((_, i) => <div key={i} className="dot"></div>)}
+                    </div>
+                )}
             </div>
         );
     }
@@ -1428,7 +1443,6 @@ export const App: FC = () => {
   
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const [notificationPermission, setNotificationPermission] = useState('default');
-  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   
   const [isLoading, setIsLoading] = useState(false);
   const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
@@ -1437,17 +1451,24 @@ export const App: FC = () => {
   const [confirmedBookingDetails, setConfirmedBookingDetails] = useState<{ program: Program; method: string } | null>(null);
   const [authMode, setAuthMode] = useState<AuthMode>('login');
 
+  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
+    const storedTheme = localStorage.getItem('funspot-theme');
+    if (storedTheme === 'light' || storedTheme === 'dark') {
+      return storedTheme;
+    }
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    return prefersDark ? 'dark' : 'light';
+  });
+
   const effectiveUser = impersonatedUser || currentUser;
   const isAdminOrManager = effectiveUser?.role === 'Admin' || effectiveUser?.role === 'Manager';
 
   useEffect(() => {
-    const storedTheme = localStorage.getItem('funspot-theme');
-    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const initialTheme = (storedTheme === 'light' || storedTheme === 'dark') ? storedTheme : (prefersDark ? 'dark' : 'light');
-    
-    setTheme(initialTheme);
-    document.documentElement.className = `${initialTheme}-theme`;
-    
+    document.documentElement.className = `${theme}-theme`;
+    localStorage.setItem('funspot-theme', theme);
+  }, [theme]);
+
+  useEffect(() => {
     try {
         const storedWaitlists = localStorage.getItem('funspot-waitlists');
         if (storedWaitlists) setWaitlists(JSON.parse(storedWaitlists));
@@ -1516,6 +1537,10 @@ export const App: FC = () => {
       const existing = prev.find(u => u.id === user.id);
       if (existing) {
         addLog(effectiveUser!.id, `Updated profile for ${user.name}`);
+        // If current user is updated, update the state as well
+        if (currentUser?.id === user.id) {
+            setCurrentUser(user);
+        }
         return prev.map(u => u.id === user.id ? user : u);
       }
       addLog(effectiveUser!.id, `Created new user: ${user.name}`);
@@ -1525,7 +1550,7 @@ export const App: FC = () => {
   };
 
   const handleEditUser = (user: User) => { 
-    if (currentUser?.role === 'Manager' && user.role === 'Admin') {
+    if (currentUser?.role === 'Manager' && user.role === 'Admin' && currentUser.id !== user.id) {
         addToast("Managers are not permitted to edit Admin accounts.", 'error');
         return;
     }
@@ -1677,10 +1702,7 @@ export const App: FC = () => {
   };
 
   const handleToggleTheme = () => {
-    const newTheme = theme === 'dark' ? 'light' : 'dark';
-    setTheme(newTheme);
-    localStorage.setItem('funspot-theme', newTheme);
-    document.documentElement.className = `${newTheme}-theme`;
+    setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
   };
 
   const childrenOfParent = useMemo(() => {
@@ -1710,7 +1732,7 @@ export const App: FC = () => {
             {toasts.map(toast => <Toast key={toast.id} message={toast} onDismiss={(id) => setToasts(prev => prev.filter(t => t.id !== id))} />)}
         </div>
         
-        <AddEditUserModal isOpen={isUserModalOpen} onClose={() => setIsUserModalOpen(false)} onSave={handleSaveUser} userToEdit={userToEdit} users={users} addToast={addToast}/>
+        <AddEditUserModal isOpen={isUserModalOpen} onClose={() => setIsUserModalOpen(false)} onSave={handleSaveUser} userToEdit={userToEdit} users={users} addToast={addToast} currentUser={currentUser} />
         <AddEditProgramModal isOpen={isAddEditProgramModalOpen} onClose={() => setIsAddEditProgramModalOpen(false)} onSave={handleSaveProgram} programToEdit={programToEdit} users={users} />
         <ProgramDetailsModal isOpen={isProgramDetailsModalOpen} onClose={() => setIsProgramDetailsModalOpen(false)} program={selectedProgram} coach={users.find(u => u.id === selectedProgram?.coach_id)} onBook={handleBookProgram} onWaitlist={handleRequestWaitlist} currentUser={effectiveUser} waitlistPosition={waitlists[selectedProgram?.id || '']?.indexOf(effectiveUser.id) + 1 || null} />
         <PaymentModal isOpen={isPaymentModalOpen} onClose={() => setIsPaymentModalOpen(false)} program={programToPay} onConfirmPayment={handleConfirmPayment} />
@@ -1725,6 +1747,7 @@ export const App: FC = () => {
         <nav className="sidebar-nav">
           <a href="#" className="nav-item" onClick={(e) => { e.preventDefault(); setIsAboutModalOpen(true); }}><InformationCircleIcon/> About Us</a>
           <a href="#" className="nav-item" onClick={(e) => { e.preventDefault(); setIsContactModalOpen(true); }}><EnvelopeIcon/> Contact</a>
+          <a href="#" className="nav-item" onClick={(e) => { e.preventDefault(); handleEditUser(effectiveUser!); }}><UserCircleIcon/> My Profile</a>
         </nav>
         <div className="sidebar-footer">
             <h4>About Funspot</h4>
@@ -1750,6 +1773,7 @@ export const App: FC = () => {
                 <NotificationsWidget notifications={notifications} onMarkAsRead={handleMarkAsRead}/>
                 <div className="header-user-info">
                     <strong>{effectiveUser.name}</strong>
+                    <button className="btn-icon" onClick={() => handleEditUser(effectiveUser)} title="Edit My Profile"><PencilIcon /></button>
                 </div>
                 <img src={effectiveUser.photo_url} alt="User Avatar" className="header-avatar" />
                 <button onClick={handleLogout} className="btn btn-secondary btn-sm">{impersonatedUser ? "End Impersonation" : "Logout"}</button>

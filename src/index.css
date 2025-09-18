@@ -1,4 +1,5 @@
 
+
 :root {
   --font-heading: 'Rajdhani', sans-serif;
   --font-body: 'Fira Code', monospace;
@@ -147,7 +148,9 @@ p { margin-bottom: 1em; color: var(--text-secondary); }
 .header-content { display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 0.5rem; }
 .header h2 { font-size: 1.2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .header-right { display: flex; align-items: center; gap: 0.5rem; }
-.header-user-info { display: none; }
+.header-user-info { display: none; align-items: center; gap: 0.5rem; }
+.header-user-info .btn-icon { color: var(--text-secondary); }
+.header-user-info .btn-icon:hover { color: var(--text-primary); background-color: var(--border-color-light); }
 .header-avatar { width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--border-color); }
 .content-area { padding: 1rem; flex-grow: 1; overflow-y: auto; } /* Allow content to scroll */
 .dashboard-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; }
@@ -287,10 +290,43 @@ td::before { content: attr(data-label); position: absolute; left: 0.75rem; font-
 /* --- CALENDAR WIDGET --- */
 .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.25rem; text-align: center; }
 .calendar-header { font-family: var(--font-heading); font-weight: bold; color: var(--text-secondary); font-size: 0.8rem; }
-.calendar-day { padding: 0.25rem; aspect-ratio: 1 / 1; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 0.8rem; transition: background-color 0.2s; }
+.calendar-day {
+    padding: 0.25rem;
+    aspect-ratio: 1 / 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    transition: background-color 0.2s;
+    position: relative; /* For dot positioning */
+}
 .calendar-day.empty { visibility: hidden; }
-.calendar-day.event-day { background-color: var(--primary-color); color: var(--text-on-primary); font-weight: bold; position: relative; cursor: pointer; }
-.calendar-day.event-day:hover { background-color: var(--primary-hover); }
+.calendar-day.event-day {
+    cursor: pointer;
+    font-weight: bold;
+}
+.calendar-day.event-day:hover {
+    background-color: var(--secondary-hover);
+}
+.event-dots {
+    position: absolute;
+    bottom: 6px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    gap: 3px;
+}
+.dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+}
+.light-theme .dot {
+    background-color: var(--primary-hover);
+}
 
 /* --- PROGRESS WIDGET --- */
 .progress-chart { display: flex; justify-content: space-around; align-items: flex-end; height: 150px; border-bottom: 1px solid var(--border-color); padding: 1rem 0; }
@@ -350,7 +386,7 @@ td::before { content: attr(data-label); position: absolute; left: 0.75rem; font-
 /* --- TABLET & SMALL DESKTOP STYLES --- */
 @media (min-width: 768px) {
     .header h2 { font-size: 1.5rem; }
-    .header-user-info { display: block; }
+    .header-user-info { display: flex; }
     .widget-controls { width: auto; flex-grow: 0; }
     .widget-header { flex-wrap: nowrap; }
 
