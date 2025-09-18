@@ -1,5 +1,5 @@
 // FIX: Import Dispatch and SetStateAction to correctly type the state setter in useLocalStorage.
-import React, { useState, useEffect, useMemo, FC, useRef, useCallback, Dispatch, SetStateAction, Component, ErrorInfo, ReactNode } from 'react';
+import React, { useState, useEffect, useMemo, FC, useRef, Dispatch, SetStateAction, Component, ErrorInfo, ReactNode } from 'react';
 
 // --- ERROR BOUNDARY ---
 export class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
