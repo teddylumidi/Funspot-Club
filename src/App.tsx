@@ -125,7 +125,9 @@ type ModalState =
   | { type: 'CONFIRMATION'; program: Program, transactionId: string }
   | { type: 'USER_FORM'; user?: User }
   | { type: 'DELETE_USER'; user: User }
-  | { type: 'EVENT_DETAILS', date: Date, events: ClubEvent[] };
+  | { type: 'EVENT_DETAILS', date: Date, events: ClubEvent[] }
+  | { type: 'PROGRAM_FORM', program?: Program }
+  | { type: 'DELETE_PROGRAM', program: Program };
 
 
 // --- SVG ICONS ---
@@ -151,6 +153,7 @@ const UserCircleIcon: FC<{ className?: string }> = ({ className = "h-6 w-6" }) =
 const BellIcon: FC<{ className?: string }> = ({ className = "h-6 w-6" }) => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}><path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" /></svg>;
 const ChevronLeftIcon: FC<{ className?: string }> = ({ className = "h-6 w-6" }) => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" /></svg>;
 const ChevronRightIcon: FC<{ className?: string }> = ({ className = "h-6 w-6" }) => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}><path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" /></svg>;
+const PlusCircleIcon: FC<{ className?: string }> = ({ className = "h-6 w-6" }) => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>;
 
 
 // --- MOCK DATA ---
@@ -236,7 +239,7 @@ export const App: FC = () => {
     const initialData = useMemo(() => createInitialData(), []);
     const [currentUser, setCurrentUser] = useLocalStorage<User | null>('currentUser', null);
     const [users, setUsers] = useState<User[]>(initialData.users);
-    const [programs, setPrograms] = useState<Program[]>(initialData.programs);
+    const [programs, setPrograms] = useLocalStorage<Program[]>('programs', initialData.programs);
     const [transactions, setTransactions] = useLocalStorage<Transaction[]>(`transactions`, initialData.transactions);
     const [sessionBookings, setSessionBookings] = useLocalStorage<SessionBooking[]>('sessionBookings', initialData.sessionBookings);
     const [clubEvents] = useState<ClubEvent[]>(initialData.clubEvents);
@@ -457,6 +460,36 @@ export const App: FC = () => {
         setModalState({ type: 'NONE' });
         addToast(`User ${user.name} has been deleted.`, 'success');
     };
+
+    const handleSaveProgram = (program: Program) => {
+        const isNewProgram = !program.id;
+        if (isNewProgram) {
+            const newProgram: Program = {
+                ...program,
+                id: `prog_${Date.now()}`,
+                enrolled_count: 0,
+                waitlisted_users: [],
+                active: true,
+                currency: 'KES', // Default currency
+                photo_url: program.photo_url || `https://placehold.co/600x400/010409/c9d1d9?text=${program.title.replace(/\s/g, '+')}`
+            };
+            setPrograms(prev => [...prev, newProgram]);
+            addToast('Program created successfully.', 'success');
+        } else {
+            setPrograms(prev => prev.map(p => p.id === program.id ? program : p));
+            addToast('Program updated successfully.', 'success');
+        }
+        setModalState({ type: 'NONE' });
+    };
+
+    const handleDeleteProgram = (program: Program) => {
+        // Cascade delete related bookings and transactions
+        setSessionBookings(prev => prev.filter(b => b.programId !== program.id));
+        setTransactions(prev => prev.filter(t => t.programId !== program.id));
+        setPrograms(prev => prev.filter(p => p.id !== program.id));
+        setModalState({ type: 'NONE' });
+        addToast(`Program "${program.title}" and its bookings have been deleted.`, 'success');
+    };
     
     const handleEditCurrentUser = () => {
         setModalState({ type: 'USER_FORM', user: currentUser! });
@@ -540,8 +573,8 @@ export const App: FC = () => {
                         />
 
                         {/* Role-based dashboards */}
-                        {currentUser.role === 'Admin' && <ManagerDashboard users={users} programs={programs} setModalState={setModalState} clubEvents={clubEvents} />}
-                        {currentUser.role === 'Manager' && <ManagerDashboard users={users} programs={programs} setModalState={setModalState} clubEvents={clubEvents} />}
+                        {currentUser.role === 'Admin' && <ManagerDashboard users={users} programs={programs} setModalState={setModalState} clubEvents={clubEvents} coaches={coaches} />}
+                        {currentUser.role === 'Manager' && <ManagerDashboard users={users} programs={programs} setModalState={setModalState} clubEvents={clubEvents} coaches={coaches} />}
                         {currentUser.role === 'Coach' && <CoachDashboard coach={currentUser} users={users} programs={programs} />}
                         {currentUser.role === 'Parent' && <ParentDashboard parent={currentUser} users={users} programs={programs} bookedSessions={userBookedSessions} onBookProgram={handleInitiateBooking} onJoinWaitlist={handleJoinWaitlist} onLeaveWaitlist={handleLeaveWaitlist} onShowDetails={p => setModalState({ type: 'PROGRAM_DETAILS', program: p })} coaches={coaches} onCancelBooking={handleCancelBooking} setModalState={setModalState} clubEvents={clubEvents}/>}
                         {currentUser.role === 'Athlete' && <AthleteDashboard athlete={currentUser} users={users} programs={programs} bookedSessions={userBookedSessions} onBookProgram={handleInitiateBooking} onJoinWaitlist={handleJoinWaitlist} onLeaveWaitlist={handleLeaveWaitlist} onShowDetails={p => setModalState({ type: 'PROGRAM_DETAILS', program: p })} coaches={coaches} onCancelBooking={handleCancelBooking} setModalState={setModalState} clubEvents={clubEvents} />}
@@ -561,6 +594,9 @@ export const App: FC = () => {
             {modalState.type === 'USER_FORM' && <UserFormModal user={modalState.user} onSave={handleSaveUser} onClose={() => setModalState({ type: 'NONE' })} coaches={coaches} parents={parents} />}
             {modalState.type === 'DELETE_USER' && <DeleteConfirmationModal user={modalState.user} onDelete={handleDeleteUser} onClose={() => setModalState({ type: 'NONE' })} />}
             {modalState.type === 'EVENT_DETAILS' && <EventDetailsModal date={modalState.date} events={modalState.events} onClose={() => setModalState({ type: 'NONE' })} />}
+            {modalState.type === 'PROGRAM_FORM' && <ProgramFormModal program={modalState.program} onSave={handleSaveProgram} onClose={() => setModalState({ type: 'NONE' })} coaches={coaches} />}
+            {modalState.type === 'DELETE_PROGRAM' && <DeleteProgramConfirmationModal program={modalState.program} onDelete={handleDeleteProgram} onClose={() => setModalState({ type: 'NONE' })} />}
+
 
             {/* Toast Container */}
             <div className="toast-container">
@@ -803,7 +839,6 @@ const Header: FC<HeaderProps> = ({
 };
 
 // --- AUTHENTICATION COMPONENTS ---
-// ... (rest of the file remains the same)
 const LoginScreen: FC<{ users: User[], onLogin: (user: User) => void }> = ({ users, onLogin }) => {
     return (
         <div className="auth-container">
@@ -900,7 +935,7 @@ const AdminDashboard: FC<{ users: User[], setModalState: Dispatch<SetStateAction
     );
 };
 
-const ManagerDashboard: FC<{ users: User[], programs: Program[], setModalState: Dispatch<SetStateAction<ModalState>>, clubEvents: ClubEvent[] }> = ({ users, programs, setModalState, clubEvents }) => {
+const ManagerDashboard: FC<{ users: User[], programs: Program[], setModalState: Dispatch<SetStateAction<ModalState>>, clubEvents: ClubEvent[], coaches: User[] }> = ({ users, programs, setModalState, clubEvents, coaches }) => {
     const coachCount = useMemo(() => users.filter(u => u.role === 'Coach').length, [users]);
     const athleteCount = useMemo(() => users.filter(u => u.role === 'Athlete').length, [users]);
     const totalCapacity = useMemo(() => programs.reduce((acc, p) => acc + p.capacity, 0), [programs]);
@@ -915,6 +950,7 @@ const ManagerDashboard: FC<{ users: User[], programs: Program[], setModalState: 
                 <p><strong>Club Capacity:</strong> {totalEnrolled} / {totalCapacity}</p>
             </div>
             <CalendarWidget clubEvents={clubEvents} setModalState={setModalState} />
+            <ProgramManagementWidget programs={programs} coaches={coaches} setModalState={setModalState} />
         </>
     );
 };
@@ -1156,6 +1192,59 @@ const CalendarWidget: FC<{ clubEvents: ClubEvent[], setModalState: Dispatch<SetS
                         </div>
                     );
                 })}
+            </div>
+        </div>
+    );
+};
+
+const ProgramManagementWidget: FC<{
+    programs: Program[],
+    coaches: User[],
+    setModalState: Dispatch<SetStateAction<ModalState>>
+}> = ({ programs, coaches, setModalState }) => {
+    return (
+        <div className="widget widget-col-span-full">
+            <div className="widget-header">
+                <h3><BookOpenIcon /> Program Management</h3>
+                <button className="btn btn-primary btn-sm" onClick={() => setModalState({ type: 'PROGRAM_FORM' })}>
+                    <PlusCircleIcon /> Add Program
+                </button>
+            </div>
+            <div className="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Coach</th>
+                            <th>Capacity</th>
+                            <th>Price</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {programs.map(program => {
+                            const coach = coaches.find(c => c.id === program.coach_id);
+                            return (
+                                <tr key={program.id}>
+                                    <td data-label="Title">{program.title}</td>
+                                    <td data-label="Coach">{coach?.name || 'N/A'}</td>
+                                    <td data-label="Capacity">{program.enrolled_count} / {program.capacity}</td>
+                                    <td data-label="Price">{formatCurrency(program.price_cents, program.currency)}</td>
+                                    <td data-label="Actions">
+                                        <div className="action-buttons">
+                                            <button className="btn-icon" onClick={() => setModalState({ type: 'PROGRAM_FORM', program })} aria-label={`Edit ${program.title}`}>
+                                                <PencilIcon className="icon-sm" />
+                                            </button>
+                                            <button className="btn-icon" onClick={() => setModalState({ type: 'DELETE_PROGRAM', program })} aria-label={`Delete ${program.title}`}>
+                                                <TrashIcon className="icon-sm" />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            );
+                        })}
+                    </tbody>
+                </table>
             </div>
         </div>
     );
@@ -1451,6 +1540,165 @@ const EventDetailsModal: FC<{ date: Date, events: ClubEvent[], onClose: () => vo
         </Modal>
     );
 };
+
+const ProgramFormModal: FC<{
+    program?: Program,
+    onSave: (program: Program) => void,
+    onClose: () => void,
+    coaches: User[]
+}> = ({ program, onSave, onClose, coaches }) => {
+    const [formData, setFormData] = useState<Partial<Program>>(program || {
+        title: '',
+        description: '',
+        coach_id: '',
+        price_cents: 0,
+        duration_minutes: 45,
+        schedule: [{ day: 'Monday', time: '10:00' }],
+        skill_level: 'All',
+        capacity: 10,
+        location_type: 'Indoor',
+        category: 'General',
+        photo_url: ''
+    });
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target;
+        const target = e.target as HTMLInputElement;
+        const isNumber = target.type === 'number';
+        setFormData(prev => ({ ...prev, [name]: isNumber ? parseInt(value, 10) || 0 : value }));
+    };
+
+    const handleScheduleChange = (index: number, field: 'day' | 'time', value: string) => {
+        const newSchedule = [...(formData.schedule || [])];
+        newSchedule[index] = { ...newSchedule[index], [field]: value };
+        setFormData(prev => ({ ...prev, schedule: newSchedule }));
+    };
+
+    const addScheduleItem = () => {
+        const newSchedule = [...(formData.schedule || []), { day: 'Monday', time: '10:00' }];
+        setFormData(prev => ({ ...prev, schedule: newSchedule }));
+    };
+
+    const removeScheduleItem = (index: number) => {
+        const newSchedule = [...(formData.schedule || [])];
+        newSchedule.splice(index, 1);
+        setFormData(prev => ({ ...prev, schedule: newSchedule }));
+    };
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!formData.title || !formData.coach_id) {
+            alert('Title and Coach are required.'); // A toast would be better
+            return;
+        }
+        onSave(formData as Program);
+    };
+
+    const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const programCategories: ProgramCategory[] = ['Figure Skating', 'Speed Skating', 'Synchronized Skating', 'Hockey Skills', 'General'];
+    const skillLevels: SkillLevel[] = ['Beginner', 'Intermediate', 'Advanced', 'All'];
+
+    return (
+        <Modal onClose={onClose} size="lg">
+            <form onSubmit={handleSubmit}>
+                <div className="modal-header">
+                    <h2>{program ? 'Edit Program' : 'Create Program'}</h2>
+                    <button type="button" onClick={onClose} className="btn-icon" aria-label="Close"><XMarkIcon /></button>
+                </div>
+                <div className="modal-body">
+                    <div className="form-grid">
+                        <div className="form-group">
+                            <label htmlFor="title">Program Title</label>
+                            <input type="text" id="title" name="title" value={formData.title || ''} onChange={handleChange} required />
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="category">Category</label>
+                            <select id="category" name="category" value={formData.category} onChange={handleChange} required>
+                                {programCategories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                            </select>
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="coach_id">Assign Coach</label>
+                            <select id="coach_id" name="coach_id" value={formData.coach_id} onChange={handleChange} required>
+                                <option value="">Select a coach</option>
+                                {coaches.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                            </select>
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="skill_level">Skill Level</label>
+                            <select id="skill_level" name="skill_level" value={formData.skill_level} onChange={handleChange} required>
+                                {skillLevels.map(lvl => <option key={lvl} value={lvl}>{lvl}</option>)}
+                            </select>
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="price_cents">Price (in cents)</label>
+                            <input type="number" id="price_cents" name="price_cents" value={formData.price_cents || 0} onChange={handleChange} required />
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="duration_minutes">Duration (minutes)</label>
+                            <input type="number" id="duration_minutes" name="duration_minutes" value={formData.duration_minutes || 0} onChange={handleChange} required />
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="capacity">Capacity</label>
+                            <input type="number" id="capacity" name="capacity" value={formData.capacity || 0} onChange={handleChange} required />
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="location_type">Location</label>
+                            <select id="location_type" name="location_type" value={formData.location_type} onChange={handleChange} required>
+                                <option value="Indoor">Indoor</option>
+                                <option value="Outdoor">Outdoor</option>
+                            </select>
+                        </div>
+                        <div className="form-group form-grid-span-2">
+                            <label htmlFor="photo_url">Photo URL</label>
+                            <input type="text" id="photo_url" name="photo_url" value={formData.photo_url || ''} onChange={handleChange} placeholder="https://example.com/image.png" />
+                        </div>
+                        <div className="form-group form-grid-span-2">
+                            <label htmlFor="description">Description</label>
+                            <textarea id="description" name="description" value={formData.description || ''} onChange={handleChange} rows={3} required></textarea>
+                        </div>
+                        <div className="form-group form-grid-span-2">
+                            <label>Schedule</label>
+                            {formData.schedule?.map((s, index) => (
+                                <div key={index} className="schedule-item-form">
+                                    <select value={s.day} onChange={(e) => handleScheduleChange(index, 'day', e.target.value)}>
+                                        {daysOfWeek.map(day => <option key={day} value={day}>{day}</option>)}
+                                    </select>
+                                    <input type="time" value={s.time} onChange={(e) => handleScheduleChange(index, 'time', e.target.value)} />
+                                    {formData.schedule && formData.schedule.length > 1 &&
+                                        <button type="button" className="btn-icon" onClick={() => removeScheduleItem(index)} aria-label="Remove session time"><TrashIcon className="icon-sm" /></button>
+                                    }
+                                </div>
+                            ))}
+                            <button type="button" className="btn btn-secondary btn-sm" onClick={addScheduleItem}>Add Session Time</button>
+                        </div>
+                    </div>
+                </div>
+                <div className="modal-actions">
+                    <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
+                    <button type="submit" className="btn btn-primary">Save Program</button>
+                </div>
+            </form>
+        </Modal>
+    );
+};
+
+const DeleteProgramConfirmationModal: FC<{ program: Program, onDelete: (program: Program) => void, onClose: () => void }> = ({ program, onDelete, onClose }) => {
+    return (
+        <Modal onClose={onClose} size="sm">
+            <div className="modal-body delete-confirmation">
+                <ExclamationTriangleIcon className="delete-modal-icon" />
+                <h3>Are you sure?</h3>
+                <p>This action will permanently delete <strong>{program.title}</strong> and all associated bookings. This cannot be undone.</p>
+            </div>
+            <div className="modal-actions">
+                <button className="btn btn-secondary" onClick={onClose}>Cancel</button>
+                <button className="btn btn-danger" onClick={() => onDelete(program)}>Delete</button>
+            </div>
+        </Modal>
+    );
+};
+
 
 // --- TOAST COMPONENT ---
 const Toast: FC<{ message: string, type: ToastMessage['type'], onClose: () => void }> = ({ message, type, onClose }) => (

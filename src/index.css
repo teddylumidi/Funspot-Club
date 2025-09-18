@@ -267,6 +267,9 @@ p { margin-bottom: 1em; color: var(--text-secondary); }
 .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-color) 30%, transparent); }
 .photo-upload-container { display: flex; align-items: center; gap: 1rem; }
 .profile-preview { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border-color); }
+.schedule-item-form { display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem; }
+.schedule-item-form select, .schedule-item-form input[type="time"] { flex-grow: 1; }
+.schedule-item-form .btn-icon { flex-shrink: 0; }
 
 /* --- RESPONSIVE TABLE (MOBILE-FIRST) --- */
 .table-container { overflow-x: auto; }
@@ -345,6 +348,7 @@ td::before { content: attr(data-label); position: absolute; left: 0.75rem; font-
     .dashboard-grid { grid-template-columns: repeat(2, 1fr); }
     .widget-col-span-2 { grid-column: span 2 / span 2; }
     .form-grid { grid-template-columns: repeat(2, 1fr); gap: 0 1.5rem; }
+    .form-grid-span-2 { grid-column: span 2 / span 2; }
     .program-grid { grid-template-columns: repeat(2, 1fr); }
     
     /* Responsive Table */
