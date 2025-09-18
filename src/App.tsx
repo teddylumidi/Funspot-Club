@@ -1,6 +1,36 @@
-
 // FIX: Import Dispatch and SetStateAction to correctly type the state setter in useLocalStorage.
-import React, { useState, useEffect, useMemo, FC, useRef, useCallback, Dispatch, SetStateAction } from 'react';
+import React, { useState, useEffect, useMemo, FC, useRef, useCallback, Dispatch, SetStateAction, Component, ErrorInfo, ReactNode } from 'react';
+
+// --- ERROR BOUNDARY ---
+export class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
+  constructor(props: { children: ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(_: Error): { hasError: boolean } {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error("Uncaught error:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="error-boundary-fallback">
+          <ExclamationTriangleIcon className="error-icon" />
+          <h2>Something went wrong.</h2>
+          <p>We've been notified and are working to fix the issue. Please try refreshing the page.</p>
+          <button className="btn btn-primary" onClick={() => window.location.reload()}>Refresh Page</button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 
 // --- TYPES ---
 type Role = 'Admin' | 'Manager' | 'Coach' | 'Athlete' | 'Parent';
@@ -99,10 +129,9 @@ type ModalState =
 
 
 // --- SVG ICONS ---
-const EyeIcon: FC<{ className?: string }> = ({ className = "h-6 w-6" }) => <svg xmlns="http://www.w.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}><path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639l4.43-7.532A1.012 1.012 0 0 1 7.5 4.5h9a1.012 1.012 0 0 1 .534.175l4.43 7.532a1.012 1.012 0 0 1 0 .639l-4.43 7.532A1.012 1.012 0 0 1 16.5 19.5h-9a1.012 1.012 0 0 1-.534-.175L2.036 12.322Z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg>;
-const PencilIcon: FC<{ className?: string, style?: React.CSSProperties }> = ({ className = "h-6 w-6", style }) => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className} style={style}><path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" /></svg>;
-// FIX: Add `style` prop to allow inline styling, which was missing and causing a type error on usage.
-const TrashIcon: FC<{ className?: string, style?: React.CSSProperties }> = ({ className = "h-6 w-6", style }) => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className} style={style}><path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg>;
+const EyeIcon: FC<{ className?: string }> = ({ className = "h-6 w-6" }) => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}><path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639l4.43-7.532A1.012 1.012 0 0 1 7.5 4.5h9a1.012 1.012 0 0 1 .534.175l4.43 7.532a1.012 1.012 0 0 1 0 .639l-4.43 7.532A1.012 1.012 0 0 1 16.5 19.5h-9a1.012 1.012 0 0 1-.534-.175L2.036 12.322Z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg>;
+const PencilIcon: FC<{ className?: string }> = ({ className = "h-6 w-6" }) => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}><path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" /></svg>;
+const TrashIcon: FC<{ className?: string }> = ({ className = "h-6 w-6" }) => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}><path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg>;
 const SunIcon: FC<{ className?: string }> = ({ className = "h-6 w-6" }) => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}><path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-6.364-.386 1.591-1.591M3 12h2.25m.386-6.364 1.591 1.591M12 12a2.25 2.25 0 0 0-2.25 2.25 2.25 2.25 0 0 0 2.25 2.25 2.25 2.25 0 0 0 2.25-2.25A2.25 2.25 0 0 0 12 12Z" /></svg>;
 const MoonIcon: FC<{ className?: string }> = ({ className = "h-6 w-6" }) => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}><path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" /></svg>;
 const SearchIcon: FC<{ className?: string }> = ({ className = "h-6 w-6" }) => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}><path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" /></svg>;
@@ -110,7 +139,7 @@ const UserPlusIcon: FC<{ className?: string }> = ({ className = "h-6 w-6" }) => 
 const XMarkIcon: FC<{ className?: string }> = ({ className = "h-6 w-6" }) => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>;
 const CheckCircleIcon: FC<{ className?: string }> = ({ className = "h-6 w-6" }) => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>;
 const ArrowLeftOnRectangleIcon: FC<{ className?: string }> = ({ className = "h-6 w-6" }) => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" /></svg>;
-const ExclamationTriangleIcon: FC<{ className?: string, style?: React.CSSProperties }> = ({ className = "h-6 w-6", style }) => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className} style={style}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" /></svg>;
+const ExclamationTriangleIcon: FC<{ className?: string }> = ({ className = "h-6 w-6" }) => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" /></svg>;
 const CreditCardIcon: FC<{ className?: string }> = ({ className = "h-6 w-6" }) => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h6m3-3.75l-3 3m0 0l-3-3m3 3V15m6-1.5h.008v.008H18V15Zm-12 0h.008v.008H6V15Z" /></svg>;
 const DevicePhoneMobileIcon: FC<{ className?: string }> = ({ className = "h-6 w-6" }) => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}><path strokeLinecap="round" strokeLinejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 0 0 6 3.75v16.5a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 18 20.25V3.75a2.25 2.25 0 0 0-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" /></svg>;
 const SkateIcon: FC<{ className?: string }> = ({ className = "h-6 w-6" }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className}><path d="M22.2,6.4C22.6,5.6,22,4.7,21.2,4.3C20.6,4,20,4,19.4,4.2l-3.5,1.1L12.5,2c-0.6-0.5-1.5-0.5-2.1,0L7.1,5.3L3.6,4.2 C2.7,4,1.8,4.5,1.5,5.4s0.5,1.8,1.4,2.1L6,8.2V13h2V9.8l3.4,2.1c0.5,0.3,1.1,0.5,1.7,0.5s1.2-0.2,1.7-0.5L18,9.8V13h2V8.2l3.1-0.7 C21.3,7.4,22,7,22.2,6.4z M10,14v6H8v-6H10z M16,14v6h-2v-6H16z"/></svg>;
@@ -668,7 +697,22 @@ const Sidebar: FC<{
     );
 };
 
-const Header: FC<any> = ({
+interface HeaderProps {
+    currentUser: User;
+    onThemeToggle: () => void;
+    theme: 'light' | 'dark';
+    searchTerm: string;
+    setSearchTerm: React.Dispatch<React.SetStateAction<string>>;
+    searchResults: { programs: Program[], users: User[], events: ClubEvent[] } | null;
+    setModalState: React.Dispatch<React.SetStateAction<ModalState>>;
+    userRoleFilter: Role | 'All';
+    setUserRoleFilter: React.Dispatch<React.SetStateAction<Role | "All">>;
+    eventDateFilter: string;
+    setEventDateFilter: React.Dispatch<React.SetStateAction<string>>;
+    searchRef: React.RefObject<HTMLDivElement>;
+}
+
+const Header: FC<HeaderProps> = ({
     currentUser, onThemeToggle, theme, searchTerm, setSearchTerm, searchResults,
     setModalState, userRoleFilter, setUserRoleFilter, eventDateFilter, setEventDateFilter, searchRef
 }) => {
@@ -840,10 +884,10 @@ const AdminDashboard: FC<{ users: User[], setModalState: Dispatch<SetStateAction
                                 <td data-label="Actions">
                                     <div className="action-buttons">
                                         <button className="btn-icon" onClick={() => setModalState({ type: 'USER_FORM', user })}>
-                                            <PencilIcon style={{ width: '1rem', height: '1rem' }} />
+                                            <PencilIcon className="icon-sm" />
                                         </button>
                                         <button className="btn-icon" onClick={() => setModalState({ type: 'DELETE_USER', user })}>
-                                            <TrashIcon style={{ width: '1rem', height: '1rem' }} />
+                                            <TrashIcon className="icon-sm" />
                                         </button>
                                     </div>
                                 </td>
@@ -1142,7 +1186,7 @@ const ProgramDetailsModal: FC<{ program: Program, users: User[], onBook: (p: Pro
         <Modal onClose={onClose}>
             <div className="modal-header">
                 <h2>{program.title}</h2>
-                <button onClick={onClose} className="btn-icon"><XMarkIcon /></button>
+                <button onClick={onClose} className="btn-icon" aria-label="Close"><XMarkIcon /></button>
             </div>
             <div className="modal-body program-details">
                 <img src={program.photo_url} alt={program.title} className="program-details-image" />
@@ -1183,7 +1227,7 @@ const SessionBookingModal: FC<{ program: Program, onClose: () => void, onProceed
         <Modal onClose={onClose} size="sm">
             <div className="modal-header">
                 <h2>Select a Session</h2>
-                <button onClick={onClose} className="btn-icon"><XMarkIcon /></button>
+                <button onClick={onClose} className="btn-icon" aria-label="Close"><XMarkIcon /></button>
             </div>
             <div className="modal-body">
                 <h4>{program.title}</h4>
@@ -1222,7 +1266,7 @@ const PaymentModal: FC<{ program: Program, session: {day: string, time: string},
         <Modal onClose={onClose} size="sm">
             <div className="modal-header">
                 <h2>Complete Booking</h2>
-                <button onClick={onClose} className="btn-icon"><XMarkIcon /></button>
+                <button onClick={onClose} className="btn-icon" aria-label="Close"><XMarkIcon /></button>
             </div>
             <div className="modal-body">
                 <div className="payment-summary">
@@ -1296,7 +1340,7 @@ const UserFormModal: FC<{ user?: User, onSave: (user: User) => void, onClose: ()
             <form onSubmit={handleSubmit}>
                 <div className="modal-header">
                     <h2>{user ? 'Edit User' : 'Create User'}</h2>
-                    <button onClick={onClose} className="btn-icon"><XMarkIcon /></button>
+                    <button onClick={onClose} className="btn-icon" aria-label="Close"><XMarkIcon /></button>
                 </div>
                 <div className="modal-body">
                     <div className="form-grid">
@@ -1374,13 +1418,13 @@ const DeleteConfirmationModal: FC<{ user: User, onDelete: (user: User) => void, 
     return (
         <Modal onClose={onClose} size="sm">
             <div className="modal-body delete-confirmation">
-                <ExclamationTriangleIcon style={{ width: '40px', height: '40px', color: 'var(--red)', margin: '0 auto 1rem' }} />
+                <ExclamationTriangleIcon className="delete-modal-icon" />
                 <h3>Are you sure?</h3>
                 <p>This action will permanently delete <strong>{user.name}</strong>. This cannot be undone.</p>
             </div>
             <div className="modal-actions">
                 <button className="btn btn-secondary" onClick={onClose}>Cancel</button>
-                <button className="btn btn-primary" style={{ backgroundColor: 'var(--red)' }} onClick={() => onDelete(user)}>Delete</button>
+                <button className="btn btn-danger" onClick={() => onDelete(user)}>Delete</button>
             </div>
         </Modal>
     );
@@ -1391,7 +1435,7 @@ const EventDetailsModal: FC<{ date: Date, events: ClubEvent[], onClose: () => vo
         <Modal onClose={onClose} size="md">
             <div className="modal-header">
                 <h2>Events on {date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}</h2>
-                <button onClick={onClose} className="btn-icon"><XMarkIcon /></button>
+                <button onClick={onClose} className="btn-icon" aria-label="Close"><XMarkIcon /></button>
             </div>
             <div className="modal-body event-details-list">
                 {events.map(event => (
