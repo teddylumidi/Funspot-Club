@@ -10,6 +10,7 @@ interface User {
   id: string;
   name: string;
   email: string;
+  password: string;
   dob: string;
   role: Role;
   parent_id?: string;
@@ -111,15 +112,20 @@ const CheckCircleIcon: FC = () => <svg xmlns="http://www.w3.org/2000/svg" fill="
 const PlusCircleIcon: FC = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>;
 const SunIcon: FC = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" /></svg>;
 const MoonIcon: FC = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" /></svg>;
+const InformationCircleIcon: FC = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" /></svg>;
+const EnvelopeIcon: FC<{ className?: string }> = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" /></svg>;
+const ChatBubbleLeftRightIcon: FC = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193l-3.722.534c-.454.065-.92-.093-1.267-.387a1.534 1.534 0 01-.426-1.053v-4.286c0-.97.616-1.813 1.5-2.097a6.5 6.5 0 014.389 4.389z" /><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 9.811c0-.97.616-1.813 1.5-2.097A6.5 6.5 0 019.64 3.75c.97 0 1.813-.616 2.097-1.5a6.5 6.5 0 014.389 4.389c.283.884 1.128 1.5 2.097 1.5v4.286c0 .97-.616 1.813-1.5 2.097a6.5 6.5 0 01-4.389-4.389c-.283-.884-1.128-1.5-2.097-1.5v-4.286a6.5 6.5 0 01-4.389-4.389z" /></svg>;
+const LockClosedIcon: FC<{ className?: string }> = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 0 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>;
+const UserCircleIcon: FC<{ className?: string }> = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg>;
 
 // --- MOCK DATA ---
 const initialUsers: User[] = [
-  { id: 'user_01', name: 'Admin User', email: 'admin@funspot.com', dob: '1985-01-15', role: 'Admin', photo_url: `https://i.pravatar.cc/150?u=user_01`, created_at: '2023-01-10' },
-  { id: 'user_06', name: 'Manager Mary', email: 'manager.m@funspot.com', dob: '1987-03-22', role: 'Manager', photo_url: `https://i.pravatar.cc/150?u=user_06`, created_at: '2023-01-15' },
-  { id: 'user_02', name: 'Coach Davis', email: 'coach.d@funspot.com', dob: '1990-05-20', role: 'Coach', photo_url: `https://i.pravatar.cc/150?u=user_02`, created_at: '2023-02-20' },
-  { id: 'user_03', name: 'Alice Smith (Parent)', email: 'alice.s@email.com', dob: '1988-08-08', role: 'Parent', photo_url: `https://i.pravatar.cc/150?u=user_03`, created_at: '2023-03-12' },
-  { id: 'user_04', name: 'Bobby Smith', email: 'bobby.s@email.com', dob: '2015-06-30', role: 'Athlete', parent_id: 'user_03', coach_id: 'user_02', photo_url: `https://i.pravatar.cc/150?u=user_04`, created_at: '2023-03-12', skill_level: 'Beginner' },
-  { id: 'user_05', name: 'Charlie Brown', email: 'charlie.b@email.com', dob: '2016-11-10', role: 'Athlete', parent_id: 'user_03', coach_id: 'user_02', photo_url: `https://i.pravatar.cc/150?u=user_05`, created_at: '2023-04-01', skill_level: 'Intermediate' },
+  { id: 'user_01', name: 'Admin User', email: 'admin@funspot.com', password: 'password123', dob: '1985-01-15', role: 'Admin', photo_url: `https://i.pravatar.cc/150?u=user_01`, created_at: '2023-01-10' },
+  { id: 'user_06', name: 'Manager Mary', email: 'manager.m@funspot.com', password: 'password123', dob: '1987-03-22', role: 'Manager', photo_url: `https://i.pravatar.cc/150?u=user_06`, created_at: '2023-01-15' },
+  { id: 'user_02', name: 'Coach Davis', email: 'coach.d@funspot.com', password: 'password123', dob: '1990-05-20', role: 'Coach', photo_url: `https://i.pravatar.cc/150?u=user_02`, created_at: '2023-02-20' },
+  { id: 'user_03', name: 'Alice Smith (Parent)', email: 'alice.s@email.com', password: 'password123', dob: '1988-08-08', role: 'Parent', photo_url: `https://i.pravatar.cc/150?u=user_03`, created_at: '2023-03-12' },
+  { id: 'user_04', name: 'Bobby Smith', email: 'bobby.s@email.com', password: 'password123', dob: '2015-06-30', role: 'Athlete', parent_id: 'user_03', coach_id: 'user_02', photo_url: `https://i.pravatar.cc/150?u=user_04`, created_at: '2023-03-12', skill_level: 'Beginner' },
+  { id: 'user_05', name: 'Charlie Brown', email: 'charlie.b@email.com', password: 'password123', dob: '2016-11-10', role: 'Athlete', parent_id: 'user_03', coach_id: 'user_02', photo_url: `https://i.pravatar.cc/150?u=user_05`, created_at: '2023-04-01', skill_level: 'Intermediate' },
 ];
 
 const initialPrograms: Program[] = [
@@ -198,6 +204,19 @@ const Toast: FC<{ message: ToastMessage; onDismiss: (id: number) => void }> = ({
 const RoleBadge: FC<{ role: Role }> = ({ role }) => <span className={`role-badge role-${role.toLowerCase()}`}>{role}</span>;
 const SkillBadge: FC<{ level: SkillLevel }> = ({ level }) => <span className={`skill-badge skill-${level.toLowerCase()}`}>{level}</span>;
 
+const LoadingSpinner: FC = () => (
+    <div className="loading-overlay">
+        <div className="spinner"></div>
+    </div>
+);
+
+const ClubLogo: FC<{ className?: string }> = ({ className }) => (
+    <div className={`club-logo ${className || ''}`}>
+        <SkateIcon />
+        <h3>FUNSPOT</h3>
+    </div>
+);
+
 
 // --- MAIN FEATURE COMPONENTS ---
 
@@ -263,6 +282,10 @@ const AddEditUserModal: FC<{
       addToast('Please fill all required fields.', 'error');
       return;
     }
+    if (!userToEdit && !formData.password) {
+        addToast('Please set a temporary password for the new user.', 'error');
+        return;
+    }
     onSave(formData as User);
     onClose();
   };
@@ -286,6 +309,12 @@ const AddEditUserModal: FC<{
              <div className="form-group"><label>Date of Birth</label><input type="date" name="dob" value={formData.dob || ''} onChange={handleChange} required /></div>
             <div className="form-group"><label>Role</label><select name="role" value={formData.role || ''} onChange={handleChange} required><option value="">Select Role</option><option>Admin</option><option>Manager</option><option>Coach</option><option>Parent</option><option>Athlete</option></select></div>
           </div>
+          {!userToEdit && (
+            <div className="form-group">
+                <label>Temporary Password</label>
+                <input type="password" name="password" value={formData.password || ''} onChange={handleChange} required />
+            </div>
+          )}
           {formData.role === 'Athlete' && (
             <div className="form-grid">
               <div className="form-group"><label>Parent/Guardian</label><select name="parent_id" value={formData.parent_id || ''} onChange={handleChange}><option value="">Assign Parent</option>{parentOptions.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}</select></div>
@@ -616,6 +645,91 @@ const EventDetailsModal: FC<{
     );
 };
 
+const AboutUsModal: FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, onClose }) => (
+    <Modal isOpen={isOpen} onClose={onClose} size="md">
+        <div className="modal-header">
+            <h3>About Funspot Skating Club</h3>
+            <button type="button" className="btn-icon" onClick={onClose}><XMarkIcon /></button>
+        </div>
+        <div className="modal-body">
+            <h4>Our Mission</h4>
+            <p>To provide a safe, fun, and inclusive environment for skaters of all ages and skill levels to learn, grow, and connect with the community.</p>
+            <h4>Our History</h4>
+            <p>Founded in 2023, Funspot started as a small weekend gathering of skate enthusiasts. We've since grown into a vibrant club offering professional coaching, diverse programs, and regular community events. We believe in the power of skating to build confidence, discipline, and lifelong friendships.</p>
+            <h4>What We Offer</h4>
+            <ul>
+                <li>Professional coaching for all skill levels.</li>
+                <li>A wide range of programs from skating to chess.</li>
+                <li>Regular events, competitions, and social gatherings.</li>
+                <li>A state-of-the-art indoor facility and a spacious outdoor park.</li>
+            </ul>
+        </div>
+    </Modal>
+);
+
+const ContactUsModal: FC<{
+    isOpen: boolean;
+    onClose: () => void;
+    addToast: (message: string, type: ToastMessage['type']) => void;
+}> = ({ isOpen, onClose, addToast }) => {
+    const [isSending, setIsSending] = useState(false);
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsSending(true);
+        setTimeout(() => {
+            setIsSending(false);
+            addToast('Your message has been sent!', 'success');
+            onClose();
+        }, 1500);
+    };
+
+    return (
+        <Modal isOpen={isOpen} onClose={onClose} size="md">
+            <form onSubmit={handleSubmit}>
+                <div className="modal-header">
+                    <h3>Contact Us</h3>
+                    <button type="button" className="btn-icon" onClick={onClose}><XMarkIcon /></button>
+                </div>
+                <div className="modal-body">
+                    <p>Have a question or feedback? Fill out the form below and we'll get back to you soon.</p>
+                    <div className="form-group"><label>Your Name</label><input name="name" required /></div>
+                    <div className="form-group"><label>Your Email</label><input type="email" name="email" required /></div>
+                    <div className="form-group"><label>Subject</label><input name="subject" required /></div>
+                    <div className="form-group"><label>Message</label><textarea name="message" rows={4} required></textarea></div>
+                </div>
+                <div className="modal-actions">
+                    <button type="button" className="btn btn-secondary" onClick={onClose} disabled={isSending}>Cancel</button>
+                    <button type="submit" className="btn btn-primary" disabled={isSending}>
+                        {isSending ? 'Sending...' : 'Send Message'}
+                    </button>
+                </div>
+            </form>
+        </Modal>
+    );
+};
+
+const BookingConfirmationModal: FC<{
+    isOpen: boolean;
+    onClose: () => void;
+    details: { program: Program; method: string } | null;
+}> = ({ isOpen, onClose, details }) => {
+    if (!isOpen || !details) return null;
+
+    return (
+        <Modal isOpen={isOpen} onClose={onClose} size="sm">
+            <div className="booking-confirmation">
+                <CheckCircleIcon />
+                <h3>Booking Confirmed!</h3>
+                <p>You're all set for <strong>{details.program.title}</strong>. We're excited to see you!</p>
+                <div className="confirmation-details">
+                    <div><span>Amount Paid:</span><span>{details.program.currency} {details.program.price_cents / 100}</span></div>
+                    <div><span>Payment Method:</span><span>{details.method}</span></div>
+                </div>
+                <button className="btn btn-primary btn-full" onClick={onClose}>Done</button>
+            </div>
+        </Modal>
+    );
+};
 
 const UserManagementWidget: FC<{
   users: User[];
@@ -766,7 +880,7 @@ const TransactionLogWidget: FC<{ transactions: Transaction[], users: User[], pro
     const getProgramName = (id: string) => programs.find(p => p.id === id)?.title || 'N/A';
 
     return (
-        <div className="widget widget-col-span-2">
+        <div className="widget widget-col-span-4">
             <div className="widget-header"><h3>Transaction Log</h3></div>
             <div className="table-container">
                 <table>
@@ -1021,7 +1135,7 @@ const AthleteProfileWidget: FC<{ athlete: User }> = ({ athlete }) => {
 
 const ActivityManagementWidget: FC<{ activities: Activity[], onAdd: () => void, onEdit: (activity: Activity) => void, onDelete: (id: string) => void }> = ({ activities, onAdd, onEdit, onDelete }) => {
     return (
-        <div className="widget">
+        <div className="widget widget-col-span-2">
             <div className="widget-header">
                 <h3>Club Activities</h3>
                 <button className="btn btn-primary btn-sm" onClick={onAdd}><PlusCircleIcon/> Add Activity</button>
@@ -1107,6 +1221,178 @@ const CoachReportsWidget: FC<{
     );
 };
 
+const ContactWidget: FC = () => (
+    <div className="widget">
+        <div className="widget-header">
+            <h3>Recent Messages</h3>
+        </div>
+        <div className="contact-widget-body">
+            <ChatBubbleLeftRightIcon />
+            <p>No new messages</p>
+            <span>Messages from the contact form will appear here.</span>
+        </div>
+    </div>
+);
+
+// --- AUTHENTICATION COMPONENTS ---
+type AuthMode = 'login' | 'signup' | 'forgot';
+
+const LoginPage: FC<{
+    onLogin: (user: User) => void;
+    onSwitchMode: (mode: AuthMode) => void;
+    users: User[];
+    addToast: (message: string, type: ToastMessage['type']) => void;
+}> = ({ onLogin, onSwitchMode, users, addToast }) => {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        const user = users.find(u => u.email === email && u.password === password);
+        if (user) {
+            onLogin(user);
+        } else {
+            addToast('Invalid email or password.', 'error');
+        }
+    };
+
+    return (
+        <>
+            <ClubLogo className="auth-logo" />
+            <h2>Welcome Back</h2>
+            <p>Please enter your details to sign in.</p>
+            <form onSubmit={handleSubmit} className="auth-form">
+                <div className="form-group-icon">
+                    <EnvelopeIcon className="input-icon" />
+                    <input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} required />
+                </div>
+                <div className="form-group-icon">
+                    <LockClosedIcon className="input-icon" />
+                    <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} required />
+                </div>
+                <div className="auth-links">
+                    <button type="button" className="link-button" onClick={() => onSwitchMode('forgot')}>Forgot Password?</button>
+                </div>
+                <button type="submit" className="btn btn-primary btn-full">Sign In</button>
+            </form>
+            <p className="auth-switch">
+                Don't have an account? <button type="button" className="link-button" onClick={() => onSwitchMode('signup')}>Sign Up</button>
+            </p>
+        </>
+    );
+};
+
+const SignupPage: FC<{
+    onSignup: (newUser: Omit<User, 'id' | 'created_at' | 'photo_url' | 'dob' | 'role'>) => void;
+    onSwitchMode: (mode: AuthMode) => void;
+    users: User[];
+    addToast: (message: string, type: ToastMessage['type']) => void;
+}> = ({ onSignup, onSwitchMode, users, addToast }) => {
+    const [step, setStep] = useState<'choice' | 'form'>('choice');
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (password !== confirmPassword) {
+            addToast('Passwords do not match.', 'error');
+            return;
+        }
+        if (users.some(u => u.email === email)) {
+            addToast('An account with this email already exists.', 'error');
+            return;
+        }
+        onSignup({ name, email, password });
+    };
+
+    if (step === 'choice') {
+        return (
+            <>
+                <ClubLogo className="auth-logo" />
+                <h2>Join Funspot Club</h2>
+                <p>How would you like to sign up?</p>
+                <div className="signup-choice">
+                    <div className="choice-box">
+                        <h4>Administrator</h4>
+                        <p>Create a new administrator account for a club.</p>
+                        <button className="btn btn-primary btn-full" onClick={() => setStep('form')}>Sign Up as Admin</button>
+                    </div>
+                    <div className="choice-box">
+                        <h4>Club Member</h4>
+                        <p>Member accounts (Coach, Parent, Athlete) must be created by a club administrator.</p>
+                        <button className="btn btn-secondary btn-full" onClick={() => onSwitchMode('login')}>Contact Your Admin</button>
+                    </div>
+                </div>
+                <p className="auth-switch">
+                    Already have an account? <button type="button" className="link-button" onClick={() => onSwitchMode('login')}>Sign In</button>
+                </p>
+            </>
+        )
+    }
+
+    return (
+        <>
+            <ClubLogo className="auth-logo" />
+            <h2>Create Admin Account</h2>
+            <p>Fill in your details to get started.</p>
+            <form onSubmit={handleSubmit} className="auth-form">
+                <div className="form-group-icon">
+                    <UserCircleIcon className="input-icon" />
+                    <input type="text" placeholder="Full Name" value={name} onChange={e => setName(e.target.value)} required />
+                </div>
+                <div className="form-group-icon">
+                    <EnvelopeIcon className="input-icon" />
+                    <input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} required />
+                </div>
+                <div className="form-group-icon">
+                    <LockClosedIcon className="input-icon" />
+                    <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} required />
+                </div>
+                <div className="form-group-icon">
+                    <LockClosedIcon className="input-icon" />
+                    <input type="password" placeholder="Confirm Password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required />
+                </div>
+                <button type="submit" className="btn btn-primary btn-full">Create Account</button>
+            </form>
+            <p className="auth-switch">
+                Already have an account? <button type="button" className="link-button" onClick={() => onSwitchMode('login')}>Sign In</button>
+            </p>
+        </>
+    );
+};
+
+const ForgotPasswordPage: FC<{
+    onSwitchMode: (mode: AuthMode) => void;
+    addToast: (message: string, type: ToastMessage['type']) => void;
+}> = ({ onSwitchMode, addToast }) => {
+    const [email, setEmail] = useState('');
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        addToast('If an account exists, a password reset link has been sent.', 'info');
+        onSwitchMode('login');
+    };
+
+    return (
+        <>
+            <ClubLogo className="auth-logo" />
+            <h2>Reset Password</h2>
+            <p>Enter your email and we'll send you a link to get back into your account.</p>
+            <form onSubmit={handleSubmit} className="auth-form">
+                <div className="form-group-icon">
+                    <EnvelopeIcon className="input-icon" />
+                    <input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} required />
+                </div>
+                <button type="submit" className="btn btn-primary btn-full">Send Reset Link</button>
+            </form>
+             <p className="auth-switch">
+                Remember your password? <button type="button" className="link-button" onClick={() => onSwitchMode('login')}>Sign In</button>
+            </p>
+        </>
+    );
+};
+
 // --- APP ---
 
 export const App: FC = () => {
@@ -1143,18 +1429,24 @@ export const App: FC = () => {
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const [notificationPermission, setNotificationPermission] = useState('default');
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  
+  const [isLoading, setIsLoading] = useState(false);
+  const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+  const [isBookingConfirmationOpen, setIsBookingConfirmationOpen] = useState(false);
+  const [confirmedBookingDetails, setConfirmedBookingDetails] = useState<{ program: Program; method: string } | null>(null);
+  const [authMode, setAuthMode] = useState<AuthMode>('login');
 
   const effectiveUser = impersonatedUser || currentUser;
   const isAdminOrManager = effectiveUser?.role === 'Admin' || effectiveUser?.role === 'Manager';
 
   useEffect(() => {
-    const storedTheme = localStorage.getItem('funspot-theme') as 'light' | 'dark' | null;
-    if (storedTheme) {
-        setTheme(storedTheme);
-        document.documentElement.className = `${storedTheme}-theme`;
-    } else {
-        document.documentElement.className = 'dark-theme';
-    }
+    const storedTheme = localStorage.getItem('funspot-theme');
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const initialTheme = (storedTheme === 'light' || storedTheme === 'dark') ? storedTheme : (prefersDark ? 'dark' : 'light');
+    
+    setTheme(initialTheme);
+    document.documentElement.className = `${initialTheme}-theme`;
     
     try {
         const storedWaitlists = localStorage.getItem('funspot-waitlists');
@@ -1177,8 +1469,12 @@ export const App: FC = () => {
   };
   
   const handleLogin = (user: User) => {
-    setCurrentUser(user);
-    addLog(user.id, 'User logged in');
+    setIsLoading(true);
+    setTimeout(() => {
+        setCurrentUser(user);
+        addLog(user.id, 'User logged in');
+        setIsLoading(false);
+    }, 1000);
   };
   
   const handleLogout = () => {
@@ -1188,8 +1484,24 @@ export const App: FC = () => {
     } else {
         addLog(currentUser!.id, 'User logged out');
         setCurrentUser(null);
+        setAuthMode('login');
     }
   };
+
+  const handleSignup = (newUser: Omit<User, 'id' | 'created_at' | 'photo_url' | 'dob' | 'role'>) => {
+    const newUserId = `user_${String(Date.now()).slice(-4)}`;
+    const userToSave: User = {
+        ...newUser,
+        id: newUserId,
+        created_at: new Date().toISOString().split('T')[0],
+        photo_url: `https://i.pravatar.cc/150?u=${newUserId}`,
+        dob: '1990-01-01', // placeholder DOB
+        role: 'Admin'
+    };
+    setUsers(prev => [...prev, userToSave]);
+    addToast('Admin account created successfully! Please log in.', 'success');
+    setAuthMode('login');
+};
   
   const handleImpersonate = (user: User) => {
       if ((currentUser?.role === 'Admin' || currentUser?.role === 'Manager') && currentUser.id !== user.id) {
@@ -1312,8 +1624,13 @@ export const App: FC = () => {
       const newTransaction: Transaction = { id: `txn_${Date.now()}`, userId: effectiveUser.id, programId: programToPay.id, amount_cents: programToPay.price_cents, currency: programToPay.currency, method, status: 'Completed', created_at: new Date().toISOString().split('T')[0] };
       setTransactions(prev => [...prev, newTransaction]);
       setPrograms(prev => prev.map(p => p.id === programToPay.id ? {...p, enrolled_count: p.enrolled_count + 1} : p));
-      setIsPaymentModalOpen(false); setProgramToPay(null);
-      addToast('Payment successful! Your booking is confirmed.', 'success');
+      
+      setConfirmedBookingDetails({ program: programToPay, method });
+
+      setIsPaymentModalOpen(false); 
+      setProgramToPay(null);
+      setIsBookingConfirmationOpen(true);
+
       addLog(effectiveUser.id, `Booked program ${programToPay.title}`);
   };
   
@@ -1373,20 +1690,15 @@ export const App: FC = () => {
   
   // --- RENDER LOGIC ---
 
+  if (isLoading) return <LoadingSpinner />;
+
   if (!currentUser || !effectiveUser) {
     return (
-      <div className="login-container">
-        <div className="login-box">
-          <SkateIcon />
-          <h1>FUNSPOT CLUB</h1>
-          <p>Select your portal to continue</p>
-          <div className="portal-selection">
-            {initialUsers.map(user => (
-              <button key={user.id} className="btn btn-primary btn-full" onClick={() => handleLogin(user)}>
-                Login as {user.name} ({user.role})
-              </button>
-            ))}
-          </div>
+      <div className="auth-container">
+        <div className="auth-box">
+           {authMode === 'login' && <LoginPage onLogin={handleLogin} onSwitchMode={setAuthMode} users={users} addToast={addToast} />}
+           {authMode === 'signup' && <SignupPage onSignup={handleSignup} onSwitchMode={setAuthMode} users={users} addToast={addToast} />}
+           {authMode === 'forgot' && <ForgotPasswordPage onSwitchMode={setAuthMode} addToast={addToast} />}
         </div>
       </div>
     );
@@ -1404,10 +1716,19 @@ export const App: FC = () => {
         <PaymentModal isOpen={isPaymentModalOpen} onClose={() => setIsPaymentModalOpen(false)} program={programToPay} onConfirmPayment={handleConfirmPayment} />
         <AddEditActivityModal isOpen={isActivityModalOpen} onClose={() => setIsActivityModalOpen(false)} onSave={handleSaveActivity} activityToEdit={activityToEdit} />
         <EventDetailsModal isOpen={isEventModalOpen} onClose={() => setIsEventModalOpen(false)} events={selectedEvents} />
+        <AboutUsModal isOpen={isAboutModalOpen} onClose={() => setIsAboutModalOpen(false)} />
+        <ContactUsModal isOpen={isContactModalOpen} onClose={() => setIsContactModalOpen(false)} addToast={addToast} />
+        <BookingConfirmationModal isOpen={isBookingConfirmationOpen} onClose={() => setIsBookingConfirmationOpen(false)} details={confirmedBookingDetails} />
 
       <aside className="sidebar">
-        <div className="sidebar-header">
-          <h3><SkateIcon /> FUNSPOT</h3>
+        <ClubLogo className="sidebar-logo" />
+        <nav className="sidebar-nav">
+          <a href="#" className="nav-item" onClick={(e) => { e.preventDefault(); setIsAboutModalOpen(true); }}><InformationCircleIcon/> About Us</a>
+          <a href="#" className="nav-item" onClick={(e) => { e.preventDefault(); setIsContactModalOpen(true); }}><EnvelopeIcon/> Contact</a>
+        </nav>
+        <div className="sidebar-footer">
+            <h4>About Funspot</h4>
+            <p>A safe, fun, and inclusive environment for skaters of all ages and skill levels.</p>
         </div>
       </aside>
 
@@ -1448,10 +1769,11 @@ export const App: FC = () => {
             {isAdminOrManager && <>
                 <AnalyticsWidget users={users} transactions={transactions} programs={programs}/>
                 <EventsCalendarWidget events={mockEvents} onDayClick={handleDayClick}/>
-                <ActivityManagementWidget activities={activities} onAdd={() => {setActivityToEdit(null); setIsActivityModalOpen(true)}} onEdit={(act) => {setActivityToEdit(act); setIsActivityModalOpen(true)}} onDelete={handleDeleteActivity} />
+                <ContactWidget />
                 <UserManagementWidget users={users} onImpersonate={handleImpersonate} onEdit={handleEditUser} onDelete={handleDeleteUser} onAdd={handleAddUser} currentUser={currentUser} />
                 <ProgramManagementWidget programs={programs} users={users} onViewDetails={handleViewProgramDetails} onEditProgram={handleEditProgram} onAddProgram={handleAddProgram} currentUser={effectiveUser}/>
                 <TransactionLogWidget transactions={transactions} users={users} programs={programs} />
+                <ActivityManagementWidget activities={activities} onAdd={() => {setActivityToEdit(null); setIsActivityModalOpen(true)}} onEdit={(act) => {setActivityToEdit(act); setIsActivityModalOpen(true)}} onDelete={handleDeleteActivity} />
                 <ActionLogWidget logs={actionLogs} users={users} />
             </>}
 
