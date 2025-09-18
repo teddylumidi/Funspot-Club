@@ -1258,12 +1258,11 @@ export const App: FC = () => {
             if (spotsOpened > 0) {
                 const waitlist = waitlists[program.id];
                 if (waitlist && waitlist.length > 0) {
-                    // This side-effect is safe because React runs the updater synchronously
                     promotedUserId = waitlist[0];
                 }
             }
             return prev.map(p => p.id === program.id ? program : p);
-        } else { // This is an add - FIX: was missing
+        } else { // This is a new program
             return [...prev, program];
         }
     });
