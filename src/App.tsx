@@ -154,7 +154,11 @@ const BellIcon: FC<{ className?: string }> = ({ className = "h-6 w-6" }) => <svg
 const ChevronLeftIcon: FC<{ className?: string }> = ({ className = "h-6 w-6" }) => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" /></svg>;
 const ChevronRightIcon: FC<{ className?: string }> = ({ className = "h-6 w-6" }) => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}><path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" /></svg>;
 const PlusCircleIcon: FC<{ className?: string }> = ({ className = "h-6 w-6" }) => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>;
-
+const InformationCircleIcon: FC<{ className?: string }> = ({ className = "h-6 w-6" }) => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}><path strokeLinecap="round" strokeLinejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" /></svg>;
+const MapPinIcon: FC<{ className?: string }> = ({ className = "h-6 w-6" }) => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}><path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" /></svg>;
+const PhoneIcon: FC<{ className?: string }> = ({ className = "h-6 w-6" }) => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 6.75Z" /></svg>;
+const EnvelopeIcon: FC<{ className?: string }> = ({ className = "h-6 w-6" }) => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}><path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25-2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" /></svg>;
+const ClockIcon: FC<{ className?: string }> = ({ className = "h-6 w-6" }) => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>;
 
 // --- MOCK DATA ---
 const createInitialData = () => {
@@ -204,6 +208,14 @@ const formatCurrency = (amount_cents: number, currency: string) => `${(amount_ce
 const getRoleClassName = (role: Role) => `role-${role.toLowerCase()}`;
 const getSkillClassName = (skill: SkillLevel) => `skill-${skill.toLowerCase()}`;
 
+const ROLE_DESCRIPTIONS: Record<Role, string> = {
+    Admin: 'Admins have full control over the application, including user and program management.',
+    Manager: 'Managers can oversee programs and staff, but cannot change system-level settings.',
+    Coach: 'Coaches can view their assigned athletes and program schedules.',
+    Parent: 'Parents can manage their children\'s profiles, book sessions, and view their history.',
+    Athlete: 'Athletes can view their schedule, book sessions, and track their progress.',
+};
+
 
 // --- HOOKS ---
 // FIX: Update the return type to allow functional updates, consistent with React's useState.
@@ -231,7 +243,7 @@ const useLocalStorage = <T,>(key: string, initialValue: T): [T, Dispatch<SetStat
     return [storedValue, setValue];
 };
 
-type View = 'DASHBOARD' | 'USERS';
+type View = 'DASHBOARD' | 'USERS' | 'PROFILE' | 'INFO';
 
 // --- MAIN APP COMPONENT ---
 export const App: FC = () => {
@@ -491,8 +503,8 @@ export const App: FC = () => {
         addToast(`Program "${program.title}" and its bookings have been deleted.`, 'success');
     };
     
-    const handleEditCurrentUser = () => {
-        setModalState({ type: 'USER_FORM', user: currentUser! });
+    const handleNavigateToProfile = () => {
+        setActiveView('PROFILE');
     };
 
     const handleDismissNotification = (id: string) => {
@@ -550,7 +562,7 @@ export const App: FC = () => {
                 onLogout={handleLogout}
                 theme={theme}
                 onThemeToggle={handleThemeToggle}
-                onEditCurrentUser={handleEditCurrentUser}
+                onNavigateToProfile={handleNavigateToProfile}
                 searchTerm={searchTerm}
                 setSearchTerm={setSearchTerm}
                 searchResults={searchResults}
@@ -584,6 +596,21 @@ export const App: FC = () => {
                 {activeView === 'USERS' && (currentUser.role === 'Admin' || currentUser.role === 'Manager') && (
                     <AdminDashboard users={users} setModalState={setModalState} />
                 )}
+
+                {activeView === 'PROFILE' && (
+                    <ProfilePage
+                        currentUser={currentUser}
+                        users={users}
+                        programs={programs}
+                        sessionBookings={sessionBookings}
+                        transactions={transactions}
+                        setModalState={setModalState}
+                        userAndChildrenIds={userAndChildrenIds}
+                        onCancelBooking={handleCancelBooking}
+                    />
+                )}
+
+                {activeView === 'INFO' && <ClubInformationPage />}
             </DashboardLayout>
 
             {/* Modals */}
@@ -622,7 +649,7 @@ interface DashboardLayoutProps {
     onLogout: () => void;
     theme: 'light' | 'dark';
     onThemeToggle: () => void;
-    onEditCurrentUser: () => void;
+    onNavigateToProfile: () => void;
     searchTerm: string;
     setSearchTerm: React.Dispatch<React.SetStateAction<string>>;
     searchResults: { programs: Program[], users: User[], events: ClubEvent[] } | null;
@@ -637,7 +664,7 @@ interface DashboardLayoutProps {
 }
 
 const DashboardLayout: FC<DashboardLayoutProps> = ({
-    currentUser, onLogout, theme, onThemeToggle, onEditCurrentUser, searchTerm, setSearchTerm, searchResults,
+    currentUser, onLogout, theme, onThemeToggle, onNavigateToProfile, searchTerm, setSearchTerm, searchResults,
     setModalState, userRoleFilter, setUserRoleFilter, eventDateFilter, setEventDateFilter, activeView, setActiveView, children
 }) => {
     const searchRef = useRef<HTMLDivElement>(null);
@@ -657,7 +684,7 @@ const DashboardLayout: FC<DashboardLayoutProps> = ({
             <Sidebar
                 currentUser={currentUser}
                 onLogout={onLogout}
-                onEditCurrentUser={onEditCurrentUser}
+                onNavigateToProfile={onNavigateToProfile}
                 activeView={activeView}
                 setActiveView={setActiveView}
             />
@@ -675,6 +702,7 @@ const DashboardLayout: FC<DashboardLayoutProps> = ({
                     eventDateFilter={eventDateFilter}
                     setEventDateFilter={setEventDateFilter}
                     searchRef={searchRef}
+                    setActiveView={setActiveView}
                 />
                 <main className="content-area">
                     <div className="dashboard-grid">
@@ -691,11 +719,12 @@ const Sidebar: FC<{
     activeView: View,
     setActiveView: (view: View) => void,
     onLogout: () => void,
-    onEditCurrentUser: () => void
-}> = ({ currentUser, activeView, setActiveView, onLogout, onEditCurrentUser }) => {
+    onNavigateToProfile: () => void
+}> = ({ currentUser, activeView, setActiveView, onLogout, onNavigateToProfile }) => {
     const navItems = [
         { id: 'DASHBOARD', label: 'Dashboard', icon: HomeIcon, roles: ['Admin', 'Manager', 'Coach', 'Parent', 'Athlete'] },
         { id: 'USERS', label: 'User Management', icon: UsersIcon, roles: ['Admin', 'Manager'] },
+        { id: 'INFO', label: 'Club Information', icon: InformationCircleIcon, roles: ['Admin', 'Manager', 'Coach', 'Parent', 'Athlete'] },
     ];
 
     return (
@@ -721,7 +750,7 @@ const Sidebar: FC<{
             </nav>
             <div className="sidebar-footer">
                 <div className="header-user-info">
-                    <button onClick={onEditCurrentUser} className="btn-icon" aria-label="Edit Profile">
+                    <button onClick={onNavigateToProfile} className="btn-icon" aria-label="My Profile">
                         <UserCircleIcon />
                     </button>
                     <button onClick={onLogout} className="btn-icon" aria-label="Logout">
@@ -746,11 +775,12 @@ interface HeaderProps {
     eventDateFilter: string;
     setEventDateFilter: React.Dispatch<React.SetStateAction<string>>;
     searchRef: React.RefObject<HTMLDivElement>;
+    setActiveView: React.Dispatch<React.SetStateAction<View>>;
 }
 
 const Header: FC<HeaderProps> = ({
     currentUser, onThemeToggle, theme, searchTerm, setSearchTerm, searchResults,
-    setModalState, userRoleFilter, setUserRoleFilter, eventDateFilter, setEventDateFilter, searchRef
+    setModalState, userRoleFilter, setUserRoleFilter, eventDateFilter, setEventDateFilter, searchRef, setActiveView
 }) => {
     return (
         <header className="header">
@@ -800,7 +830,7 @@ const Header: FC<HeaderProps> = ({
                                     {searchResults.users.map(u => (
                                         <div key={u.id} className="search-result-item" onClick={() => { setModalState({ type: 'USER_FORM', user: u }); setSearchTerm(''); }}>
                                             <span className="search-item-title">{u.name}</span>
-                                            <span className={`role-badge ${getRoleClassName(u.role)}`}>{u.role}</span>
+                                            <RoleBadgeWithTooltip role={u.role} />
                                         </div>
                                     ))}
                                     {searchResults.events.length > 0 && <div className="search-category-header">Events</div>}
@@ -822,13 +852,15 @@ const Header: FC<HeaderProps> = ({
                     )}
                 </div>
                 <div className="header-right">
-                    <div className="header-user-info">
-                        <div>
-                            <strong>{currentUser.name}</strong>
-                            <div className="text-secondary" style={{ fontSize: '0.8rem' }}>{currentUser.role}</div>
+                    <button className="header-user-button" onClick={() => setActiveView('PROFILE')}>
+                        <div className="header-user-info">
+                            <div className="header-user-text">
+                                <strong>{currentUser.name}</strong>
+                                <div className="text-secondary" style={{ fontSize: '0.8rem' }}>{currentUser.role}</div>
+                            </div>
+                            <img src={currentUser.photo_url} alt={currentUser.name} className="header-avatar" />
                         </div>
-                        <img src={currentUser.photo_url} alt={currentUser.name} className="header-avatar" />
-                    </div>
+                    </button>
                     <button onClick={onThemeToggle} className="btn-icon theme-toggle" aria-label="Toggle theme">
                         {theme === 'light' ? <MoonIcon /> : <SunIcon />}
                     </button>
@@ -884,6 +916,17 @@ const NotificationsWidget: FC<{ notifications: AppNotification[], programs: Prog
     )
 };
 
+const RoleBadgeWithTooltip: FC<{ role: Role }> = ({ role }) => {
+    const description = ROLE_DESCRIPTIONS[role];
+    return (
+      <div className="tooltip-container">
+        <span className={`role-badge ${getRoleClassName(role)}`}>{role}</span>
+        <InformationCircleIcon className="tooltip-icon" />
+        <div className="tooltip-text">{description}</div>
+      </div>
+    );
+};
+
 const AdminDashboard: FC<{ users: User[], setModalState: Dispatch<SetStateAction<ModalState>> }> = ({ users, setModalState }) => {
     return (
         <div className="widget widget-col-span-full">
@@ -913,7 +956,7 @@ const AdminDashboard: FC<{ users: User[], setModalState: Dispatch<SetStateAction
                                         <span>{user.name}</span>
                                     </div>
                                 </td>
-                                <td data-label="Role"><span className={`role-badge ${getRoleClassName(user.role)}`}>{user.role}</span></td>
+                                <td data-label="Role"><RoleBadgeWithTooltip role={user.role} /></td>
                                 <td data-label="Email">{user.email}</td>
                                 <td data-label="Joined">{formatDate(user.created_at)}</td>
                                 <td data-label="Actions">
@@ -1050,13 +1093,20 @@ const MySessionsWidget: FC<{ sessions: SessionBooking[], programs: Program[], on
 
 const AvailableProgramsWidget: FC<{ programs: Program[], onBookProgram: (p: Program) => void, onJoinWaitlist: (p: Program) => void, onLeaveWaitlist: (p: Program) => void, onShowDetails: (p: Program) => void, currentUser: User, coaches: User[] }> = ({ programs, onBookProgram, onJoinWaitlist, onLeaveWaitlist, onShowDetails, currentUser, coaches }) => {
     const [categoryFilter, setCategoryFilter] = useState<ProgramCategory | 'All'>('All');
+    const [skillLevelFilter, setSkillLevelFilter] = useState<SkillLevel | 'All'>('All');
+    const [coachFilter, setCoachFilter] = useState<string | 'All'>('All');
     
     const programCategories = useMemo(() => ['All', ...Array.from(new Set(programs.map(p => p.category)))], [programs]);
+    const skillLevels: (SkillLevel | 'All')[] = ['All', 'Beginner', 'Intermediate', 'Advanced'];
 
     const filteredPrograms = useMemo(() => {
-        if (categoryFilter === 'All') return programs;
-        return programs.filter(p => p.category === categoryFilter);
-    }, [programs, categoryFilter]);
+        return programs.filter(p => {
+            const categoryMatch = categoryFilter === 'All' || p.category === categoryFilter;
+            const skillMatch = skillLevelFilter === 'All' || p.skill_level === skillLevelFilter;
+            const coachMatch = coachFilter === 'All' || p.coach_id === coachFilter;
+            return categoryMatch && skillMatch && coachMatch;
+        });
+    }, [programs, categoryFilter, skillLevelFilter, coachFilter]);
 
     const getCapacityClass = (p: Program) => {
         const percentage = p.enrolled_count / p.capacity;
@@ -1069,11 +1119,27 @@ const AvailableProgramsWidget: FC<{ programs: Program[], onBookProgram: (p: Prog
         <div className="widget widget-col-span-full">
             <div className="widget-header">
                 <h3>Available Programs</h3>
-                 <div className="program-filter">
-                    <label htmlFor="category-filter">Category:</label>
-                    <select id="category-filter" value={categoryFilter} onChange={e => setCategoryFilter(e.target.value as ProgramCategory | 'All')}>
-                        {programCategories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                    </select>
+                <div className="program-filter">
+                    <div className="filter-item">
+                        <label htmlFor="category-filter">Category</label>
+                        <select id="category-filter" value={categoryFilter} onChange={e => setCategoryFilter(e.target.value as ProgramCategory | 'All')}>
+                            <option value="All">All Categories</option>
+                            {programCategories.filter(c => c !== 'All').map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                        </select>
+                    </div>
+                    <div className="filter-item">
+                        <label htmlFor="skill-level-filter">Skill Level</label>
+                        <select id="skill-level-filter" value={skillLevelFilter} onChange={e => setSkillLevelFilter(e.target.value as SkillLevel | 'All')}>
+                            {skillLevels.map(lvl => <option key={lvl} value={lvl}>{lvl === 'All' ? 'All Levels' : lvl}</option>)}
+                        </select>
+                    </div>
+                    <div className="filter-item">
+                        <label htmlFor="coach-filter">Coach</label>
+                        <select id="coach-filter" value={coachFilter} onChange={e => setCoachFilter(e.target.value)}>
+                            <option value="All">All Coaches</option>
+                            {coaches.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                        </select>
+                    </div>
                 </div>
             </div>
             <div className="program-grid">
@@ -1245,6 +1311,206 @@ const ProgramManagementWidget: FC<{
                         })}
                     </tbody>
                 </table>
+            </div>
+        </div>
+    );
+};
+
+// --- PROFILE PAGE ---
+const ProfilePage: FC<{
+    currentUser: User;
+    users: User[];
+    programs: Program[];
+    sessionBookings: SessionBooking[];
+    transactions: Transaction[];
+    setModalState: Dispatch<SetStateAction<ModalState>>;
+    userAndChildrenIds: string[];
+    onCancelBooking: (programId: string, transactionId: string) => void;
+}> = ({ currentUser, users, programs, sessionBookings, transactions, setModalState, userAndChildrenIds, onCancelBooking }) => {
+
+    const userBookings = useMemo(() => {
+        return sessionBookings.filter(b => userAndChildrenIds.includes(b.userId));
+    }, [sessionBookings, userAndChildrenIds]);
+
+    const userTransactions = useMemo(() => {
+        return transactions.filter(t => userAndChildrenIds.includes(t.userId))
+                           .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    }, [transactions, userAndChildrenIds]);
+
+    const children = useMemo(() => {
+        if (currentUser.role !== 'Parent') return [];
+        return users.filter(u => u.parent_id === currentUser.id);
+    }, [currentUser, users]);
+
+    return (
+        <div className="profile-page">
+            <div className="profile-header widget">
+                <div className="profile-header-main">
+                    <img src={currentUser.photo_url} alt={currentUser.name} className="profile-avatar" />
+                    <div className="profile-header-info">
+                        <h1>{currentUser.name}</h1>
+                        <RoleBadgeWithTooltip role={currentUser.role} />
+                    </div>
+                </div>
+                <button className="btn btn-secondary" onClick={() => setModalState({ type: 'USER_FORM', user: currentUser })}>
+                    <PencilIcon className="icon-sm" /> Edit Profile
+                </button>
+            </div>
+
+            <div className="dashboard-grid">
+                <div className="widget">
+                    <h3>Contact Information</h3>
+                    <p><strong>Email:</strong> {currentUser.email}</p>
+                    <p><strong>Date of Birth:</strong> {formatDate(currentUser.dob)}</p>
+                    {currentUser.bio && (
+                        <>
+                            <h4>Bio</h4>
+                            <p>{currentUser.bio}</p>
+                        </>
+                    )}
+                    {currentUser.role === 'Parent' && children.length > 0 && (
+                         <>
+                            <h4>Your Children</h4>
+                            <div className="children-list">
+                                {children.map(child => (
+                                    <div key={child.id} className="child-info-item">
+                                        <img src={child.photo_url} alt={child.name} className="table-avatar"/>
+                                        <span>{child.name}</span>
+                                        <span className={`skill-badge ${getSkillClassName(child.skill_level!)}`}>{child.skill_level}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </>
+                    )}
+                </div>
+                
+                <MySessionsWidget sessions={userBookings} programs={programs} users={users} onCancelBooking={onCancelBooking} />
+
+                <div className="widget widget-col-span-full">
+                    <h3>Booking History</h3>
+                    {userTransactions.length > 0 ? (
+                        <div className="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Program</th>
+                                        <th>User</th>
+                                        <th>Amount</th>
+                                        <th>Transaction ID</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {userTransactions.map(t => {
+                                        const program = programs.find(p => p.id === t.programId);
+                                        const user = users.find(u => u.id === t.userId);
+                                        return (
+                                            <tr key={t.id}>
+                                                <td data-label="Date">{formatDate(t.created_at)}</td>
+                                                <td data-label="Program">{program?.title || 'N/A'}</td>
+                                                <td data-label="User">{user?.name || 'N/A'}</td>
+                                                <td data-label="Amount">{formatCurrency(t.amount_cents, t.currency)}</td>
+                                                <td data-label="Transaction ID">{t.id}</td>
+                                            </tr>
+                                        )
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
+                    ) : (
+                        <p>No transaction history found.</p>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+
+// --- CLUB INFORMATION PAGE ---
+const ClubInformationPage: FC = () => {
+    type InfoSection = 'about' | 'contact' | 'location';
+    const [activeSection, setActiveSection] = useState<InfoSection>('about');
+
+    const renderContent = () => {
+        switch (activeSection) {
+            case 'contact':
+                return (
+                    <div className="info-section">
+                        <h2>Contact Us</h2>
+                        <p>Have questions? We're here to help! Reach out to us through any of the channels below.</p>
+                        <div className="contact-details-grid">
+                            <div className="contact-item">
+                                <h4><PhoneIcon className="icon-sm" /> General Inquiries</h4>
+                                <p>+254 712 345 678</p>
+                            </div>
+                            <div className="contact-item">
+                                <h4><EnvelopeIcon className="icon-sm" /> Email Support</h4>
+                                <p>hello@funspotclub.com</p>
+                            </div>
+                             <div className="contact-item">
+                                <h4><ClockIcon className="icon-sm" /> Opening Hours</h4>
+                                <p>Mon - Fri: 10:00 AM - 9:00 PM</p>
+                                <p>Sat - Sun: 9:00 AM - 10:00 PM</p>
+                            </div>
+                        </div>
+                    </div>
+                );
+            case 'location':
+                return (
+                    <div className="info-section">
+                        <h2>Location & Facilities</h2>
+                        <div className="location-grid">
+                             <div className="location-info">
+                                <h4><MapPinIcon className="icon-sm" /> Our Address</h4>
+                                <p>Funspot Skating Rink</p>
+                                <p>123 Ice Lane</p>
+                                <p>Nairobi, Kenya</p>
+                                <h4 style={{marginTop: '1rem'}}>Our Facilities</h4>
+                                <ul>
+                                    <li>Olympic-sized indoor ice rink</li>
+                                    <li>Pro shop for skate rentals and gear</li>
+                                    <li>Cozy cafe with hot beverages and snacks</li>
+                                    <li>Spacious viewing gallery for spectators</li>
+                                    <li>Secure lockers and changing rooms</li>
+                                </ul>
+                             </div>
+                             <div className="location-map">
+                                 <img src="https://placehold.co/600x400/010409/c9d1d9?text=Map+Placeholder" alt="Map to Funspot Club" />
+                             </div>
+                        </div>
+                    </div>
+                );
+            case 'about':
+            default:
+                return (
+                    <div className="info-section">
+                        <h2>About Funspot Skating Club</h2>
+                        <p>Founded in 2010, Funspot Skating Club has been at the heart of Nairobi's skating community for over a decade. Our mission is to provide a safe, fun, and professional environment for skaters of all ages and skill levels to pursue their passion for ice sports.</p>
+                        <p>From first-timers taking their tentative first steps on the ice to seasoned competitors honing their skills, we offer a wide range of programs led by certified, passionate coaches. We believe in fostering a supportive community where every member feels valued and encouraged to achieve their personal best.</p>
+                        <p>Join us on the ice and become part of the Funspot family!</p>
+                    </div>
+                );
+        }
+    };
+
+    return (
+        <div className="info-page widget-col-span-full">
+            <div className="widget">
+                <div className="info-nav">
+                    <button className={`info-nav-item ${activeSection === 'about' ? 'active' : ''}`} onClick={() => setActiveSection('about')}>
+                        About Us
+                    </button>
+                    <button className={`info-nav-item ${activeSection === 'contact' ? 'active' : ''}`} onClick={() => setActiveSection('contact')}>
+                        Contact Details
+                    </button>
+                    <button className={`info-nav-item ${activeSection === 'location' ? 'active' : ''}`} onClick={() => setActiveSection('location')}>
+                        Location/Facilities
+                    </button>
+                </div>
+                <div className="info-content">
+                    {renderContent()}
+                </div>
             </div>
         </div>
     );
