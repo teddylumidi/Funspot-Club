@@ -1,6 +1,6 @@
 :root {
-  --font-heading: 'Rajdhani', sans-serif;
-  --font-body: 'Fira Code', monospace;
+  --font-heading: 'Inter', sans-serif;
+  --font-body: 'Roboto', sans-serif;
 }
 
 /* --- DARK THEME (DEFAULT) --- */
@@ -253,6 +253,36 @@ p { margin-bottom: 1em; color: var(--text-secondary); }
 .session-option-details { display: flex; justify-content: space-between; width: 100%; }
 .session-option-details .day { font-weight: bold; }
 .session-option-details .time { color: var(--text-secondary); }
+.program-details .detail-divider {
+  border: none;
+  border-top: 1px solid var(--border-color);
+  margin: 1.25rem 0;
+}
+.program-details h4 {
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-secondary);
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+}
+.coach-bio {
+  font-style: italic;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+.prerequisites-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.prerequisites-list li {
+  background-color: var(--bg-main);
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
 
 /* --- ICON SIZES --- */
 .icon-sm {
@@ -416,6 +446,24 @@ td::before { content: attr(data-label); position: absolute; left: 0.75rem; font-
 .confirmation-details div span:first-child { color: var(--text-secondary); }
 .confirmation-details div span:last-child { font-weight: bold; }
 .delete-confirmation { text-align: center; }
+
+/* --- PROGRESS BAR --- */
+.progress-bar-container {
+  width: 100%;
+  background-color: var(--border-color);
+  border-radius: 1rem;
+  overflow: hidden;
+}
+.progress-bar {
+  background-color: var(--primary-color);
+  color: var(--text-on-primary);
+  padding: 0.25rem 0.5rem;
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: bold;
+  white-space: nowrap;
+  transition: width 0.5s ease-in-out;
+}
 
 /* --- TOAST --- */
 .toast-container { position: fixed; bottom: 1rem; right: 1rem; z-index: 2000; display: flex; flex-direction: column; gap: 1rem; width: 90%; max-width: 350px; }
