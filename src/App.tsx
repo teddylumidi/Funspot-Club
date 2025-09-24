@@ -1,443 +1,168 @@
-import React, { useState, useEffect, createContext, useContext, ReactNode, FC } from 'react';
+import React, { ReactNode } from 'react';
 
-// --- TYPES ---
-type Role = 'Admin' | 'User';
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: Role;
-  dob: string;
-}
-
-interface AuthContextType {
-  user: User | null;
-  isAuthenticated: boolean;
-  loading: boolean;
-  login: (email: string, password: string) => Promise<boolean>;
-  logout: () => void;
-  register: (userData: Omit<User, 'id' | 'role'> & { password: string }) => Promise<boolean>;
-}
-
-// --- ICONS ---
-const UserIcon: FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-  </svg>
-);
-
-const LockIcon: FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-  </svg>
-);
-
-const EmailIcon: FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-  </svg>
-);
-
-const CalendarIcon: FC<{ className?: string }> = ({ className }) => (
-    <svg className={className} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0h18M-4.5 12h22.5" />
-    </svg>
-);
-
-
-const LogoutIcon: FC<{ className?: string }> = ({ className }) => (
-    <svg className={className} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
-    </svg>
-);
-
-
-// --- AUTHENTICATION CONTEXT ---
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(true);
-
-  useEffect(() => {
-    // Seed admin user if it doesn't exist
-    const users = JSON.parse(localStorage.getItem('users') || '[]');
-    const adminExists = users.some((u: any) => u.email === 'admin@funspot.com');
-    if (!adminExists) {
-      const adminUser = {
-        id: 'admin-001',
-        name: 'Admin',
-        email: 'admin@funspot.com',
-        role: 'Admin',
-        dob: '1990-01-01',
-      };
-      const adminPass = 'admin123';
-      const userPasswords = JSON.parse(localStorage.getItem('userPasswords') || '{}');
-      userPasswords[adminUser.email] = adminPass;
-      users.push(adminUser);
-      localStorage.setItem('users', JSON.stringify(users));
-      localStorage.setItem('userPasswords', JSON.stringify(userPasswords));
-    }
-
-    // Check for logged-in user
-    const loggedInUser = localStorage.getItem('loggedInUser');
-    if (loggedInUser) {
-      const foundUser = JSON.parse(loggedInUser);
-      setUser(foundUser);
-      setIsAuthenticated(true);
-    }
-    setLoading(false);
-  }, []);
-
-  const login = async (email: string, password: string): Promise<boolean> => {
-    const users = JSON.parse(localStorage.getItem('users') || '[]');
-    const userPasswords = JSON.parse(localStorage.getItem('userPasswords') || '{}');
-    const foundUser = users.find((u: User) => u.email === email);
-
-    if (foundUser && userPasswords[email] === password) {
-      setUser(foundUser);
-      setIsAuthenticated(true);
-      localStorage.setItem('loggedInUser', JSON.stringify(foundUser));
-      return true;
-    }
-    return false;
-  };
-
-  const register = async (userData: Omit<User, 'id' | 'role'> & { password: string }): Promise<boolean> => {
-    const users = JSON.parse(localStorage.getItem('users') || '[]');
-    const userPasswords = JSON.parse(localStorage.getItem('userPasswords') || '{}');
-    
-    if (users.some((u: User) => u.email === userData.email)) {
-      return false; // User already exists
-    }
-
-    const newUser: User = {
-      ...userData,
-      id: `user-${Date.now()}`,
-      role: 'User',
-    };
-    
-    users.push(newUser);
-    userPasswords[newUser.email] = userData.password;
-    
-    localStorage.setItem('users', JSON.stringify(users));
-    localStorage.setItem('userPasswords', JSON.stringify(userPasswords));
-    
-    setUser(newUser);
-    setIsAuthenticated(true);
-    localStorage.setItem('loggedInUser', JSON.stringify(newUser));
-    return true;
-  };
-
-  const logout = () => {
-    setUser(null);
-    setIsAuthenticated(false);
-    localStorage.removeItem('loggedInUser');
-  };
-
-  return (
-    <AuthContext.Provider value={{ user, isAuthenticated, loading, login, logout, register }}>
-      {children}
-    </AuthContext.Provider>
-  );
-};
-
-const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};
-
-// --- AUTH COMPONENTS ---
-const LoginForm: FC = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const { login } = useAuth();
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    if (!email || !password) {
-        setError('Please fill in all fields.');
-        return;
-    }
-    const success = await login(email, password);
-    if (!success) {
-      setError('Invalid email or password.');
-    }
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      {error && <p className="text-red-400 text-center text-sm">{error}</p>}
-      <div className="relative">
-        <EmailIcon className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full pl-10 pr-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-        />
-      </div>
-      <div className="relative">
-        <LockIcon className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full pl-10 pr-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-        />
-      </div>
-      <button type="submit" className="w-full py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold transition-colors">
-        Log In
-      </button>
-    </form>
-  );
-};
-
-const RegisterForm: FC = () => {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [dob, setDob] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [error, setError] = useState('');
-  const { register } = useAuth();
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    if (!name || !email || !dob || !password || !confirmPassword) {
-      setError('Please fill in all fields.');
-      return;
-    }
-    if (password !== confirmPassword) {
-      setError('Passwords do not match.');
-      return;
-    }
-    if (password.length < 6) {
-        setError('Password must be at least 6 characters long.');
-        return;
-    }
-    const success = await register({ name, email, dob, password });
-    if (!success) {
-      setError('An account with this email already exists.');
-    }
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      {error && <p className="text-red-400 text-center text-sm">{error}</p>}
-      <div className="relative">
-        <UserIcon className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-        <input type="text" placeholder="Full Name" value={name} onChange={(e) => setName(e.target.value)} className="w-full pl-10 pr-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" />
-      </div>
-       <div className="relative">
-        <EmailIcon className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-        <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full pl-10 pr-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" />
-      </div>
-      <div className="relative">
-        <CalendarIcon className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-        <input type="date" placeholder="Date of Birth" value={dob} onChange={(e) => setDob(e.target.value)} className="w-full pl-10 pr-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" />
-      </div>
-      <div className="relative">
-        <LockIcon className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-        <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full pl-10 pr-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" />
-      </div>
-      <div className="relative">
-        <LockIcon className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-        <input type="password" placeholder="Confirm Password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="w-full pl-10 pr-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" />
-      </div>
-      <button type="submit" className="w-full py-3 bg-green-600 hover:bg-green-700 rounded-lg font-semibold transition-colors">
-        Create Account
-      </button>
-    </form>
-  );
-};
-
-const AuthScreen: FC = () => {
-  const [isLoginView, setIsLoginView] = useState(true);
-
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-900 p-4">
-      <div className="w-full max-w-md mx-auto bg-gray-800 rounded-xl shadow-lg p-8 space-y-6 border border-gray-700">
-        <h1 className="text-3xl font-bold text-center text-white">Funport Skating Club</h1>
-        <div className="flex border-b border-gray-600">
-          <button onClick={() => setIsLoginView(true)} className={`w-1/2 py-3 text-lg font-semibold transition-colors ${isLoginView ? 'text-blue-400 border-b-2 border-blue-400' : 'text-gray-400'}`}>
-            Login
-          </button>
-          <button onClick={() => setIsLoginView(false)} className={`w-1/2 py-3 text-lg font-semibold transition-colors ${!isLoginView ? 'text-green-400 border-b-2 border-green-400' : 'text-gray-400'}`}>
-            Register
-          </button>
-        </div>
-        {isLoginView ? <LoginForm /> : <RegisterForm />}
-      </div>
-    </div>
-  );
-};
-
-// --- DASHBOARD COMPONENTS ---
-const UserTable: FC = () => {
-    const [users, setUsers] = useState<User[]>([]);
-
-    useEffect(() => {
-        const storedUsers = JSON.parse(localStorage.getItem('users') || '[]');
-        setUsers(storedUsers);
-    }, []);
-
+const Header: React.FC = () => {
+    const navLinks = ['HOME', 'ABOUT', 'EVENTS', 'LESSONS', 'GALLERY'];
     return (
-        <div className="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700">
-            <h2 className="text-2xl font-bold mb-6 text-white">User Management</h2>
-            <div className="overflow-x-auto">
-                <table className="w-full text-left">
-                    <thead className="bg-gray-700">
-                        <tr>
-                            <th className="p-4 font-semibold">Name</th>
-                            <th className="p-4 font-semibold">Email</th>
-                            <th className="p-4 font-semibold">Date of Birth</th>
-                            <th className="p-4 font-semibold">Role</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-700">
-                        {users.map(user => (
-                            <tr key={user.id} className="hover:bg-gray-700/50">
-                                <td className="p-4">{user.name}</td>
-                                <td className="p-4">{user.email}</td>
-                                <td className="p-4">{user.dob}</td>
-                                <td className="p-4">
-                                    <span className={`px-3 py-1 text-sm rounded-full ${user.role === 'Admin' ? 'bg-red-500/20 text-red-300' : 'bg-blue-500/20 text-blue-300'}`}>
-                                        {user.role}
-                                    </span>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+        <header className="absolute top-0 left-0 right-0 z-10">
+            <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-24">
+                <div className="text-3xl font-['Bebas_Neue'] text-[#A94438] tracking-wider">
+                    FUNSPOT
+                </div>
+                <div className="hidden md:flex items-center space-x-8">
+                    {navLinks.map(link => (
+                        <a key={link} href="#" className="text-sm font-medium tracking-wider text-gray-600 hover:text-[#A94438] transition-colors">{link}</a>
+                    ))}
+                </div>
+                <a href="#" className="hidden md:inline-block bg-[#A94438] text-white px-6 py-2 text-sm font-bold tracking-wider hover:bg-[#933a2f] transition-colors">
+                    JOIN NOW
+                </a>
+                <div className="md:hidden">
+                    {/* Mobile menu button can be added here */}
+                </div>
+            </nav>
+        </header>
+    );
+};
+
+const Hero: React.FC = () => {
+    return (
+        <section className="pt-24 min-h-[80vh] flex items-center">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid md:grid-cols-2 gap-16 items-center">
+                <div className="text-left">
+                    <h1 className="text-7xl lg:text-8xl font-['Bebas_Neue'] text-[#A94438] leading-none tracking-wide">
+                        SKATE WITH CONFIDENCE
+                    </h1>
+                    <a href="#" className="mt-8 inline-block bg-[#A94438] text-white px-10 py-4 text-lg font-bold tracking-wider hover:bg-[#933a2f] transition-colors">
+                        JOIN NOW
+                    </a>
+                </div>
+                <div className="flex justify-center">
+                    <img src="https://picsum.photos/id/1060/600/700" alt="Person maintaining rollerblades" className="w-full h-auto max-w-md object-cover" />
+                </div>
             </div>
-        </div>
+        </section>
     );
 };
 
-
-const AdminDashboard: FC = () => {
-    const { user, logout } = useAuth();
+const JoinClub: React.FC = () => {
     return (
-        <div className="min-h-screen bg-gray-900 text-gray-100">
-            <header className="bg-gray-800/50 backdrop-blur-sm p-4 flex justify-between items-center border-b border-gray-700 sticky top-0">
-                <h1 className="text-xl font-bold">Admin Dashboard</h1>
-                <div className="flex items-center gap-4">
-                    <span className="font-semibold">{user?.name}</span>
-                    <button onClick={logout} className="p-2 rounded-full hover:bg-gray-700 transition-colors" aria-label="Logout">
-                        <LogoutIcon className="w-6 h-6" />
-                    </button>
+        <section className="py-20 bg-white">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid md:grid-cols-2 gap-16 items-center">
+                <div className="flex justify-center">
+                    <img src="https://picsum.photos/id/1080/500/600" alt="Skating helmet and knee pads" className="w-full h-auto max-w-md object-cover" />
                 </div>
-            </header>
-            <main className="p-4 md:p-8">
-                <UserTable />
-            </main>
-        </div>
+                <div>
+                    <h2 className="text-5xl font-['Bebas_Neue'] text-[#A94438] tracking-wider">
+                        JOIN OUR SKATE CLUB
+                    </h2>
+                    <p className="mt-4 text-lg text-gray-600 max-w-lg">
+                        Our skating club welcomes skaters of every age and skill level. Whether you're just starting out or are a seasoned pro, you'll find a supportive community here. Come improve your skills, make new friends, and share your love of skating in a safe and inclusive space.
+                    </p>
+                    <a href="#" className="mt-8 inline-block bg-[#A94438] text-white px-8 py-3 text-sm font-bold tracking-wider hover:bg-[#933a2f] transition-colors">
+                        UPCOMING EVENTS
+                    </a>
+                </div>
+            </div>
+        </section>
     );
 };
 
-const UserDashboard: FC = () => {
-    const { user, logout } = useAuth();
-    return (
-         <div className="min-h-screen bg-gray-900 text-gray-100 font-sans">
-            <header className="bg-gray-800/50 backdrop-blur-sm p-4 flex justify-between items-center border-b border-gray-700 sticky top-0">
-                <h1 className="text-xl font-bold text-green-400">Funport Skating Club</h1>
-                <div className="flex items-center gap-4">
-                    <div className="text-right">
-                        <p className="font-semibold">{user?.name}</p>
-                        <p className="text-xs text-gray-400">{user?.email}</p>
-                    </div>
-                    <button onClick={logout} className="p-2 rounded-full hover:bg-gray-700 transition-colors" aria-label="Logout">
-                        <LogoutIcon className="w-6 h-6" />
-                    </button>
-                </div>
-            </header>
-            <main className="p-4 md:p-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {/* Welcome Widget */}
-                    <div className="md:col-span-2 lg:col-span-3 bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700">
-                        <h2 className="text-2xl font-bold mb-2">Welcome back, {user?.name}!</h2>
-                        <p className="text-gray-400">Here's what's happening at the club today.</p>
-                    </div>
+const Events: React.FC = () => {
+    const eventList = [
+        {
+            title: 'SKATE NIGHT',
+            description: 'Join us for a fun evening of skating and socializing.',
+            imgSrc: 'https://picsum.photos/id/237/400/300' // Using a dog as a placeholder mascot
+        },
+        {
+            title: 'BEGINNER SKILLS WORKSHOP',
+            description: 'Learn the basics of skating in a friendly environment. Perfect for newcomers and those looking to improve.',
+            imgSrc: 'https://picsum.photos/id/30/400/300'
+        }
+    ];
 
-                    {/* My Programs Widget */}
-                    <div className="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700">
-                        <h3 className="text-xl font-bold mb-4">My Programs</h3>
-                        <div className="space-y-4">
-                            <div className="p-4 bg-gray-700/50 rounded-lg border-l-4 border-purple-500">
-                                <h4 className="font-semibold">Advanced Figure Skating</h4>
-                                <p className="text-sm text-gray-400">Mon & Wed, 5:00 PM - 6:30 PM</p>
-                            </div>
-                            <div className="p-4 bg-gray-700/50 rounded-lg border-l-4 border-blue-500">
-                                <h4 className="font-semibold">Hockey Power Skating</h4>
-                                <p className="text-sm text-gray-400">Fri, 6:00 PM - 7:00 PM</p>
-                            </div>
+    return (
+        <section className="bg-[#A94438] py-20">
+            <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-white">
+                <h2 className="text-5xl font-['Bebas_Neue'] tracking-wider border-b-2 border-white/50 pb-4 inline-block">
+                    EVENTS
+                </h2>
+                <div className="grid md:grid-cols-2 gap-12 mt-12">
+                    {eventList.map(event => (
+                        <div key={event.title}>
+                            <img src={event.imgSrc} alt={event.title} className="w-full h-64 object-cover" />
+                            <h3 className="mt-6 text-2xl font-['Bebas_Neue'] tracking-wider">{event.title}</h3>
+                            <p className="mt-2 text-white/80 font-light">{event.description}</p>
+                            <a href="#" className="mt-6 inline-block bg-white text-[#A94438] px-6 py-2 text-sm font-bold tracking-wider hover:bg-gray-200 transition-colors">
+                                RSVP
+                            </a>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </section>
+    );
+};
+
+const Services: React.FC = () => {
+    return (
+        <section className="py-20 bg-white">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid md:grid-cols-2 gap-16 items-start">
+                <div>
+                    <h2 className="text-5xl font-['Bebas_Neue'] text-[#A94438] tracking-wider">
+                        SERVICES
+                    </h2>
+                    <div className="mt-12 space-y-12">
+                        <div>
+                            <h3 className="text-2xl font-['Bebas_Neue'] text-black tracking-wider">SKATE LESSONS</h3>
+                            <p className="mt-2 text-gray-600">Learn skating skills with group or private lessons for all ages.</p>
+                            <a href="#" className="mt-2 inline-block text-[#A94438] font-bold border-b border-[#A94438] hover:text-[#933a2f] hover:border-[#933a2f]">Join a Lesson</a>
+                        </div>
+                        <div>
+                            <h3 className="text-2xl font-['Bebas_Neue'] text-black tracking-wider">BEGINNERS WELCOME</h3>
+                            <p className="mt-2 text-gray-600">Special programs designed for beginners to learn skating fundamentals.</p>
+                            <a href="#" className="mt-2 inline-block text-[#A94438] font-bold border-b border-[#A94438] hover:text-[#933a2f] hover:border-[#933a2f]">Learn More</a>
                         </div>
                     </div>
-
-                    {/* Upcoming Events Widget */}
-                    <div className="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700">
-                        <h3 className="text-xl font-bold mb-4">Upcoming Events</h3>
-                        <ul className="space-y-3 text-gray-300">
-                            <li className="flex items-start gap-3">
-                                <span className="font-bold text-green-400">Dec 15:</span>
-                                <span>Winter Gala Showcase</span>
-                            </li>
-                            <li className="flex items-start gap-3">
-                                <span className="font-bold text-green-400">Jan 10:</span>
-                                <span>Regional Competition</span>
-                            </li>
-                        </ul>
-                    </div>
-
-                     {/* Club News Widget */}
-                    <div className="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700">
-                        <h3 className="text-xl font-bold mb-4">Club News</h3>
-                        <p className="text-gray-400 text-sm">New session registration for the Spring term opens next Monday! Be sure to sign up early.</p>
-                    </div>
                 </div>
-            </main>
-        </div>
+                <div className="flex justify-center">
+                     <img src="https://picsum.photos/id/211/500/600" alt="Trophy case" className="w-full h-auto max-w-md object-cover" />
+                </div>
+            </div>
+        </section>
     );
 };
 
-// --- APP ROUTER ---
-export const App: FC = () => {
-  const { isAuthenticated, user, loading } = useAuth();
-
-  if (loading) {
+const Footer: React.FC = () => {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
+        <footer className="bg-[#FAF8F5] py-8">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-gray-500">
+                <p>&copy; {new Date().getFullYear()} FUNSPOT. All rights reserved.</p>
+            </div>
+        </footer>
     );
-  }
-
-  if (!isAuthenticated) {
-    return <AuthScreen />;
-  }
-
-  return user?.role === 'Admin' ? <AdminDashboard /> : <UserDashboard />;
 };
 
-// Error boundary remains unchanged
+
+export const App: React.FC = () => {
+    return (
+        <>
+            <Header />
+            <main>
+                <Hero />
+                <JoinClub />
+                <Events />
+                <Services />
+            </main>
+            <Footer />
+        </>
+    );
+};
+
 export class ErrorBoundary extends React.Component<{ children: ReactNode }, { hasError: boolean }> {
-  // FIX: In TypeScript, class properties like 'state' must be declared.
-  state: { hasError: boolean };
-  constructor(props: { children: ReactNode }) {
-    super(props);
-    this.state = { hasError: false };
-  }
+  // FIX: Refactored to use class field for state initialization, removing the constructor and redundant state declaration.
+  // This modern syntax is cleaner and avoids TypeScript type inference issues.
+  state = { hasError: false };
 
   static getDerivedStateFromError(_: Error): { hasError: boolean } {
     return { hasError: true };
