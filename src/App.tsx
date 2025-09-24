@@ -12,7 +12,8 @@ const Header: React.FC = () => {
         { name: 'ABOUT', href: '#about' },
         { name: 'EVENTS', href: '#events' },
         { name: 'LESSONS', href: '#lessons' },
-        { name: 'GALLERY', href: '#gallery' }
+        { name: 'GALLERY', href: '#gallery' },
+        { name: 'REGISTER', href: '#register' }
     ];
 
     return (
@@ -26,7 +27,7 @@ const Header: React.FC = () => {
                         <a key={link.name} href={link.href} className="text-sm font-medium tracking-wider text-gray-600 hover:text-[#A94438] transition-colors">{link.name}</a>
                     ))}
                 </div>
-                <a href="#" onClick={(e) => handleComingSoon(e, 'Registration form coming soon!')} className="hidden md:inline-block bg-[#A94438] text-white px-6 py-2 text-sm font-bold tracking-wider hover:bg-[#933a2f] transition-colors">
+                <a href="#register" className="hidden md:inline-block bg-[#A94438] text-white px-6 py-2 text-sm font-bold tracking-wider hover:bg-[#933a2f] transition-colors">
                     JOIN NOW
                 </a>
                 <div className="md:hidden">
@@ -45,7 +46,7 @@ const Hero: React.FC = () => {
                     <h1 className="text-7xl lg:text-8xl font-['Bebas_Neue'] text-[#A94438] leading-none tracking-wide">
                         SKATE WITH CONFIDENCE
                     </h1>
-                    <a href="#" onClick={(e) => handleComingSoon(e, 'Registration form coming soon!')} className="mt-8 inline-block bg-[#A94438] text-white px-10 py-4 text-lg font-bold tracking-wider hover:bg-[#933a2f] transition-colors">
+                    <a href="#register" className="mt-8 inline-block bg-[#A94438] text-white px-10 py-4 text-lg font-bold tracking-wider hover:bg-[#933a2f] transition-colors">
                         JOIN NOW
                     </a>
                 </div>
@@ -198,6 +199,67 @@ const Gallery: React.FC = () => {
     );
 };
 
+const RegistrationForm: React.FC = () => {
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        alert('Thank you for registering! We will be in touch soon.');
+        // Here you would typically handle form submission, e.g., send data to a server.
+        (e.target as HTMLFormElement).reset();
+    };
+
+    return (
+        <section id="register" className="py-20 bg-white">
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="text-center">
+                    <h2 className="text-5xl font-['Bebas_Neue'] text-[#A94438] tracking-wider">BECOME A MEMBER</h2>
+                    <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
+                        Ready to roll with us? Fill out the form below to join the Funspot Skating Club community. We're excited to have you!
+                    </p>
+                </div>
+                <form onSubmit={handleSubmit} className="mt-12 space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                            <input type="text" id="firstName" name="firstName" required className="w-full p-3 border border-gray-300 focus:ring-1 focus:ring-[#A94438] focus:border-[#A94438] transition" />
+                        </div>
+                        <div>
+                            <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                            <input type="text" id="lastName" name="lastName" required className="w-full p-3 border border-gray-300 focus:ring-1 focus:ring-[#A94438] focus:border-[#A94438] transition" />
+                        </div>
+                    </div>
+                    <div>
+                        <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                        <input type="email" id="email" name="email" required className="w-full p-3 border border-gray-300 focus:ring-1 focus:ring-[#A94438] focus:border-[#A94438] transition" />
+                    </div>
+                     <div>
+                        <label htmlFor="skillLevel" className="block text-sm font-medium text-gray-700 mb-1">Skating Skill Level</label>
+                        <select id="skillLevel" name="skillLevel" required className="w-full p-3 border border-gray-300 bg-white focus:ring-1 focus:ring-[#A94438] focus:border-[#A94438] transition">
+                            <option value="">Please select</option>
+                            <option value="beginner">Beginner</option>
+                            <option value="intermediate">Intermediate</option>
+                            <option value="advanced">Advanced</option>
+                            <option value="pro">Professional</option>
+                        </select>
+                    </div>
+                     <div className="flex items-start">
+                        <div className="flex items-center h-5">
+                            <input id="terms" name="terms" type="checkbox" required className="focus:ring-[#A94438] h-4 w-4 text-[#A94438] border-gray-300" />
+                        </div>
+                        <div className="ml-3 text-sm">
+                            <label htmlFor="terms" className="font-medium text-gray-700">I agree to the <a href="#" onClick={(e) => handleComingSoon(e, 'Terms and Conditions page coming soon!')} className="text-[#A94438] hover:underline">Terms and Conditions</a></label>
+                        </div>
+                    </div>
+                    <div className="text-center">
+                         <button type="submit" className="mt-4 inline-block bg-[#A94438] text-white px-10 py-4 text-lg font-bold tracking-wider hover:bg-[#933a2f] transition-colors">
+                            REGISTER NOW
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+    );
+};
+
 
 const Footer: React.FC = () => {
     return (
@@ -220,14 +282,21 @@ export const App: React.FC = () => {
                 <Events />
                 <Services />
                 <Gallery />
+                <RegistrationForm />
             </main>
             <Footer />
         </>
     );
 };
 
+// Fix: Refactored ErrorBoundary to use a constructor for state initialization.
+// This is a more robust pattern that avoids potential issues with class field syntax in some TypeScript environments,
+// which could lead to the compiler incorrectly reporting that 'props' does not exist.
 export class ErrorBoundary extends React.Component<{ children: ReactNode }, { hasError: boolean }> {
-  state = { hasError: false };
+  constructor(props: { children: ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
 
   static getDerivedStateFromError(_: Error): { hasError: boolean } {
     return { hasError: true };
