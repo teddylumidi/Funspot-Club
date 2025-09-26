@@ -11,20 +11,26 @@ import {
   HeartHandshake,
   Inbox,
   LayoutDashboard,
+  Megaphone,
   MessageCircle,
+  NotebookPen,
   ShieldCheck,
   Smartphone,
   Sparkles,
   Timer,
   Trophy,
-  Users
+  Users,
+  CalendarRange,
+  UserPlus,
+  Globe2,
+  LogIn,
+  FileText
 } from 'lucide-react';
 
 const heroMain = new URL('../images/hero.png', import.meta.url).href;
-const skatingCover = new URL('../images/skating - Copy.jpg', import.meta.url).href;
-const skatingImage = new URL('../images/Gemini_Generated_Image_b0l0f4b0l0f4b0l0.png', import.meta.url).href;
-const swimmingImage = new URL('../images/Gemini_Generated_Image_i3bknli3bknli3bk.png', import.meta.url).href;
-const chessImage = new URL('../images/Gemini_Generated_Image_l1k3mxl1k3mxl1k3.png', import.meta.url).href;
+const skatingImage = new URL('../images/1.png', import.meta.url).href;
+const swimmingImage = new URL('../images/2.png', import.meta.url).href;
+const chessImage = new URL('../images/3.png', import.meta.url).href;
 
 const heroGalleryImages = [swimmingImage, chessImage, skatingImage];
 
@@ -37,6 +43,8 @@ type NavLink = {
 const navigation: NavLink[] = [
   { label: 'Home', href: '#home' },
   { label: 'About', href: '#about' },
+  { label: 'Management Suite', href: '#management' },
+  { label: 'Sign Ups', href: '#signups' },
   {
     label: 'Programs & Training',
     href: '#programs',
@@ -47,6 +55,7 @@ const navigation: NavLink[] = [
       { label: 'Other Activities', href: '#other-activities' }
     ]
   },
+  { label: 'Subject Management', href: '#subjects' },
   {
     label: 'Events',
     href: '#events',
@@ -94,7 +103,149 @@ const navigation: NavLink[] = [
       { label: 'Training Reports & Milestones', href: '#reports' }
     ]
   },
+  { label: 'Community Hub', href: '#community' },
   { label: 'Enroll / Sign Up', href: '#contact' }
+];
+
+const systemModules = [
+  {
+    title: 'Admin Command Center',
+    description: 'Create coach, athlete, and under-18 accounts, configure modules, and audit finances in one secure view.',
+    Icon: ShieldCheck
+  },
+  {
+    title: 'Coach Management',
+    description: 'Assign coaching pods, monitor certifications, and deliver individualized training plans.',
+    Icon: ClipboardList
+  },
+  {
+    title: 'Athlete Management',
+    description: 'Track athlete journeys, guardians, and linked siblings with level progression and attendance history.',
+    Icon: Trophy
+  },
+  {
+    title: 'Parents Management',
+    description: 'Connect guardians to under-18 athletes, handle consents, and surface balances instantly.',
+    Icon: HeartHandshake
+  },
+  {
+    title: 'Training Management',
+    description: 'Build weekly timetables, indoor/outdoor rotations, and capture attendance + drill results.',
+    Icon: Timer
+  },
+  {
+    title: 'Subject Management',
+    description: 'Toggle indoor chess labs and outdoor skating/swimming tracks—add or retire sessions anytime.',
+    Icon: LayoutDashboard
+  },
+  {
+    title: 'Training Reports',
+    description: 'Convert training logs into shareable exam-style feedback for athletes and guardians.',
+    Icon: NotebookPen
+  },
+  {
+    title: 'Promotion Management',
+    description: 'Visualize beginner, intermediate, and elite milestones with automated approval workflows.',
+    Icon: BarChart3
+  },
+  {
+    title: 'Payments & Reminders',
+    description: 'Automate Mpesa and card billing with smart reminders that sync to every dashboard.',
+    Icon: CreditCard
+  },
+  {
+    title: 'Messaging Hub',
+    description: 'Enable private chats, segmented announcements, and notice boards in a single hub.',
+    Icon: MessageCircle
+  },
+  {
+    title: 'Individual Logs',
+    description: 'Role-based logs capture every update, visible only to the relevant coach, parent, or admin.',
+    Icon: FileText
+  },
+  {
+    title: 'Events & Public Portal',
+    description: 'Publish upcoming events and public highlights while syncing past archives to role dashboards.',
+    Icon: CalendarRange
+  },
+  {
+    title: 'Public Dashboard',
+    description: 'Share safe, high-level club stories and metrics with the community without exposing private data.',
+    Icon: Globe2
+  },
+  {
+    title: 'Mass Outreach',
+    description: 'Broadcast updates to teams or the entire club with private, trackable messaging.',
+    Icon: Megaphone
+  }
+];
+
+const signupChannels = [
+  {
+    title: 'Admin-Initiated Accounts',
+    description: 'Centralized onboarding for coaches, athletes, and under-18 guardians with approval workflows.',
+    Icon: UserPlus
+  },
+  {
+    title: 'Google Sign-In',
+    description: 'One-click authentication with Google Workspace or personal accounts.',
+    Icon: LogIn
+  },
+  {
+    title: 'Microsoft Sign-In',
+    description: 'Support for Microsoft Entra ID to align with school or corporate partners.',
+    Icon: LayoutDashboard
+  },
+  {
+    title: 'Phone Verification',
+    description: 'SMS-based flows ideal for Mpesa-linked guardians and regional partners.',
+    Icon: Smartphone
+  },
+  {
+    title: 'Email Invitations',
+    description: 'Secure email invites with temporary passwords and guardian pairing.',
+    Icon: Inbox
+  }
+];
+
+const subjectCatalog = [
+  {
+    id: 'indoor-subjects',
+    title: 'Indoor Strategy Labs',
+    summary: 'Modular chess experiences configurable by the admin to match seasons and cohorts.',
+    Icon: MessageCircle,
+    activities: ['Classic Ladder & Blitz', 'Team Battle Rooms', 'Puzzle Rush Arena', 'Coach-led analysis lounges']
+  },
+  {
+    id: 'outdoor-subjects',
+    title: 'Outdoor Performance Tracks',
+    summary: 'Dynamic skating and swimming rotations with optional pop-up activities.',
+    Icon: CalendarClock,
+    activities: ['Artistic & Speed Skating Pods', 'Endurance Swim Sets', 'Recovery & Mobility Clinics', 'Seasonal pop-up camps']
+  }
+];
+
+const communityHighlights = [
+  {
+    title: 'Public Dashboard',
+    description: 'Curated highlights, announcements, and event teasers visible to the wider community.',
+    Icon: Globe2
+  },
+  {
+    title: 'Role-Based Event Feeds',
+    description: 'Parents and coaches see upcoming and archived events automatically from their dashboards.',
+    Icon: CalendarRange
+  },
+  {
+    title: 'Private Mass Messaging',
+    description: 'Launch segmented broadcasts—teams, parents, or all members—with read receipts.',
+    Icon: Megaphone
+  },
+  {
+    title: 'Individual Activity Logs',
+    description: 'Every athlete, coach, and guardian sees a personalized timeline of interactions and balances.',
+    Icon: FileText
+  }
 ];
 
 const quickHighlights = [
@@ -314,7 +465,7 @@ export const App: React.FC = () => {
       <header
         className="hero"
         style={{
-          backgroundImage: `linear-gradient(135deg, rgba(4, 13, 30, 0.82) 0%, rgba(19, 111, 232, 0.68) 45%, rgba(24, 194, 156, 0.55) 100%), url(${skatingCover})`
+          backgroundImage: `linear-gradient(135deg, rgba(18, 18, 27, 0.82) 0%, rgba(216, 27, 96, 0.6) 45%, rgba(120, 32, 88, 0.5) 100%), url(${heroMain})`
         }}
       >
         <nav className="hero__nav">
@@ -367,12 +518,13 @@ export const App: React.FC = () => {
             <span className="hero__kicker">Skate. Splash. Strategize.</span>
             <h1>Where fearless athletes launch and families stay in sync.</h1>
             <p>
-              Weekend academies and weekday sessions designed for skating, swimming, chess, and multi-sport
-              excellence—powered by dashboards, messaging, and payments in one vibrant club platform.
+              Empower admins, coaches, athletes, and parents with synchronized dashboards, automated payments,
+              and configurable indoor/outdoor programs that keep every session on track.
             </p>
             <div className="hero__stats">
               <StatBadge text="Elite Skating & Aquatics Labs" />
               <StatBadge text="Coach · Athlete · Parent Dashboards" />
+              <StatBadge text="Google · Microsoft · Phone · Email Sign-Ups" />
               <StatBadge text="Automated Card & Mpesa Billing" />
             </div>
             <div className="hero__actions">
@@ -422,6 +574,47 @@ export const App: React.FC = () => {
           </div>
         </section>
 
+        <section id="management" className="section system-overview">
+          <div className="section__header">
+            <h2>Unified Management Suite</h2>
+            <p>Role-based controls let the admin orchestrate sign ups, dashboards, finances, and program modules with precision.</p>
+          </div>
+          <div className="hex-grid">
+            {systemModules.map(module => (
+              <div key={module.title} className="hex-card">
+                <div className="hex-card__icon">
+                  <module.Icon size={24} />
+                </div>
+                <h3>{module.title}</h3>
+                <p>{module.description}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section id="signups" className="section signups">
+          <div className="section__header">
+            <h2>Multi-Channel Sign Ups</h2>
+            <p>Admins launch accounts for coaches, athletes, and their parents—while self-service flows cover Google, Microsoft, phone, and email logins.</p>
+          </div>
+          <div className="signups__grid">
+            {signupChannels.map(channel => (
+              <div key={channel.title} className="signup-card">
+                <div className="signup-card__icon">
+                  <channel.Icon size={22} />
+                </div>
+                <h3>{channel.title}</h3>
+                <p>{channel.description}</p>
+              </div>
+            ))}
+          </div>
+          <div className="signups__note">
+            <StatBadge text="Guardian-linked accounts for under-18 athletes" />
+            <StatBadge text="Role-scoped dashboards with admin oversight" />
+            <StatBadge text="Audit-ready activity histories" />
+          </div>
+        </section>
+
         <section id="programs" className="section programs">
           <div className="section__header">
             <h2>Programs & Training Tracks</h2>
@@ -445,6 +638,54 @@ export const App: React.FC = () => {
                     Learn More
                   </a>
                 </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section id="subjects" className="section subjects">
+          <div className="section__header">
+            <h2>Subject Management</h2>
+            <p>Curate indoor strategy labs and outdoor performance tracks. Admins can add or retire offerings with a click.</p>
+          </div>
+          <div className="subjects__grid">
+            {subjectCatalog.map(subject => (
+              <article key={subject.id} className="subject-card">
+                <div className="subject-card__heading">
+                  <subject.Icon size={24} />
+                  <h3>{subject.title}</h3>
+                </div>
+                <p>{subject.summary}</p>
+                <ul>
+                  {subject.activities.map(activity => (
+                    <li key={activity}>{activity}</li>
+                  ))}
+                </ul>
+                <span className="subject-card__tag">Admin configurable</span>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section id="subjects" className="section subjects">
+          <div className="section__header">
+            <h2>Subject Management</h2>
+            <p>Toggle indoor chess labs or outdoor skating and swimming rotations—admins add, remove, and tailor every activity in seconds.</p>
+          </div>
+          <div className="subjects__grid">
+            {subjectCatalog.map(subject => (
+              <article key={subject.id} className="subject-card">
+                <div className="subject-card__icon">
+                  <subject.Icon size={24} />
+                </div>
+                <h3>{subject.title}</h3>
+                <p>{subject.summary}</p>
+                <ul>
+                  {subject.activities.map(activity => (
+                    <li key={activity}>{activity}</li>
+                  ))}
+                </ul>
+                <span className="subject-card__note">Admin configurable · Auto-syncs to dashboards & schedules</span>
               </article>
             ))}
           </div>
@@ -584,6 +825,50 @@ export const App: React.FC = () => {
                 ))}
               </ul>
             </div>
+          </div>
+        </section>
+
+        <section id="community" className="section community">
+          <div className="section__header">
+            <h2>Community & Public Experience</h2>
+            <p>Give families and fans a window into the club while keeping private data locked behind role-based access.</p>
+          </div>
+          <div className="community__grid">
+            {communityHighlights.map(highlight => (
+              <div key={highlight.title} className="community-card">
+                <div className="community-card__icon">
+                  <highlight.Icon size={22} />
+                </div>
+                <h3>{highlight.title}</h3>
+                <p>{highlight.description}</p>
+              </div>
+            ))}
+          </div>
+          <div className="community__cta">
+            <a className="btn ghost" href="#public-dashboard">Preview Public Dashboard</a>
+            <a className="btn primary" href="#messaging">Launch Mass Messaging</a>
+          </div>
+        </section>
+
+        <section id="community" className="section community">
+          <div className="section__header">
+            <h2>Community & Public Outreach</h2>
+            <p>Share highlights broadly while keeping private data secure—public stories and private dashboards live side by side.</p>
+          </div>
+          <div className="community__grid">
+            {communityHighlights.map(item => (
+              <div key={item.title} className="community-card">
+                <div className="community-card__icon">
+                  <item.Icon size={22} />
+                </div>
+                <h3>{item.title}</h3>
+                <p>{item.description}</p>
+              </div>
+            ))}
+          </div>
+          <div className="community__cta">
+            <a className="btn primary" href="#public-dashboard">Preview Public Dashboard</a>
+            <a className="btn ghost" href="#messaging">Explore Messaging Hub</a>
           </div>
         </section>
 
